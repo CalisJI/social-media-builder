@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      TIKTOK_CLIENT_KEY: ${TIKTOK_CLIENT_KEY:?set TIKTOK_CLIENT_KEY in .env}
+      TIKTOK_CLIENT_SECRET: ${TIKTOK_CLIENT_SECRET:?set TIKTOK_CLIENT_SECRET in .env}
+      TIKTOK_REDIRECT_URI: ${TIKTOK_REDIRECT_URI:?set TIKTOK_REDIRECT_URI in .env}
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env}
