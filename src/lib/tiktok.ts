@@ -4,6 +4,17 @@ export const TIKTOK_API = "https://open.tiktokapis.com";
 export const SESSION_COOKIE = "smb_tiktok_session";
 export const STATE_COOKIE = "smb_tiktok_oauth_state";
 
+export class TikTokApiError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+    public readonly logId?: string,
+  ) {
+    super(message);
+    this.name = "TikTokApiError";
+  }
+}
+
 export type TikTokSession = {
   accessToken: string;
   openId: string;
@@ -85,7 +96,14 @@ export async function tiktokFetch<T>(
     error?: { code?: string; message?: string; log_id?: string };
   };
   if (!response.ok || (payload.error?.code && payload.error.code !== "ok")) {
-    throw new Error(payload.error?.message || `TikTok API returned ${response.status}`);
+    const code = payload.error?.code || `http_${response.status}`;
+    const logId = payload.error?.log_id;
+    const detail = [
+      payload.error?.message || `TikTok API returned ${response.status}`,
+      `Code: ${code}`,
+      logId ? `Log ID: ${logId}` : "",
+    ].filter(Boolean).join(" · ");
+    throw new TikTokApiError(detail, code, logId);
   }
   return payload;
 }
