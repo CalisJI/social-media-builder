@@ -63,6 +63,10 @@ export function oauthConfig() {
   };
 }
 
+export function publicOrigin(): string {
+  return new URL(required("TIKTOK_REDIRECT_URI")).origin;
+}
+
 export async function tiktokFetch<T>(
   path: string,
   accessToken: string,

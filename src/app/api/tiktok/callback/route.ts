@@ -2,21 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   encryptSession,
   oauthConfig,
+  publicOrigin,
   SESSION_COOKIE,
   STATE_COOKIE,
 } from "@/lib/tiktok";
 
 export async function GET(request: NextRequest) {
+  const origin = publicOrigin();
   const error = request.nextUrl.searchParams.get("error");
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
   const expectedState = request.cookies.get(STATE_COOKIE)?.value;
 
   if (error) {
-    return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(error)}`, request.url));
+    return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(error)}`, origin));
   }
   if (!code || !state || !expectedState || state !== expectedState) {
-    return NextResponse.redirect(new URL("/?error=invalid_oauth_response", request.url));
+    return NextResponse.redirect(new URL("/?error=invalid_oauth_response", origin));
   }
 
   const { clientKey, clientSecret, redirectUri } = oauthConfig();
@@ -41,10 +43,10 @@ export async function GET(request: NextRequest) {
   };
   if (!tokenResponse.ok || !token.access_token || !token.open_id) {
     const message = token.error_description || token.error || "token_exchange_failed";
-    return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(message)}`, request.url));
+    return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(message)}`, origin));
   }
 
-  const response = NextResponse.redirect(new URL("/studio?connected=1", request.url));
+  const response = NextResponse.redirect(new URL("/studio?connected=1", origin));
   response.cookies.set(
     SESSION_COOKIE,
     encryptSession({
