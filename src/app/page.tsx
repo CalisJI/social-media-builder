@@ -1,7 +1,8 @@
 import Link from "next/link";
 import styles from "./page.module.css";
 
-export default function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -19,6 +20,11 @@ export default function Home() {
           Social Media Builder helps creators prepare, review, and publish their
           own media to connected social accounts, including TikTok.
         </p>
+        <div className={styles.actions}>
+          <a className={styles.connect} href="/api/tiktok/login">Connect TikTok</a>
+          <span>Uses TikTok Login Kit · You approve every permission</span>
+        </div>
+        {error && <p className={styles.loginError}>TikTok connection was not completed. Check the configured scopes and try again.</p>}
       </section>
 
       <section className={styles.workflow} aria-label="Publishing workflow">
