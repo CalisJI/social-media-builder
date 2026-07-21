@@ -60,16 +60,23 @@ export async function POST(request: NextRequest) {
       body: Buffer.from(await video.arrayBuffer()),
     });
     if (!upload.ok) throw new Error(`TikTok upload returned ${upload.status}`);
+    console.info("TikTok upload accepted", {
+      mode,
+      publishId: initialized.data.publish_id,
+      bytes: video.size,
+    });
     return NextResponse.json({
       ok: true,
       publishId: initialized.data.publish_id,
       message: mode === "publish" ? "Video submitted for direct publishing." : "Video sent to TikTok drafts.",
     });
   } catch (error) {
+    console.error("TikTok publish request failed", {
+      message: error instanceof Error ? error.message : "unknown error",
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "TikTok request failed." },
       { status: 502 },
     );
   }
 }
-

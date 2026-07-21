@@ -17,15 +17,25 @@ export default function PublishForm({ privacyOptions }: { privacyOptions: string
         method: "POST",
         body: new FormData(event.currentTarget),
       });
-      const payload = (await response.json()) as { error?: string; message?: string; publishId?: string };
+      const responseText = await response.text();
+      let payload: { error?: string; message?: string; publishId?: string } = {};
+      try {
+        payload = responseText ? JSON.parse(responseText) as typeof payload : {};
+      } catch {
+        payload = {};
+      }
       setResult({
         ok: response.ok,
         message: response.ok
-          ? `${payload.message} Reference: ${payload.publishId}`
-          : payload.error || "TikTok request failed.",
+          ? `${payload.message || "TikTok accepted the upload."}${payload.publishId ? ` Reference: ${payload.publishId}` : " Check TikTok notifications for processing status."}`
+          : payload.error || `Upload returned HTTP ${response.status}. Check TikTok notifications before retrying.`,
       });
-    } catch {
-      setResult({ ok: false, message: "The upload was interrupted. Try again." });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "network connection closed";
+      setResult({
+        ok: false,
+        message: `The response was interrupted (${detail}). Check TikTok notifications before retrying to avoid a duplicate.`,
+      });
     } finally {
       setBusy(false);
     }
@@ -69,4 +79,3 @@ export default function PublishForm({ privacyOptions }: { privacyOptions: string
     </form>
   );
 }
-
