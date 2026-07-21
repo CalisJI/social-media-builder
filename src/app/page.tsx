@@ -37,7 +37,7 @@ export default function Home() {
       </section>
 
       <footer className={styles.footer}>
-        <span>Social Media Builder</span>
+        <span>Social Media Builder by Calis Content</span>
         <span>Creator-controlled publishing</span>
       </footer>
     </main>

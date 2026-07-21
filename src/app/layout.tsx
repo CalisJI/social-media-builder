@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Social Media Builder",
+  title: "Social Media Builder | Calis Content",
   description: "Prepare, review, and publish creator-owned social content.",
 };
 
