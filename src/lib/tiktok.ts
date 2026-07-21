@@ -55,9 +55,10 @@ export function decryptSession(value?: string): TikTokSession | null {
 }
 
 export function oauthConfig() {
+  const environment = process.env.TIKTOK_ENV === "production" ? "PROD" : "SANDBOX";
   return {
-    clientKey: required("TIKTOK_CLIENT_KEY"),
-    clientSecret: required("TIKTOK_CLIENT_SECRET"),
+    clientKey: required(`${environment}_TIKTOK_CLIENT_KEY`),
+    clientSecret: required(`${environment}_TIKTOK_CLIENT_SECRET`),
     redirectUri: required("TIKTOK_REDIRECT_URI"),
   };
 }
@@ -84,4 +85,3 @@ export async function tiktokFetch<T>(
   }
   return payload;
 }
-
