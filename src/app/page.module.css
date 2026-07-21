@@ -1,142 +1,86 @@
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  min-height: 100vh;
+  padding: 0 clamp(24px, 6vw, 88px);
+  background:
+    radial-gradient(circle at 82% 14%, rgba(111, 78, 255, 0.18), transparent 26rem),
+    #f7f8fc;
+  color: #172033;
 }
 
-.main {
+.header {
+  min-height: 92px;
   display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+  border-bottom: 1px solid #cfd5e3;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
+.brand {
+  font-weight: 720;
+  letter-spacing: -0.035em;
 }
 
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
+.header nav { display: flex; gap: 28px; color: #4e5b73; font-size: 14px; }
+.header a:focus-visible { outline: 3px solid #6f4eff; outline-offset: 5px; }
+
+.hero {
+  max-width: 960px;
+  padding: clamp(72px, 12vw, 160px) 0 clamp(64px, 9vw, 116px);
+}
+
+.eyebrow {
+  margin-bottom: 24px;
+  color: #6041e7;
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 850px;
+  font-size: clamp(52px, 8vw, 108px);
+  line-height: 0.94;
+  letter-spacing: -0.07em;
   text-wrap: balance;
-  color: var(--text-primary);
 }
 
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
+.lede {
+  max-width: 630px;
+  margin-top: 38px;
+  color: #4e5b73;
+  font-size: clamp(18px, 2.2vw, 24px);
+  line-height: 1.55;
 }
 
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
+.workflow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #cfd5e3;
+  border-bottom: 1px solid #cfd5e3;
 }
 
-.ctas {
+.workflow article { min-height: 190px; padding: 30px 30px 34px 0; }
+.workflow article + article { border-left: 1px solid #cfd5e3; padding-left: 30px; }
+.workflow span { display: block; margin-bottom: 42px; color: #6041e7; font-weight: 680; }
+.workflow p { max-width: 290px; color: #4e5b73; line-height: 1.6; }
+
+.footer {
+  min-height: 100px;
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.ctas a {
-  display: flex;
-  justify-content: center;
   align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
+  justify-content: space-between;
+  color: #657087;
+  font-size: 13px;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
-}
-
-a.secondary {
-  border-color: var(--button-secondary-border);
-}
-
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
-}
-
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
-  }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
-  }
+@media (max-width: 720px) {
+  .header { min-height: 74px; }
+  .header nav { gap: 16px; }
+  .workflow { grid-template-columns: 1fr; }
+  .workflow article { min-height: 150px; padding: 26px 0; }
+  .workflow article + article { border-left: 0; border-top: 1px solid #cfd5e3; padding-left: 0; }
+  .workflow span { margin-bottom: 18px; }
+  .footer { align-items: flex-start; flex-direction: column; justify-content: center; gap: 8px; }
 }
