@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { decryptSession, SESSION_COOKIE, tiktokFetch } from "@/lib/tiktok";
+import { accessTokenNeedsRefresh, decryptSession, SESSION_COOKIE, tiktokFetch } from "@/lib/tiktok";
 import PublishForm from "./PublishForm";
 import styles from "./studio.module.css";
 
@@ -13,6 +13,7 @@ type CreatorResponse = { data: { privacy_level_options?: string[] } };
 export default async function StudioPage() {
   const session = decryptSession((await cookies()).get(SESSION_COOKIE)?.value);
   if (!session) redirect("/?error=session_required");
+  if (accessTokenNeedsRefresh(session)) redirect("/api/tiktok/refresh");
 
   const userFields = [
     "open_id", "union_id", "avatar_url", "display_name", "bio_description",

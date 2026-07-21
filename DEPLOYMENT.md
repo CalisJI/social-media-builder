@@ -14,6 +14,7 @@ PROD_TIKTOK_CLIENT_SECRET=paste_production_client_secret_here
 SANDBOX_TIKTOK_CLIENT_KEY=paste_sandbox_client_key_here
 SANDBOX_TIKTOK_CLIENT_SECRET=paste_sandbox_client_secret_here
 TIKTOK_REDIRECT_URI=https://tiktok-agent-calis-legal.chillpickle.org/api/tiktok/callback
+TIKTOK_ALLOW_PUBLIC_POSTS=false
 SESSION_SECRET=paste_random_64_hex_characters_here
 ```
 
@@ -34,3 +35,17 @@ Start or update the app with `docker compose up -d --build`. Compose refuses to 
 - Terms of Service: `https://tiktok-agent-calis-legal.chillpickle.org/terms/`
 
 The redirect URI must match character-for-character in TikTok and `.env`.
+
+## OAuth ownership and review checklist
+
+- The application backend is the only OAuth owner. Do not create a TikTok OAuth2
+  credential in n8n or add `/rest/oauth2-credential/callback` as a redirect URI.
+- Required publishing scopes include `video.upload` and `video.publish`. Direct
+  Post remains limited to `SELF_ONLY` until TikTok approves the app for public
+  visibility; always use the privacy options returned by Creator Info. Keep
+  `TIKTOK_ALLOW_PUBLIC_POSTS=false` until that approval is confirmed.
+- The encrypted HTTP-only session stores both access and refresh tokens. The
+  backend refreshes an expiring access token without exposing either token to
+  the browser or workflow exports.
+- Record the current TikTok review/audit state and test-account label without
+  client keys, client secrets, authorization codes, or tokens.

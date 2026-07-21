@@ -7,7 +7,19 @@ export const STATE_COOKIE = "smb_tiktok_oauth_state";
 export type TikTokSession = {
   accessToken: string;
   openId: string;
-  expiresAt: number;
+  accessExpiresAt: number;
+  refreshToken?: string;
+  refreshExpiresAt?: number;
+};
+
+type TokenResponse = {
+  access_token?: string;
+  expires_in?: number;
+  open_id?: string;
+  refresh_expires_in?: number;
+  refresh_token?: string;
+  error?: string;
+  error_description?: string;
 };
 
 function required(name: string): string {
@@ -47,8 +59,21 @@ export function decryptSession(value?: string): TikTokSession | null {
       decipher.update(Buffer.from(dataValue, "base64url")),
       decipher.final(),
     ]);
-    const session = JSON.parse(decrypted.toString("utf8")) as TikTokSession;
-    return session.expiresAt > Date.now() ? session : null;
+    const parsed = JSON.parse(decrypted.toString("utf8")) as TikTokSession & {
+      expiresAt?: number;
+    };
+    const session: TikTokSession = {
+      accessToken: parsed.accessToken,
+      openId: parsed.openId,
+      accessExpiresAt: parsed.accessExpiresAt ?? parsed.expiresAt ?? 0,
+      refreshToken: parsed.refreshToken,
+      refreshExpiresAt: parsed.refreshExpiresAt,
+    };
+    if (!session.accessToken || !session.openId) return null;
+    const usableUntil = session.refreshToken
+      ? session.refreshExpiresAt ?? session.accessExpiresAt
+      : session.accessExpiresAt;
+    return usableUntil > Date.now() ? session : null;
   } catch {
     return null;
   }
@@ -65,6 +90,49 @@ export function oauthConfig() {
 
 export function publicOrigin(): string {
   return new URL(required("TIKTOK_REDIRECT_URI")).origin;
+}
+
+export function sessionCookieMaxAge(session: TikTokSession): number {
+  const expiresAt = session.refreshToken
+    ? session.refreshExpiresAt ?? session.accessExpiresAt
+    : session.accessExpiresAt;
+  return Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+}
+
+export function accessTokenNeedsRefresh(session: TikTokSession): boolean {
+  return session.accessExpiresAt <= Date.now() + 5 * 60 * 1000;
+}
+
+export async function refreshTikTokSession(session: TikTokSession): Promise<TikTokSession> {
+  if (!session.refreshToken || (session.refreshExpiresAt ?? 0) <= Date.now()) {
+    throw new Error("TikTok session expired. Connect TikTok again.");
+  }
+  const { clientKey, clientSecret } = oauthConfig();
+  const response = await fetch(`${TIKTOK_API}/v2/oauth/token/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_key: clientKey,
+      client_secret: clientSecret,
+      grant_type: "refresh_token",
+      refresh_token: session.refreshToken,
+    }),
+    cache: "no-store",
+  });
+  const token = (await response.json()) as TokenResponse;
+  if (!response.ok || !token.access_token) {
+    throw new Error("TikTok token refresh failed. Connect TikTok again.");
+  }
+  const now = Date.now();
+  return {
+    accessToken: token.access_token,
+    openId: token.open_id ?? session.openId,
+    accessExpiresAt: now + (token.expires_in ?? 86400) * 1000,
+    refreshToken: token.refresh_token ?? session.refreshToken,
+    refreshExpiresAt: token.refresh_expires_in
+      ? now + token.refresh_expires_in * 1000
+      : session.refreshExpiresAt,
+  };
 }
 
 export async function tiktokFetch<T>(

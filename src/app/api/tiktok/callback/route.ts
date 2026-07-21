@@ -4,6 +4,7 @@ import {
   oauthConfig,
   publicOrigin,
   SESSION_COOKIE,
+  sessionCookieMaxAge,
   STATE_COOKIE,
 } from "@/lib/tiktok";
 
@@ -15,46 +16,64 @@ export async function GET(request: NextRequest) {
   const expectedState = request.cookies.get(STATE_COOKIE)?.value;
 
   if (error) {
-    return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(error)}`, origin));
+    const response = NextResponse.redirect(new URL(`/?error=${encodeURIComponent(error)}`, origin));
+    response.cookies.delete(STATE_COOKIE);
+    return response;
   }
   if (!code || !state || !expectedState || state !== expectedState) {
-    return NextResponse.redirect(new URL("/?error=invalid_oauth_response", origin));
+    const response = NextResponse.redirect(new URL("/?error=invalid_oauth_response", origin));
+    response.cookies.delete(STATE_COOKIE);
+    return response;
   }
 
   const { clientKey, clientSecret, redirectUri } = oauthConfig();
-  const tokenResponse = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_key: clientKey,
-      client_secret: clientSecret,
-      code,
-      grant_type: "authorization_code",
-      redirect_uri: redirectUri,
-    }),
-    cache: "no-store",
-  });
-  const token = (await tokenResponse.json()) as {
+  let token: {
     access_token?: string;
     open_id?: string;
     expires_in?: number;
+    refresh_token?: string;
+    refresh_expires_in?: number;
     error?: string;
     error_description?: string;
-  };
-  if (!tokenResponse.ok || !token.access_token || !token.open_id) {
-    const message = token.error_description || token.error || "token_exchange_failed";
-    return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(message)}`, origin));
+  } = {};
+  try {
+    const tokenResponse = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_key: clientKey,
+        client_secret: clientSecret,
+        code,
+        grant_type: "authorization_code",
+        redirect_uri: redirectUri,
+      }),
+      cache: "no-store",
+    });
+    token = await tokenResponse.json();
+    if (!tokenResponse.ok || !token.access_token || !token.open_id) {
+      throw new Error("token_exchange_failed");
+    }
+  } catch {
+    const response = NextResponse.redirect(new URL("/?error=token_exchange_failed", origin));
+    response.cookies.delete(STATE_COOKIE);
+    return response;
   }
 
+  const now = Date.now();
+  const session = {
+    accessToken: token.access_token,
+    openId: token.open_id,
+    accessExpiresAt: now + (token.expires_in ?? 86400) * 1000,
+    refreshToken: token.refresh_token,
+    refreshExpiresAt: token.refresh_expires_in
+      ? now + token.refresh_expires_in * 1000
+      : undefined,
+  };
   const response = NextResponse.redirect(new URL("/studio?connected=1", origin));
   response.cookies.set(
     SESSION_COOKIE,
-    encryptSession({
-      accessToken: token.access_token,
-      openId: token.open_id,
-      expiresAt: Date.now() + (token.expires_in ?? 86400) * 1000,
-    }),
-    { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: token.expires_in ?? 86400 },
+    encryptSession(session),
+    { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: sessionCookieMaxAge(session) },
   );
   response.cookies.delete(STATE_COOKIE);
   return response;
