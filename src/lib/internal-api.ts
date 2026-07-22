@@ -33,6 +33,11 @@ export function validateMediaUrl(value: unknown): string {
     throw new Error("videoUrl must be a valid HTTPS URL");
   }
   const host = url.hostname.toLowerCase();
+  const allowedPrefixes = (process.env.N8N_MEDIA_ALLOWED_PREFIXES || "/cal-3/")
+    .split(",")
+    .map((prefix) => prefix.trim())
+    .filter(Boolean)
+    .map((prefix) => prefix.startsWith("/") ? prefix : `/${prefix}`);
   if (
     url.protocol !== "https:" ||
     url.username ||
@@ -40,9 +45,36 @@ export function validateMediaUrl(value: unknown): string {
     (url.port && url.port !== "443") ||
     url.hash ||
     !allowedHosts.includes(host) ||
+    !allowedPrefixes.some((prefix) => url.pathname.startsWith(prefix)) ||
     url.pathname === "/"
   ) {
     throw new Error("videoUrl is not allowed");
   }
   return url.toString();
+}
+
+export async function validateRemoteMedia(videoUrl: string): Promise<void> {
+  const configuredMaxBytes = Number(process.env.N8N_MEDIA_MAX_BYTES || 524_288_000);
+  if (!Number.isSafeInteger(configuredMaxBytes) || configuredMaxBytes <= 0) {
+    throw new Error("N8N_MEDIA_MAX_BYTES must be a positive integer");
+  }
+
+  const response = await fetch(videoUrl, {
+    method: "HEAD",
+    redirect: "error",
+    signal: AbortSignal.timeout(10_000),
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error(`Media URL returned HTTP ${response.status}`);
+
+  const contentType = response.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
+  if (contentType !== "video/mp4") throw new Error("Media URL must return Content-Type video/mp4");
+
+  const contentLength = Number(response.headers.get("content-length"));
+  if (!Number.isSafeInteger(contentLength) || contentLength <= 0) {
+    throw new Error("Media URL must return a valid Content-Length");
+  }
+  if (contentLength > configuredMaxBytes) {
+    throw new Error(`Media file exceeds the ${configuredMaxBytes}-byte limit`);
+  }
 }

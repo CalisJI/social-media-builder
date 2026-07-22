@@ -1,4 +1,4 @@
-import { isAuthorizedServiceRequest, validateMediaUrl } from "@/lib/internal-api";
+import { isAuthorizedServiceRequest, validateMediaUrl, validateRemoteMedia } from "@/lib/internal-api";
 import { loadFreshTikTokSession } from "@/lib/tiktok-session-store";
 import { tiktokFetch } from "@/lib/tiktok";
 
@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     }
     const input = await request.json() as Record<string, unknown>;
     const videoUrl = validateMediaUrl(input.videoUrl);
+    await validateRemoteMedia(videoUrl);
     const caption = typeof input.caption === "string" ? input.caption.trim() : "";
     const mode = input.mode === "publish" ? "publish" : "draft";
     const privacy = typeof input.privacy === "string" ? input.privacy : "SELF_ONLY";
@@ -68,7 +69,10 @@ export async function POST(request: Request) {
       message: error instanceof Error ? error.message : "unknown error",
     });
     const message = error instanceof Error ? error.message : "Publish request failed";
-    const status = message.includes("videoUrl") || message.includes("not configured") ? 400 : 502;
+    const isMediaValidationError = [
+      "videoUrl", "not configured", "Media URL", "Media file", "N8N_MEDIA_MAX_BYTES",
+    ].some((fragment) => message.includes(fragment));
+    const status = isMediaValidationError ? 400 : 502;
     return Response.json({ error: message }, { status });
   }
 }
