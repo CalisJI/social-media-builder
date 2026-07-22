@@ -1,5 +1,10 @@
 # CAL-35 n8n workflow
 
+The upstream vocabulary backlog, Discord ingestion, editorial gates, dedupe and
+atomic claim contract are documented in
+[`docs/vocabulary-editorial-workflow.md`](../docs/vocabulary-editorial-workflow.md).
+The workflow must consume only rows that have passed those gates.
+
 `workflows/cal-35-vocabulary-publisher.json` is the version-controlled import
 for the Social-Workspace workflow. It remains inactive and starts only from a
 manual trigger. The publish branch is additionally locked by both an explicit
