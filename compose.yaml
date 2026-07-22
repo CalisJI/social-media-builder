@@ -1,4 +1,20 @@
 services:
+  renderer:
+    build: ./renderer
+    restart: unless-stopped
+    ports:
+      - "${RENDERER_PORT:-3100}:3100"
+    environment:
+      RENDERER_PORT: 3100
+      RENDER_OUTPUT_DIR: /data/renders
+      RENDER_PUBLIC_BASE_URL: ${RENDER_PUBLIC_BASE_URL:-http://localhost:3100/files}
+      RENDER_TIMEOUT_MS: ${RENDER_TIMEOUT_MS:-120000}
+      HTTP_REQUEST_TIMEOUT_MS: ${HTTP_REQUEST_TIMEOUT_MS:-130000}
+      RENDER_PRESET: ${RENDER_PRESET:-medium}
+      RENDER_CRF: ${RENDER_CRF:-20}
+    volumes:
+      - renderer-output:/data/renders
+
   web:
     build: .
     restart: unless-stopped
@@ -22,3 +38,4 @@ services:
 
 volumes:
   tiktok-session:
+  renderer-output:
