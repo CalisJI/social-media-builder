@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://social-media-builder.local/schemas/vocabulary-pastel-v1.json",
+  "title": "Vocabulary Pastel v1 render item",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "template_id", "duration_seconds", "brand_handle", "word",
+    "ipa", "part_of_speech", "meaning_vi", "example_en", "example_vi",
+    "cta", "pronunciation_audio_url", "background_music_url"
+  ],
+  "properties": {
+    "template_id": { "const": "vocabulary-pastel-v1" },
+    "duration_seconds": { "type": "number", "minimum": 9.8, "maximum": 10.2 },
+    "brand_handle": { "type": "string", "pattern": "^@[A-Za-z0-9._]{1,31}$", "maxLength": 32 },
+    "word": { "type": "string", "minLength": 1, "maxLength": 24 },
+    "ipa": { "type": ["string", "null"], "maxLength": 48 },
+    "part_of_speech": { "type": ["string", "null"], "maxLength": 24 },
+    "meaning_vi": { "type": "string", "minLength": 1, "maxLength": 90 },
+    "example_en": { "type": ["string", "null"], "maxLength": 90 },
+    "example_vi": { "type": ["string", "null"], "maxLength": 100 },
+    "cta": { "type": ["string", "null"], "maxLength": 54 },
+    "pronunciation_audio_url": { "type": ["string", "null"], "format": "uri", "pattern": "^https://" },
+    "background_music_url": { "type": ["string", "null"], "format": "uri", "pattern": "^https://" }
+  }
+}
