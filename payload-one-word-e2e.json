@@ -1,0 +1,25 @@
+{
+  "batch_id": "vocab-e2e-resilient-001",
+  "template_id": "vocabulary-pastel-v1",
+  "brand_handle": "@english.daily.vn",
+  "publish_at": "2026-07-20T19:30:00+07:00",
+  "interval_minutes": 1440,
+  "duration_seconds": 10,
+  "privacy_level": "SELF_ONLY",
+  "disable_comment": false,
+  "disable_duet": true,
+  "disable_stitch": true,
+  "entries": [
+    {
+      "word": "resilient",
+      "ipa": "/rɪˈzɪl.i.ənt/",
+      "part_of_speech": "adjective",
+      "meaning_vi": "kiên cường; nhanh chóng phục hồi sau khó khăn",
+      "example_en": "She stayed resilient after the setback.",
+      "example_vi": "Cô ấy vẫn kiên cường sau trở ngại.",
+      "caption": "Resilient: kiên cường, nhanh chóng phục hồi sau khó khăn. Follow @english.daily.vn để học 1 từ mỗi ngày. #LearnEnglish #EnglishVocabulary #TuVungTiengAnh",
+      "pronunciation_audio_url": null,
+      "background_music_url": null
+    }
+  ]
+}
