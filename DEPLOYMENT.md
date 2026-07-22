@@ -65,8 +65,9 @@ The redirect URI must match character-for-character in TikTok and `.env`.
 
 ## CAL-3 media storage policy
 
-- Store rendered outputs under the dedicated R2 object prefix `cal-3/`. The
-  internal publish API rejects objects outside `N8N_MEDIA_ALLOWED_PREFIXES`.
+- Store rendered outputs under `cal-3/pending/` while render/publish is in
+  progress. The internal publish API rejects objects outside the dedicated
+  `cal-3/` namespace configured by `N8N_MEDIA_ALLOWED_PREFIXES`.
 - Upload only MP4 files and set object metadata `Content-Type: video/mp4`.
   Before TikTok is called, the backend performs a bounded 10-second `HEAD`
   request and rejects redirects, non-2xx responses, missing/invalid lengths,
@@ -75,9 +76,16 @@ The redirect URI must match character-for-character in TikTok and `.env`.
 - The public custom domain intentionally provides stable, non-expiring object
   URLs. Keep R2 write/list/delete credentials private in n8n; the public domain
   grants read access only and neither exposes nor requires an access key.
-- In Cloudflare R2, create a lifecycle rule scoped to prefix `cal-3/` and choose
-  the retention period approved by the owner. A 30-day expiry is the suggested
-  baseline, but do not enable automatic deletion without that explicit approval.
+- After TikTok reports `PUBLISH_COMPLETE`, copy the object to
+  `cal-3/published/<publish-id>.mp4`, verify the copy's size/content type and
+  public HTTPS response, then delete the corresponding `pending/` object. Do not
+  move it on an init response or an intermediate processing state.
+- Owner-approved retention is 15 days after successful publish. In Cloudflare
+  R2, create an object expiration lifecycle rule scoped only to prefix
+  `cal-3/published/`, with age 15 days. R2 calculates age from object creation,
+  so the post-success copy into `published/` starts the retention clock. Never
+  scope this rule to `cal-3/pending/`: failed or stalled jobs must remain
+  available for investigation and explicit cleanup.
 - TLS/content verification after each policy or domain change:
 
   ```bash
