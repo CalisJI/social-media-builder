@@ -18,6 +18,8 @@ TIKTOK_ALLOW_PUBLIC_POSTS=false
 SESSION_SECRET=paste_random_64_hex_characters_here
 N8N_SERVICE_TOKEN=paste_a_different_random_64_hex_characters_here
 N8N_MEDIA_ALLOWED_HOSTS=tiktok-media.calis.chillpickle.org
+N8N_MEDIA_ALLOWED_PREFIXES=/cal-3/
+N8N_MEDIA_MAX_BYTES=524288000
 TIKTOK_SESSION_FILE=/app/data/tiktok-session.enc
 ```
 
@@ -60,5 +62,35 @@ The redirect URI must match character-for-character in TikTok and `.env`.
   - `POST /api/internal/tiktok/status` with `publishId`.
   Both endpoints require `Authorization: Bearer <N8N_SERVICE_TOKEN>`. Media URLs
   must use HTTPS and an exact host listed in `N8N_MEDIA_ALLOWED_HOSTS`.
+
+## CAL-3 media storage policy
+
+- Store rendered outputs under the dedicated R2 object prefix `cal-3/`. The
+  internal publish API rejects objects outside `N8N_MEDIA_ALLOWED_PREFIXES`.
+- Upload only MP4 files and set object metadata `Content-Type: video/mp4`.
+  Before TikTok is called, the backend performs a bounded 10-second `HEAD`
+  request and rejects redirects, non-2xx responses, missing/invalid lengths,
+  non-MP4 content, and objects larger than `N8N_MEDIA_MAX_BYTES` (500 MiB by
+  default).
+- The public custom domain intentionally provides stable, non-expiring object
+  URLs. Keep R2 write/list/delete credentials private in n8n; the public domain
+  grants read access only and neither exposes nor requires an access key.
+- In Cloudflare R2, create a lifecycle rule scoped to prefix `cal-3/` and choose
+  the retention period approved by the owner. A 30-day expiry is the suggested
+  baseline, but do not enable automatic deletion without that explicit approval.
+- TLS/content verification after each policy or domain change:
+
+  ```bash
+  curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+    --head https://tiktok-media.calis.chillpickle.org/cal-3/<object>.mp4
+  ```
+
+  Expect HTTP 200, `Content-Type: video/mp4`, a positive `Content-Length`, and
+  no redirect. Test a byte range separately with `curl -r 0-0`; expect 206.
+- Rollback: disable the R2 custom domain to stop all public reads immediately;
+  disable/delete the lifecycle rule to stop future expiry; revoke the n8n R2
+  token to stop writes; then remove the host from `N8N_MEDIA_ALLOWED_HOSTS` and
+  redeploy the backend. Existing objects remain recoverable unless a lifecycle
+  deletion has already executed.
 - Record the current TikTok review/audit state and test-account label without
   client keys, client secrets, authorization codes, or tokens.
