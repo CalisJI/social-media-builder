@@ -21,6 +21,7 @@ N8N_MEDIA_ALLOWED_HOSTS=tiktok-media.calis.chillpickle.org
 N8N_MEDIA_ALLOWED_PREFIXES=/cal-3/
 N8N_MEDIA_MAX_BYTES=524288000
 TIKTOK_SESSION_FILE=/app/data/tiktok-session.enc
+PUBLISH_IDEMPOTENCY_FILE=/app/data/publish-idempotency.json
 ```
 
 Generate `SESSION_SECRET` and `N8N_SERVICE_TOKEN` separately with
@@ -58,10 +59,67 @@ The redirect URI must match character-for-character in TikTok and `.env`.
   Docker volume at `TIKTOK_SESSION_FILE`. n8n authenticates only with
   `N8N_SERVICE_TOKEN` and can call:
   - `POST /api/internal/tiktok/publish` with `videoUrl`, optional `caption`,
-    `mode` (`draft` or `publish`), and `privacy`.
+    `mode` (`draft` or `publish`), `privacy`, and a stable `idempotencyKey`.
   - `POST /api/internal/tiktok/status` with `publishId`.
   Both endpoints require `Authorization: Bearer <N8N_SERVICE_TOKEN>`. Media URLs
   must use HTTPS and an exact host listed in `N8N_MEDIA_ALLOWED_HOSTS`.
+
+## CAL-40 reliability and rollback guide
+
+### Idempotency contract
+
+- n8n derives one stable `job_id` from `batch_id` plus the item index. The same
+  value is the renderer `Idempotency-Key`, R2 object name, and backend
+  `idempotencyKey`. Re-running a batch therefore addresses the same render,
+  object, and publish operation instead of allocating new ones.
+- The backend writes an `in_progress` claim to `PUBLISH_IDEMPOTENCY_FILE` before
+  TikTok init. Concurrent requests with the same key and payload share the
+  in-flight Promise; completed requests return the stored `publishId` with
+  `cached:true`. Reusing a key with a different payload returns HTTP 409.
+- If the connection fails after init may have reached TikTok, the record becomes
+  `reconcile_required`. Replays return 409 and never call init again. Check the
+  execution log and TikTok status before any manual recovery; do not delete the
+  record merely to force a retry.
+- Keep the idempotency file on the same persistent, access-restricted volume as
+  the encrypted TikTok session. Back it up before deploys and never expose or
+  edit it through a public endpoint.
+
+### Retry policy and trace evidence
+
+- Renderer, R2, and backend publish use explicit workflow loops. Transport
+  failures and HTTP 408, 425, 429, and 5xx retry at most three total attempts,
+  with 1s then 2s backoff. Other 4xx responses fail immediately.
+- HTTP nodes keep `neverError:true` only so the classifier can inspect the real
+  status. Built-in `retryOnFail` is intentionally disabled; otherwise either a
+  5xx can bypass retry or a permanent 4xx can be retried blindly.
+- n8n saves successful and failed execution data. Classifier output records
+  `attempt`, `last_http_status`, final component status, stable `job_id`, and
+  cached publish state. Backend logs record the key, state, cached/shared flags,
+  but never credentials or request media content.
+
+### Common failures
+
+- `NON_RETRYABLE`: fix payload, media allow-list, credential binding, or an
+  idempotency conflict. Automatic retries will not help.
+- `RETRY_EXHAUSTED`: the dependency stayed unavailable for all three attempts.
+  Preserve the execution, restore the dependency, then replay the same batch
+  and key.
+- `idempotency_in_progress`: an operation is active or its outcome is ambiguous.
+  Reconcile the stored publish ID/status; never generate a replacement key to
+  bypass this safety stop.
+- R2 retry always overwrites `cal-3/pending/<job_id>.mp4`. A different object
+  name indicates an upstream job-ID bug and publishing must remain disabled.
+
+### Safe rollback
+
+1. Set `N8N_CAL3_PUBLISH_ENABLED=false` and deactivate the workflow to stop new
+   publish calls while preserving execution evidence.
+2. Roll back the app/workflow image, but retain the persistent session and
+   idempotency volume. Deleting the idempotency file can permit duplicate init.
+3. For an R2 incident, revoke the n8n write credential or disable its workflow
+   branch; do not delete pending objects until jobs are reconciled.
+4. Re-enable only after `npm run test:n8n`, renderer tests, lint, and production
+   build pass with no real TikTok or public-media calls.
 
 ## CAL-3 media storage policy
 
