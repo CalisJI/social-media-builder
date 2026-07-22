@@ -1,0 +1,8 @@
+{
+  "id": "vocabulary-pastel-test-v1",
+  "schema": "../vocabulary-pastel-v1/schema.json",
+  "assets": { "background": "../vocabulary-pastel-v1/assets/background.png", "petal": "../vocabulary-pastel-v1/assets/petal.png" },
+  "palette": { "ink": "#27243A", "secondary": "#625D78", "accent": "#6E67D8", "card": "#FFF8EC", "ipa": "#E7D9FF" },
+  "layout": { "safeZone": [80, 220, 920, 1500], "card": [96, 300, 888, 1150] },
+  "timeline": { "hook": [0, 1.17], "word": [0.8, 2.8], "meaning": [2.2, 4.4], "example": [4, 7.47], "cta": [7.2, 9.4] }
+}

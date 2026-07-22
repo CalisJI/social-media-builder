@@ -4,6 +4,8 @@
   on 2026-07-22. Copyright belongs to the Social Media Builder project owner;
   permitted for project use, modification and commercial output. No third-party
   media is embedded.
+- `background.png` and `petal.png`: deterministic raster exports of the SVG
+  sources for FFmpeg builds without an SVG decoder; the same license applies.
 - Font: Noto Sans, Copyright 2012 The Noto Project Authors, licensed under the
   SIL Open Font License 1.1. Obtain font files from the official Noto repository:
   <https://github.com/notofonts/noto-fonts>. The font binary is deliberately not

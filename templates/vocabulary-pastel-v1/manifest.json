@@ -1,0 +1,8 @@
+{
+  "id": "vocabulary-pastel-v1",
+  "schema": "schema.json",
+  "assets": { "background": "assets/background.png", "petal": "assets/petal.png" },
+  "palette": { "ink": "#27243A", "secondary": "#625D78", "accent": "#E85D75", "card": "#FFF8EC", "ipa": "#E7D9FF" },
+  "layout": { "safeZone": [80, 220, 920, 1500], "card": [96, 300, 888, 1150] },
+  "timeline": { "hook": [0, 1.17], "word": [0.8, 2.8], "meaning": [2.2, 4.4], "example": [4, 7.47], "cta": [7.2, 9.4] }
+}

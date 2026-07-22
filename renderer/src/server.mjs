@@ -23,7 +23,7 @@ function recordCompletion(key, record) {
 
 async function createRender(req, res) {
   const key = req.headers["idempotency-key"]; if(!safeKey(key)) throw new RenderError("Idempotency-Key must be 8-128 URL-safe characters",400,"invalid_idempotency_key");
-  const payload=normalizePayload(await body(req)); const hash=payloadHash(payload); const filename=`${key}.mp4`; const output=path.join(outputDir,filename);
+  const payload=await normalizePayload(await body(req)); const hash=payloadHash(payload); const filename=`${key}.mp4`; const output=path.join(outputDir,filename);
   const manifest=await readJson(manifestFile,{}); const existing=manifest[key];
   if(existing && existing.hash!==hash) throw new RenderError("idempotency key was already used with a different payload",409,"idempotency_conflict");
   if(existing) { try { await stat(output); return json(res,200,{status:"completed",cached:true,idempotencyKey:key,sha256:hash,url:`${publicBase}/${filename}`}); } catch {} }

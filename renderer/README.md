@@ -36,14 +36,21 @@ successfully.
 | `RENDER_PRESET` | `medium` | x264 preset |
 | `RENDER_CRF` | `20` | x264 quality |
 | `FFMPEG_PATH` | `ffmpeg` | FFmpeg executable |
-| `RENDER_FONT_FILE` / `RENDER_BOLD_FONT_FILE` | DejaVu paths | Unicode font files |
+| `RENDER_TEMPLATES_DIR` | `/app/templates` in Docker | Versioned template package directory |
+| `RENDER_FONT_REGULAR` / `RENDER_FONT_MEDIUM` / `RENDER_FONT_BOLD` / `RENDER_FONT_EXTRABOLD` | `/usr/share/fonts/noto/*` | Required Noto Sans files; missing files fail the render |
 
 The service logs structured JSON errors to stderr. Audio fields are accepted in
 the upstream payload but intentionally ignored for the first silent E2E release.
 
 ## Verify locally without Docker
 
-Requires Node.js 20+, FFmpeg with `libx264`, and DejaVu fonts:
+Requires Node.js 20+, FFmpeg with `libx264`/SVG support, and Noto Sans Regular,
+Medium, Bold and ExtraBold. Font fallback is deliberately disabled.
+
+The image pins Noto Sans 2.014 at upstream commit
+`ffebf8c1ee449e544955a7e813c54f9b73848eac` and verifies SHA-256 checksums for
+all four font files during build. Noto Sans is distributed under
+SIL Open Font License 1.1. See `templates/vocabulary-pastel-v1/assets/LICENSE.md`.
 
 ```sh
 cd renderer

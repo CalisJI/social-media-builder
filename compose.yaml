@@ -1,6 +1,8 @@
 services:
   renderer:
-    build: ./renderer
+    build:
+      context: .
+      dockerfile: renderer/Dockerfile
     restart: unless-stopped
     ports:
       - "${RENDERER_PORT:-3100}:3100"
