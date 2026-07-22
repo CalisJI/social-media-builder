@@ -1,18 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decryptSession, SESSION_COOKIE, tiktokFetch } from "@/lib/tiktok";
+import {
+  accessTokenNeedsRefresh,
+  decryptSession,
+  encryptSession,
+  refreshTikTokSession,
+  SESSION_COOKIE,
+  sessionCookieMaxAge,
+  tiktokFetch,
+} from "@/lib/tiktok";
 
 type InitResponse = { data: { publish_id: string; upload_url: string } };
 
 export async function POST(request: NextRequest) {
-  const session = decryptSession(request.cookies.get(SESSION_COOKIE)?.value);
+  let session = decryptSession(request.cookies.get(SESSION_COOKIE)?.value);
   if (!session) return NextResponse.json({ error: "Connect TikTok first." }, { status: 401 });
 
   try {
+    const refreshed = accessTokenNeedsRefresh(session);
+    if (refreshed) session = await refreshTikTokSession(session);
     const form = await request.formData();
     const video = form.get("video");
     const mode = form.get("mode") === "publish" ? "publish" : "draft";
     const caption = String(form.get("caption") || "").trim();
     const privacy = String(form.get("privacy") || "SELF_ONLY");
+    const publicPostsEnabled = process.env.TIKTOK_ALLOW_PUBLIC_POSTS === "true";
     if (!(video instanceof File) || !video.size) {
       return NextResponse.json({ error: "Choose an MP4 or MOV video." }, { status: 400 });
     }
@@ -21,6 +32,12 @@ export async function POST(request: NextRequest) {
     }
     if (!video.type.includes("mp4") && !video.type.includes("quicktime")) {
       return NextResponse.json({ error: "Only MP4 and MOV files are accepted." }, { status: 400 });
+    }
+    if (mode === "publish" && !publicPostsEnabled && privacy !== "SELF_ONLY") {
+      return NextResponse.json(
+        { error: "Direct Post is limited to SELF_ONLY until TikTok approval." },
+        { status: 400 },
+      );
     }
 
     const sourceInfo = {
@@ -65,11 +82,21 @@ export async function POST(request: NextRequest) {
       publishId: initialized.data.publish_id,
       bytes: video.size,
     });
-    return NextResponse.json({
+    const response = NextResponse.json({
       ok: true,
       publishId: initialized.data.publish_id,
       message: mode === "publish" ? "Video submitted for direct publishing." : "Video sent to TikTok drafts.",
     });
+    if (refreshed) {
+      response.cookies.set(SESSION_COOKIE, encryptSession(session), {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: sessionCookieMaxAge(session),
+      });
+    }
+    return response;
   } catch (error) {
     console.error("TikTok publish request failed", {
       message: error instanceof Error ? error.message : "unknown error",
