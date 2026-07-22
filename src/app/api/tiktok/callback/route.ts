@@ -7,6 +7,7 @@ import {
   sessionCookieMaxAge,
   STATE_COOKIE,
 } from "@/lib/tiktok";
+import { storeTikTokSession } from "@/lib/tiktok-session-store";
 
 export async function GET(request: NextRequest) {
   const origin = publicOrigin();
@@ -70,6 +71,13 @@ export async function GET(request: NextRequest) {
       : undefined,
   };
   const response = NextResponse.redirect(new URL("/studio?connected=1", origin));
+  try {
+    await storeTikTokSession(session);
+  } catch {
+    const failed = NextResponse.redirect(new URL("/?error=session_store_failed", origin));
+    failed.cookies.delete(STATE_COOKIE);
+    return failed;
+  }
   response.cookies.set(
     SESSION_COOKIE,
     encryptSession(session),
