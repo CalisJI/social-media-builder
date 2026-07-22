@@ -13,8 +13,11 @@ input approval and `N8N_CAL3_PUBLISH_ENABLED=true`.
   desired publish time. The wait resumes each item at its own `publish_at`.
 - R2 owns the TikTok-readable HTTPS media copy. TikTok credentials never enter
   n8n; n8n calls the backend with a Header Auth credential.
-- Transport, timeout, 408, 429 and 5xx failures are retryable. Validation, 4xx
+- Transport, timeout, 408, 425, 429 and 5xx failures are retryable. Validation, 4xx
   contract failures and idempotency conflicts are non-retryable.
+- Retry is an explicit classified loop: at most three total attempts with 1s
+  then 2s backoff. The HTTP nodes do not use blind `retryOnFail`; this ensures a
+  permanent 4xx fails once while 5xx responses still enter the retry branch.
 
 ## Import and configure
 
@@ -40,4 +43,6 @@ input approval and `N8N_CAL3_PUBLISH_ENABLED=true`.
   `N8N_CAL3_PUBLISH_ENABLED=false`. This prevents new publish calls without
   deleting execution evidence or rendered media.
 
-Run `node --test n8n/test/workflow-contract.test.mjs` before importing changes.
+Run `npm run test:n8n` before importing changes. The suite includes local fault
+injection for renderer 5xx/timeout, temporary storage failure, retry exhaustion,
+and concurrent/replayed publish idempotency; it does not call real services.
