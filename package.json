@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:n8n": "node --test n8n/test/workflow-contract.test.mjs"
   },
   "dependencies": {
     "next": "16.2.10",
