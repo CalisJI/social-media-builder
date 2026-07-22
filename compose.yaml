@@ -14,3 +14,11 @@ services:
       TIKTOK_REDIRECT_URI: ${TIKTOK_REDIRECT_URI:?set TIKTOK_REDIRECT_URI in .env}
       TIKTOK_ALLOW_PUBLIC_POSTS: ${TIKTOK_ALLOW_PUBLIC_POSTS:-false}
       SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env}
+      N8N_SERVICE_TOKEN: ${N8N_SERVICE_TOKEN:?set N8N_SERVICE_TOKEN in .env}
+      N8N_MEDIA_ALLOWED_HOSTS: ${N8N_MEDIA_ALLOWED_HOSTS:?set N8N_MEDIA_ALLOWED_HOSTS in .env}
+      TIKTOK_SESSION_FILE: ${TIKTOK_SESSION_FILE:-/app/data/tiktok-session.enc}
+    volumes:
+      - tiktok-session:/app/data
+
+volumes:
+  tiktok-session:

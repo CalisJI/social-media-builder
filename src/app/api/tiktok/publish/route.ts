@@ -8,6 +8,7 @@ import {
   sessionCookieMaxAge,
   tiktokFetch,
 } from "@/lib/tiktok";
+import { storeTikTokSession } from "@/lib/tiktok-session-store";
 
 type InitResponse = { data: { publish_id: string; upload_url: string } };
 
@@ -17,7 +18,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const refreshed = accessTokenNeedsRefresh(session);
-    if (refreshed) session = await refreshTikTokSession(session);
+    if (refreshed) {
+      session = await refreshTikTokSession(session);
+      await storeTikTokSession(session);
+    }
     const form = await request.formData();
     const video = form.get("video");
     const mode = form.get("mode") === "publish" ? "publish" : "draft";

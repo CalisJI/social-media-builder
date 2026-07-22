@@ -16,9 +16,14 @@ SANDBOX_TIKTOK_CLIENT_SECRET=paste_sandbox_client_secret_here
 TIKTOK_REDIRECT_URI=https://tiktok-agent-calis-legal.chillpickle.org/api/tiktok/callback
 TIKTOK_ALLOW_PUBLIC_POSTS=false
 SESSION_SECRET=paste_random_64_hex_characters_here
+N8N_SERVICE_TOKEN=paste_a_different_random_64_hex_characters_here
+N8N_MEDIA_ALLOWED_HOSTS=tiktok-media.calis.chillpickle.org
+TIKTOK_SESSION_FILE=/app/data/tiktok-session.enc
 ```
 
-Generate the session secret with `openssl rand -hex 32`. The real `.env` is ignored by Git.
+Generate `SESSION_SECRET` and `N8N_SERVICE_TOKEN` separately with
+`openssl rand -hex 32`. Never reuse either value or paste them into n8n workflow
+exports, issue comments, or source control. The real `.env` is ignored by Git.
 
 Use `TIKTOK_ENV=sandbox` while testing and recording the review video. Change only
 this selector to `production` after approval. Docker requires a normal UTF-8
@@ -47,5 +52,13 @@ The redirect URI must match character-for-character in TikTok and `.env`.
 - The encrypted HTTP-only session stores both access and refresh tokens. The
   backend refreshes an expiring access token without exposing either token to
   the browser or workflow exports.
+- The backend also stores the OAuth owner's encrypted session in the dedicated
+  Docker volume at `TIKTOK_SESSION_FILE`. n8n authenticates only with
+  `N8N_SERVICE_TOKEN` and can call:
+  - `POST /api/internal/tiktok/publish` with `videoUrl`, optional `caption`,
+    `mode` (`draft` or `publish`), and `privacy`.
+  - `POST /api/internal/tiktok/status` with `publishId`.
+  Both endpoints require `Authorization: Bearer <N8N_SERVICE_TOKEN>`. Media URLs
+  must use HTTPS and an exact host listed in `N8N_MEDIA_ALLOWED_HOSTS`.
 - Record the current TikTok review/audit state and test-account label without
   client keys, client secrets, authorization codes, or tokens.
