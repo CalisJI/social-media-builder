@@ -1,0 +1,10 @@
+{
+  "name":"CAL-51 Google Sheets Validate Dedupe and Claim Dry Run","active":false,
+  "nodes":[
+    {"id":"manual","name":"Manual Trigger","type":"n8n-nodes-base.manualTrigger","typeVersion":1,"position":[-400,0],"parameters":{}},
+    {"id":"read","name":"Read Content RAW","type":"n8n-nodes-base.googleSheets","typeVersion":2,"position":[-180,0],"credentials":{"googleApi":{"id":"7frVxcS8Eb3CBDD9","name":"Google Service Account account"}},"parameters":{"authentication":"serviceAccount","resource":"sheet","operation":"read","sheetId":"1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0","range":"Content!A:AD","rawData":true,"dataProperty":"data","options":{"continue":true}}},
+    {"id":"validate","name":"Validate Dedupe and Claim Candidates","type":"n8n-nodes-base.code","typeVersion":2,"position":[60,0],"parameters":{"jsCode":"const m=$input.first().json.data||[]; const h=m[0]||[]; const rows=m.slice(1).filter(r=>r.some(v=>v!=='')); const col=n=>h.indexOf(n); const keys=rows.map(r=>r[col('dedupe_key')]); const duplicate_count=keys.length-new Set(keys).size; const formula_risk_count=rows.flat().filter(v=>typeof v==='string'&&/^[=+\\-@]/.test(v)).length; const eligible=rows.filter(r=>r[col('publish_ok')]==='OK'&&r[col('review_status')]==='approved'&&r[col('status')]==='approved'&&r[col('reviewed_by')]&& !r[col('claimed_at')]&&!r[col('render_id')]&&!r[col('publish_id')]); return [{json:{header_count:h.length,row_count:rows.length,duplicate_count,formula_risk_count,eligible_claim_count:eligible.length,claim_action:'dry_run_no_update'}}];"}}
+  ],
+  "connections":{"Manual Trigger":{"main":[[{"node":"Read Content RAW","type":"main","index":0}]]},"Read Content RAW":{"main":[[{"node":"Validate Dedupe and Claim Candidates","type":"main","index":0}]]}},
+  "settings":{"executionOrder":"v1"},"tags":[]
+}
