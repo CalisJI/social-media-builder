@@ -13,7 +13,11 @@ RUN npm run build
 FROM node:24.4.1-alpine3.22 AS runtime
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
-RUN addgroup -S app && adduser -S app -G app
+RUN addgroup -S app \
+  && adduser -S app -G app \
+  && mkdir -p /app/data \
+  && chown app:app /app/data \
+  && chmod 700 /app/data
 COPY --from=builder --chown=app:app /app/public ./public
 COPY --from=builder --chown=app:app /app/.next/standalone ./
 COPY --from=builder --chown=app:app /app/.next/static ./.next/static
