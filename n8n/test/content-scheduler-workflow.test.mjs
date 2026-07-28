@@ -34,12 +34,27 @@ test("scheduler selects approval fields, claims before render, and uses stable k
   assert.equal(next("Atomic Claim Row"), "Read Back Claims");
   assert.equal(next("Read Back Claims"), "Continue Only Owned Claims");
   assert.equal(next("Continue Only Owned Claims"), "Render with Stable Key");
-  assert.equal(next("Render with Stable Key"), "Download Rendered MP4");
+  assert.equal(next("Render with Stable Key"), "Classify Render Result");
+  assert.equal(next("Classify Render Result"), "Retry Render?");
+  assert.equal(next("Retry Render?"), "Render Retry Backoff");
+  assert.equal(next("Retry Render?", 1), "Download Rendered MP4");
+  assert.equal(next("Render Retry Backoff"), "Render with Stable Key");
   assert.equal(next("Download Rendered MP4"), "Upload Deterministic R2 Object");
-  assert.equal(next("Upload Deterministic R2 Object"), "Build Gated Publish Payload");
+  assert.equal(next("Upload Deterministic R2 Object"), "Classify R2 Result");
+  assert.equal(next("Classify R2 Result"), "Retry R2?");
+  assert.equal(next("Retry R2?"), "R2 Retry Backoff");
+  assert.equal(next("Retry R2?", 1), "Build Gated Publish Payload");
+  assert.equal(next("R2 Retry Backoff"), "Upload Deterministic R2 Object");
   assert.equal(byName.get("Upload Deterministic R2 Object").parameters.binaryPropertyName, "video");
   assert.match(JSON.stringify(byName.get("Render with Stable Key")), /Idempotency-Key/);
   assert.match(JSON.stringify(byName.get("Upload Deterministic R2 Object")), /idempotency_key/);
+  for (const name of ["Classify Render Result", "Classify R2 Result"]) {
+    const classify = byName.get(name).parameters.jsCode;
+    assert.match(classify, /\[408,425,429\]/);
+    assert.match(classify, /attempt>=3/);
+    assert.match(classify, /2\*\*\(attempt-1\)/);
+    assert.match(classify, /NON_RETRYABLE/);
+  }
 });
 
 test("publisher is gated and ambiguous outcomes reconcile before state update", () => {

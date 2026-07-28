@@ -3,6 +3,8 @@
 For approved-source scheduling, import
 `workflows/cal-50-content-scheduler.json` and follow
 `SCHEDULING_AUTOMATION.md`. It is inactive and dry-run locked by default.
+The separate `workflows/cal-50-manual-retry.json` is also inactive and queues
+only explicitly approved, non-ambiguous renderer/storage failures.
 
 `workflows/cal-35-vocabulary-publisher.json` is the version-controlled import
 for the Social-Workspace workflow. It remains inactive and starts only from a
