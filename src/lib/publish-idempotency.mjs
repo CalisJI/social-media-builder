@@ -84,6 +84,20 @@ export async function findIdempotentPublish({ file, key, request }) {
   return record ? replay(record, hash) : null;
 }
 
+export async function getIdempotentPublishRecord({ file, key }) {
+  validateIdempotencyKey(key);
+  const running = active.get(key);
+  if (running) return { status: "in_progress" };
+  const record = (await load(file))[key];
+  if (!record) return null;
+  return {
+    status: record.status,
+    result: record.status === "completed" ? record.result : undefined,
+    error: record.status === "reconcile_required" ? record.error : undefined,
+    updatedAt: record.updatedAt,
+  };
+}
+
 export async function runIdempotentPublish({ file, key, request, operation, now = () => new Date().toISOString() }) {
   validateIdempotencyKey(key);
   const hash = idempotencyHash(request);

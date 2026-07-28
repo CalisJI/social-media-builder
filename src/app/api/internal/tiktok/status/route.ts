@@ -1,6 +1,7 @@
 import { isAuthorizedServiceRequest } from "@/lib/internal-api";
 import { loadFreshTikTokSession } from "@/lib/tiktok-session-store";
 import { tiktokFetch } from "@/lib/tiktok";
+import { getIdempotentPublishRecord } from "@/lib/publish-idempotency.mjs";
 
 type StatusResponse = {
   data: {
@@ -17,7 +18,26 @@ export async function POST(request: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
     const input = await request.json() as Record<string, unknown>;
-    const publishId = typeof input.publishId === "string" ? input.publishId.trim() : "";
+    const idempotencyKey = typeof input.idempotencyKey === "string" ? input.idempotencyKey.trim() : "";
+    const idempotencyFile = process.env.PUBLISH_IDEMPOTENCY_FILE;
+    const record = idempotencyKey && idempotencyFile
+      ? await getIdempotentPublishRecord({ file: idempotencyFile, key: idempotencyKey })
+      : null;
+    if (idempotencyKey && !record) {
+      return Response.json({ error: "idempotency key not found" }, { status: 404 });
+    }
+    if (record && record.status !== "completed") {
+      return Response.json({
+        ok: false,
+        idempotencyKey,
+        status: record.status,
+        error: record.error,
+        updatedAt: record.updatedAt,
+      }, { status: record.status === "reconcile_required" ? 409 : 202 });
+    }
+    const publishId = typeof input.publishId === "string"
+      ? input.publishId.trim()
+      : record?.result?.publishId || "";
     if (!publishId || publishId.length > 200) {
       return Response.json({ error: "publishId is required" }, { status: 400 });
     }
@@ -30,7 +50,7 @@ export async function POST(request: Request) {
       session.accessToken,
       { method: "POST", body: JSON.stringify({ publish_id: publishId }) },
     );
-    return Response.json({ ok: true, publishId, ...result.data });
+    return Response.json({ ok: true, idempotencyKey: idempotencyKey || undefined, publishId, ...result.data });
   } catch (error) {
     console.error("Internal TikTok status request failed", {
       message: error instanceof Error ? error.message : "unknown error",

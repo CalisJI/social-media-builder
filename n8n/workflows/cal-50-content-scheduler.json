@@ -39,6 +39,16 @@
       }
     },
     {
+      "id": "prepare-claim",
+      "name": "Prepare Stable Claim",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-600, 80],
+      "parameters": {
+        "jsCode": "const owner=String($execution.id);const claimedAt=new Date().toISOString();const hash=value=>{let out=2166136261;for(let i=0;i<value.length;i++){out^=value.charCodeAt(i);out=Math.imul(out,16777619);}return(out>>>0).toString(16).padStart(8,'0');};return $input.all().map(item=>{const row=item.json;const key=String(row.idempotency_key||`cal50-${hash(`${row.content_id}\\u001f${row.publish_at}`)}`);return{json:{...row,status:'queued',claimed_at:claimedAt,claim_owner:owner,idempotency_key:key,error_code:'',updated_at:claimedAt}};});"
+      }
+    },
+    {
       "id": "claim-write",
       "name": "Atomic Claim Row",
       "type": "n8n-nodes-base.googleSheets",
@@ -48,28 +58,65 @@
       "parameters": { "authentication": "serviceAccount", "resource": "sheet", "operation": "update", "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0", "range": "Content!A:AN", "matchingColumns": ["content_id"], "options": { "valueInputMode": "RAW" } }
     },
     {
+      "id": "claim-readback",
+      "name": "Read Back Claims",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [-360, 80],
+      "credentials": { "googleApi": { "id": "CONFIGURE_IN_N8N", "name": "Google Service Account account" } },
+      "parameters": { "authentication": "serviceAccount", "resource": "sheet", "operation": "read", "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0", "range": "Content!A:AN", "rawData": true, "dataProperty": "data" }
+    },
+    {
+      "id": "claim-verify",
+      "name": "Continue Only Owned Claims",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-240, 80],
+      "parameters": {
+        "jsCode": "const claims=$('Prepare Stable Claim').all().map(i=>i.json);const matrices=$input.all().map(i=>i.json.data||[]);const matrix=matrices.find(m=>Array.isArray(m)&&m.length)||[];const [headers,...rows]=matrix;const col=name=>headers.indexOf(name);const persisted=new Map(rows.map(row=>[String(row[col('content_id')]),row]));return claims.filter(claim=>{const row=persisted.get(String(claim.content_id));return row&&String(row[col('claim_owner')])===String(claim.claim_owner)&&String(row[col('idempotency_key')])===String(claim.idempotency_key)&&String(row[col('status')])==='queued';}).map(claim=>({json:claim}));"
+      }
+    },
+    {
       "id": "render",
       "name": "Render with Stable Key",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-240, 80],
-      "parameters": { "method": "POST", "url": "={{$env.RENDERER_BASE_URL}}/jobs", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{$json.idempotency_key}}" }] }, "sendBody": true, "specifyBody": "json", "jsonBody": "={{$json}}", "options": { "timeout": 30000, "response": { "response": { "neverError": true } } } }
+      "position": [0, 80],
+      "parameters": { "method": "POST", "url": "={{$env.RENDERER_BASE_URL + '/v1/renders'}}", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{$json.idempotency_key}}" }] }, "sendBody": true, "contentType": "raw", "rawContentType": "application/json", "body": "={{JSON.stringify({...$json,job_id:$json.idempotency_key})}}", "options": { "timeout": 130000, "response": { "response": { "fullResponse": true, "neverError": true } } } }
+    },
+    {
+      "id": "download",
+      "name": "Download Rendered MP4",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [120, 80],
+      "parameters": { "url": "={{$json.body.url}}", "options": { "timeout": 30000, "response": { "response": { "responseFormat": "file", "outputPropertyName": "video" } } } }
     },
     {
       "id": "r2",
       "name": "Upload Deterministic R2 Object",
       "type": "n8n-nodes-base.s3",
       "typeVersion": 1,
-      "position": [0, 80],
+      "position": [240, 80],
       "credentials": { "s3": { "id": "CONFIGURE_IN_N8N", "name": "CAL-3 R2 (configure in n8n)" } },
-      "parameters": { "operation": "upload", "bucketName": "={{$env.CAL3_R2_BUCKET}}", "fileName": "=scheduled/{{$json.idempotency_key}}.mp4" }
+      "parameters": { "operation": "upload", "bucketName": "={{$env.CAL3_R2_BUCKET}}", "fileName": "={{'scheduled/' + $('Prepare Stable Claim').item.json.idempotency_key + '.mp4'}}", "binaryPropertyName": "video", "additionalFields": { "contentType": "video/mp4" } }
+    },
+    {
+      "id": "payload",
+      "name": "Build Gated Publish Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [360, 80],
+      "parameters": {
+        "jsCode": "const claim=$('Prepare Stable Claim').item.json;const base=String($env.CAL3_MEDIA_BASE_URL||'').replace(/\\/$/,'');if(!base.startsWith('https://'))throw new Error('NON_RETRYABLE: CAL3_MEDIA_BASE_URL must be HTTPS');return[{json:{...claim,status:'rendering',render_id:claim.idempotency_key,videoUrl:`${base}/scheduled/${claim.idempotency_key}.mp4`,caption:String(claim.caption||claim.word||'').trim(),updated_at:new Date().toISOString()}}];"
+      }
     },
     {
       "id": "gate",
       "name": "QA Mode Feature and Approval Gate",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [240, 80],
+      "position": [480, 80],
       "parameters": { "conditions": { "combinator": "and", "conditions": [{ "leftValue": "={{$env.SCHEDULER_DRY_RUN}}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "false" }, { "leftValue": "={{$json.approval_token}}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "={{$env.SCHEDULER_APPROVAL_TOKEN}}" }, { "leftValue": "={{$json.publish_mode === 'DRAFT' || ($json.publish_mode === 'SELF_ONLY' && $env.SELF_ONLY_ENABLED === 'true') || ($json.publish_mode === 'PUBLIC' && $env.PUBLIC_PUBLISH_ENABLED === 'true')}}", "operator": { "type": "boolean", "operation": "true", "singleValue": true }, "rightValue": "" }] } }
     },
     {
@@ -79,7 +126,7 @@
       "typeVersion": 4.2,
       "position": [500, 0],
       "credentials": { "httpHeaderAuth": { "id": "CONFIGURE_IN_N8N", "name": "Social Publisher Backend (configure in n8n)" } },
-      "parameters": { "method": "POST", "url": "={{$env.SOCIAL_PUBLISHER_BASE_URL}}/internal/tiktok/publish", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{$json.idempotency_key}}" }] }, "sendBody": true, "specifyBody": "json", "jsonBody": "={{$json}}", "options": { "timeout": 30000, "response": { "response": { "neverError": true } } } }
+      "parameters": { "method": "POST", "url": "={{$env.SOCIAL_PUBLISHER_BASE_URL + '/api/internal/tiktok/publish'}}", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{$json.idempotency_key}}" }] }, "sendBody": true, "contentType": "raw", "rawContentType": "application/json", "body": "={{JSON.stringify({videoUrl:$json.videoUrl,caption:$json.caption,mode:$json.publish_mode==='DRAFT'?'draft':'direct',privacy:$json.publish_mode==='PUBLIC'?'PUBLIC_TO_EVERYONE':'SELF_ONLY',idempotencyKey:$json.idempotency_key})}}", "options": { "timeout": 30000, "response": { "response": { "fullResponse": true, "neverError": true } } } }
     },
     {
       "id": "hold",
@@ -87,7 +134,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [500, 180],
-      "parameters": { "jsCode": "return $input.all().map(i=>({json:{...i.json,status:'queued',error_code:$env.SCHEDULER_DRY_RUN==='true'?'DRY_RUN':'APPROVAL_REQUIRED'}}));" }
+      "parameters": { "jsCode": "return $input.all().map(i=>({json:{...i.json,status:'queued',error_code:$env.SCHEDULER_DRY_RUN==='true'?'DRY_RUN':'APPROVAL_OR_MODE_GATE',updated_at:new Date().toISOString()}}));" }
     },
     {
       "id": "reconcile",
@@ -96,7 +143,17 @@
       "typeVersion": 4.2,
       "position": [760, 0],
       "credentials": { "httpHeaderAuth": { "id": "CONFIGURE_IN_N8N", "name": "Social Publisher Backend (configure in n8n)" } },
-      "parameters": { "method": "GET", "url": "={{$env.SOCIAL_PUBLISHER_BASE_URL}}/internal/tiktok/publish/by-idempotency/{{$json.idempotency_key}}", "options": { "timeout": 30000, "response": { "response": { "neverError": true } } } }
+      "parameters": { "method": "POST", "url": "={{$env.SOCIAL_PUBLISHER_BASE_URL + '/api/internal/tiktok/status'}}", "sendBody": true, "contentType": "raw", "rawContentType": "application/json", "body": "={{JSON.stringify({idempotencyKey:$('Build Gated Publish Payload').item.json.idempotency_key})}}", "options": { "timeout": 30000, "response": { "response": { "fullResponse": true, "neverError": true } } } }
+    },
+    {
+      "id": "normalize-state",
+      "name": "Normalize Lifecycle State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 80],
+      "parameters": {
+        "jsCode": "const payload=$('Build Gated Publish Payload').item.json;return $input.all().map(item=>{if(item.json.content_id)return item;const response=item.json;const body=response.body||response;const remote=String(body.status||'').toLowerCase();const status=remote==='published'?'published':remote==='scheduled'?'scheduled':Number(response.statusCode)>=200&&Number(response.statusCode)<300?'scheduled':'failed';return{json:{...payload,status,publish_id:body.publishId||body.publish_id||'',published_at:body.publishedAt||body.published_at||'',error_code:status==='failed'?'RECONCILE_REQUIRED':'',updated_at:new Date().toISOString()}};});"
+      }
     },
     {
       "id": "state",
@@ -112,14 +169,20 @@
     "Poll Due Content": { "main": [[{ "node": "Read Content Source", "type": "main", "index": 0 }]] },
     "Manual Dry Run": { "main": [[{ "node": "Read Content Source", "type": "main", "index": 0 }]] },
     "Read Content Source": { "main": [[{ "node": "Select Validate and Claim Due", "type": "main", "index": 0 }]] },
-    "Select Validate and Claim Due": { "main": [[{ "node": "Atomic Claim Row", "type": "main", "index": 0 }]] },
-    "Atomic Claim Row": { "main": [[{ "node": "Render with Stable Key", "type": "main", "index": 0 }]] },
-    "Render with Stable Key": { "main": [[{ "node": "Upload Deterministic R2 Object", "type": "main", "index": 0 }]] },
-    "Upload Deterministic R2 Object": { "main": [[{ "node": "QA Mode Feature and Approval Gate", "type": "main", "index": 0 }]] },
+    "Select Validate and Claim Due": { "main": [[{ "node": "Prepare Stable Claim", "type": "main", "index": 0 }]] },
+    "Prepare Stable Claim": { "main": [[{ "node": "Atomic Claim Row", "type": "main", "index": 0 }]] },
+    "Atomic Claim Row": { "main": [[{ "node": "Read Back Claims", "type": "main", "index": 0 }]] },
+    "Read Back Claims": { "main": [[{ "node": "Continue Only Owned Claims", "type": "main", "index": 0 }]] },
+    "Continue Only Owned Claims": { "main": [[{ "node": "Render with Stable Key", "type": "main", "index": 0 }]] },
+    "Render with Stable Key": { "main": [[{ "node": "Download Rendered MP4", "type": "main", "index": 0 }]] },
+    "Download Rendered MP4": { "main": [[{ "node": "Upload Deterministic R2 Object", "type": "main", "index": 0 }]] },
+    "Upload Deterministic R2 Object": { "main": [[{ "node": "Build Gated Publish Payload", "type": "main", "index": 0 }]] },
+    "Build Gated Publish Payload": { "main": [[{ "node": "QA Mode Feature and Approval Gate", "type": "main", "index": 0 }]] },
     "QA Mode Feature and Approval Gate": { "main": [[{ "node": "Schedule via Idempotent Backend", "type": "main", "index": 0 }], [{ "node": "Dry Run or Approval Hold", "type": "main", "index": 0 }]] },
     "Schedule via Idempotent Backend": { "main": [[{ "node": "Reconcile Before Retry", "type": "main", "index": 0 }]] },
-    "Reconcile Before Retry": { "main": [[{ "node": "Update Lifecycle Dashboard", "type": "main", "index": 0 }]] },
-    "Dry Run or Approval Hold": { "main": [[{ "node": "Update Lifecycle Dashboard", "type": "main", "index": 0 }]] }
+    "Reconcile Before Retry": { "main": [[{ "node": "Normalize Lifecycle State", "type": "main", "index": 0 }]] },
+    "Dry Run or Approval Hold": { "main": [[{ "node": "Normalize Lifecycle State", "type": "main", "index": 0 }]] },
+    "Normalize Lifecycle State": { "main": [[{ "node": "Update Lifecycle Dashboard", "type": "main", "index": 0 }]] }
   },
   "pinData": {},
   "meta": { "templateCredsSetupCompleted": false },

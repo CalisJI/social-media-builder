@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { runIdempotentPublish } from "../../src/lib/publish-idempotency.mjs";
+import { getIdempotentPublishRecord, runIdempotentPublish } from "../../src/lib/publish-idempotency.mjs";
 
 async function fixture(run) {
   const directory = await mkdtemp(path.join(tmpdir(), "cal37-idempotency-"));
@@ -50,4 +50,17 @@ test("ambiguous failure is persisted and cannot initialize twice", () => fixture
   assert.equal(calls, 1);
   const records = JSON.parse(await readFile(file, "utf8"));
   assert.equal(records["ambiguous-key-001"].status, "reconcile_required");
+}));
+
+test("reconciliation lookup returns durable state without replaying publish", () => fixture(async (file) => {
+  await runIdempotentPublish({
+    file,
+    key: "lookup-key-001",
+    request,
+    operation: async () => ({ publishId: "pub-lookup", mode: "draft" }),
+  });
+  const record = await getIdempotentPublishRecord({ file, key: "lookup-key-001" });
+  assert.equal(record.status, "completed");
+  assert.equal(record.result.publishId, "pub-lookup");
+  assert.equal(await getIdempotentPublishRecord({ file, key: "missing-key-001" }), null);
 }));
