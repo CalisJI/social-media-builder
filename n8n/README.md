@@ -1,5 +1,9 @@
 # CAL-35 n8n workflow
 
+For approved-source scheduling, import
+`workflows/cal-50-content-scheduler.json` and follow
+`SCHEDULING_AUTOMATION.md`. It is inactive and dry-run locked by default.
+
 `workflows/cal-35-vocabulary-publisher.json` is the version-controlled import
 for the Social-Workspace workflow. It remains inactive and starts only from a
 manual trigger. The publish branch is additionally locked by both an explicit
