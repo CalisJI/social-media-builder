@@ -1,0 +1,26 @@
+{
+  "copy": {
+    "hook": "TỪ NÀY NGHĨA LÀ GÌ?",
+    "meaningLabel": "NGHĨA TIẾNG VIỆT",
+    "exampleLabel": "VÍ DỤ",
+    "cta": "Follow {handle} • 1 từ mỗi ngày"
+  },
+  "palette": {
+    "ink": "#27243A",
+    "secondary": "#625D78",
+    "accent": "#E85D75",
+    "card": "#FFF8EC",
+    "ipa": "#E7D9FF"
+  },
+  "layout": {
+    "safeZone": [80, 220, 920, 1500],
+    "card": [96, 300, 888, 1150]
+  },
+  "timeline": {
+    "hook": [0, 0.55],
+    "word": [0.8, 0.45],
+    "meaning": [2.2, 0.5],
+    "example": [4, 0.5],
+    "cta": [7.2, 0.65]
+  }
+}

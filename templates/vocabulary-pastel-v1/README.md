@@ -15,4 +15,6 @@ soft cloud-gradient, cream card and petal motif.
 
 The renderer should validate the normalized item against `schema.json`, apply
 the defaults described in `design-spec.md`, then render at 1080x1920, 30 fps.
+`theme.json` is the AI-editable design layer: update it when changing copy,
+palette, layout or timing, and the renderer will read it automatically.
 No Canva API or manual edit is required.

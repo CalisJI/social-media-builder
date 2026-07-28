@@ -22,6 +22,7 @@ N8N_MEDIA_ALLOWED_PREFIXES=/cal-3/
 N8N_MEDIA_MAX_BYTES=524288000
 TIKTOK_SESSION_FILE=/app/data/tiktok-session.enc
 PUBLISH_IDEMPOTENCY_FILE=/app/data/publish-idempotency.json
+VOCABULARY_LEDGER_FILE=/app/data/vocabulary-ledger.json
 ```
 
 Generate `SESSION_SECRET` and `N8N_SERVICE_TOKEN` separately with
@@ -61,6 +62,10 @@ The redirect URI must match character-for-character in TikTok and `.env`.
   - `POST /api/internal/tiktok/publish` with `videoUrl`, optional `caption`,
     `mode` (`draft` or `publish`), `privacy`, and a stable `idempotencyKey`.
   - `POST /api/internal/tiktok/status` with `publishId`.
+  - `POST /api/internal/vocabulary/ingest` with a `sheet`/`discord` source and
+    one or more vocabulary items to register.
+  - `POST /api/internal/vocabulary/published` to mark a source item as posted.
+  - `GET /api/internal/vocabulary/ledger` to review pending/published items.
   Both endpoints require `Authorization: Bearer <N8N_SERVICE_TOKEN>`. Media URLs
   must use HTTPS and an exact host listed in `N8N_MEDIA_ALLOWED_HOSTS`.
 

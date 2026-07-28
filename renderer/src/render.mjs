@@ -7,6 +7,19 @@ import { fileURLToPath } from "node:url";
 const rendererRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const templatesRoot = path.resolve(process.env.RENDER_TEMPLATES_DIR || path.join(rendererRoot, "../templates"));
 const partLabels = { adjective: "tính từ", adverb: "trạng từ", noun: "danh từ", verb: "động từ", preposition: "giới từ", pronoun: "đại từ" };
+const defaultCopy = Object.freeze({
+  hook: "TỪ NÀY NGHĨA LÀ GÌ?",
+  meaningLabel: "NGHĨA TIẾNG VIỆT",
+  exampleLabel: "VÍ DỤ",
+  cta: "Follow {handle} • 1 từ mỗi ngày",
+});
+const defaultTimeline = Object.freeze({
+  hook: [0, 0.55],
+  word: [0.8, 0.45],
+  meaning: [2.2, 0.5],
+  example: [4, 0.5],
+  cta: [7.2, 0.65],
+});
 
 export class RenderError extends Error {
   constructor(message, status = 500, code = "render_failed") { super(message); this.status = status; this.code = code; }
@@ -24,6 +37,27 @@ function clean(value, name, max, { required = true, fallback = null } = {}) {
 }
 
 function contained(root, candidate) { const rel = path.relative(root, candidate); return rel && !rel.startsWith("..") && !path.isAbsolute(rel); }
+function mergeObject(base = {}, override = {}) { return { ...base, ...(override && typeof override === "object" ? override : {}) }; }
+function normalizeTimeline(value) {
+  const timeline = mergeObject(defaultTimeline, value);
+  for (const key of ["hook", "word", "meaning", "example", "cta"]) {
+    const entry = timeline[key];
+    if (!Array.isArray(entry) || entry.length !== 2 || !entry.every((part) => Number.isFinite(Number(part)))) {
+      throw new RenderError(`template timeline.${key} must contain [start, duration]`, 400, "invalid_template");
+    }
+    timeline[key] = [Number(entry[0]), Number(entry[1])];
+  }
+  return timeline;
+}
+function normalizeCopy(value) {
+  const copy = mergeObject(defaultCopy, value);
+  for (const key of ["hook", "meaningLabel", "exampleLabel", "cta"]) {
+    if (typeof copy[key] !== "string" || !copy[key].trim()) {
+      throw new RenderError(`template copy.${key} must be a non-empty string`, 400, "invalid_template");
+    }
+  }
+  return copy;
+}
 
 export async function loadTemplateRegistry(root = templatesRoot) {
   const registry = new Map();
@@ -37,6 +71,22 @@ export async function loadTemplateRegistry(root = templatesRoot) {
       if (!contained(root, resolved)) throw new RenderError(`template ${manifest.id} has unsafe ${key} path`);
       await access(resolved); manifest.assets[key] = resolved;
     }
+    const themePath = path.join(packageRoot, "theme.json");
+    try {
+      const theme = JSON.parse(await readFile(themePath, "utf8"));
+      if (theme && typeof theme === "object" && !Array.isArray(theme)) {
+        if (theme.palette) manifest.palette = mergeObject(manifest.palette, theme.palette);
+        if (theme.layout) manifest.layout = mergeObject(manifest.layout, theme.layout);
+        if (theme.timeline) manifest.timeline = normalizeTimeline(mergeObject(manifest.timeline, theme.timeline));
+        if (theme.copy) manifest.copy = normalizeCopy(mergeObject(manifest.copy, theme.copy));
+      } else {
+        throw new RenderError(`template ${manifest.id} theme file must be a JSON object`, 400, "invalid_template");
+      }
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    manifest.copy = normalizeCopy(manifest.copy);
+    manifest.timeline = normalizeTimeline(manifest.timeline);
     const [left, top, right, bottom] = manifest.layout?.safeZone || [];
     if (!(left >= 0 && top >= 0 && right <= 1080 && bottom <= 1920 && left < right && top < bottom)) throw new RenderError(`template ${manifest.id} has invalid safe zone`);
     manifest.packageRoot = packageRoot; registry.set(manifest.id, Object.freeze(manifest));
@@ -63,12 +113,13 @@ export async function normalizePayload(input) {
   if (!/^@[A-Za-z0-9._]{1,31}$/.test(handle)) throw new RenderError("brand_handle must start with @ and contain only letters, numbers, dot or underscore", 400, "invalid_payload");
   const ipa = clean(entry.ipa, "ipa", 48, { required: false, fallback: "Phát âm đang cập nhật" });
   const part = clean(entry.part_of_speech, "part_of_speech", 24, { required: false, fallback: "từ vựng" });
+  const ctaTemplate = template.copy?.cta || defaultCopy.cta;
   return {
     template: template.id, duration, word: clean(entry.word, "word", 24), ipa,
     part: partLabels[part.toLowerCase()] || part, meaning: clean(entry.meaning_vi, "meaning_vi", 90),
     exampleEn: clean(entry.example_en, "example_en", 90, { required: false, fallback: "Ví dụ đang cập nhật" }),
     exampleVi: clean(entry.example_vi, "example_vi", 100, { required: false, fallback: "" }),
-    handle, cta: clean(entry.cta ?? input.cta, "cta", 54, { required: false, fallback: `Follow ${handle} • 1 từ mỗi ngày` }),
+    handle, cta: clean(entry.cta ?? input.cta, "cta", 54, { required: false, fallback: ctaTemplate.replaceAll("{handle}", handle) }),
     pronunciationAudioUrl: entry.pronunciation_audio_url ?? null, backgroundMusicUrl: entry.background_music_url ?? null,
   };
 }
@@ -98,27 +149,32 @@ async function fonts() {
 export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FFMPEG_PATH || "ffmpeg", timeoutMs = Number(process.env.RENDER_TIMEOUT_MS || 120000) } = {}) {
   const template = await resolveTemplate(payload.template); const font = await fonts(); const work = `${outputFile}.work`;
   await rm(work, { recursive: true, force: true }); await mkdir(work, { recursive: true });
-  const display = { hook: "TỪ NÀY NGHĨA LÀ GÌ?", word: payload.word.toUpperCase(), ipa: payload.ipa, part: payload.part, meaningLabel: "NGHĨA TIẾNG VIỆT", meaning: wrapText(payload.meaning, 31, 3), exampleLabel: "VÍ DỤ", en: wrapText(payload.exampleEn, 40, 2), vi: payload.exampleVi ? wrapText(payload.exampleVi, 44, 2) : "", cta: payload.cta };
+  const display = { hook: template.copy?.hook || defaultCopy.hook, word: payload.word.toUpperCase(), ipa: payload.ipa, part: payload.part, meaningLabel: template.copy?.meaningLabel || defaultCopy.meaningLabel, meaning: wrapText(payload.meaning, 31, 3), exampleLabel: template.copy?.exampleLabel || defaultCopy.exampleLabel, en: wrapText(payload.exampleEn, 40, 2), vi: payload.exampleVi ? wrapText(payload.exampleVi, 44, 2) : "", cta: payload.cta };
   const files = {}; for (const [key, value] of Object.entries(display)) files[key] = await saveText(work, key, value);
   const p = template.palette; const dt = (file, weight, size, x, y, opts = "") => `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${p.ink}:fontsize=${size}:x='${x}':y='${y}'${opts}`;
+  const [hookStart, hookDuration] = template.timeline?.hook || defaultTimeline.hook;
+  const [wordStart, wordDuration] = template.timeline?.word || defaultTimeline.word;
+  const [meaningStart, meaningDuration] = template.timeline?.meaning || defaultTimeline.meaning;
+  const [exampleStart, exampleDuration] = template.timeline?.example || defaultTimeline.example;
+  const [ctaStart, ctaDuration] = template.timeline?.cta || defaultTimeline.cta;
   const stages = [
     "[0:v]scale=1160:2062,crop=1080:1920:x='40+20*t/10':y='71+35*t/10',setsar=1[bg]",
     `[1:v]scale=96:96,format=rgba,rotate='-0.10+0.20*t/10':ow=rotw(iw):oh=roth(ih):c=none[petal]`,
     "[bg][petal]overlay=x=55:y='330+32*t/10'[decor]",
     `[decor]drawbox=x='96+18*max(0\,1-t/1.17)':y='300+23*max(0\,1-t/1.17)':w='888-36*max(0\,1-t/1.17)':h='1150-46*max(0\,1-t/1.17)':color=${p.card}@0.96:t=fill`,
-    dt(files.hook,"bold",36,"(w-text_w)/2",`230+${rise(0,0.55,36)}`,`:alpha='${fade(0,0.55)}'`),
-    dt(files.word,"extraBold",104,"(w-text_w)/2",`405+${rise(0.8,0.45,28)}`,`:alpha='${fade(0.8,0.45)}'`),
+    dt(files.hook,"bold",36,"(w-text_w)/2",`230+${rise(hookStart,hookDuration,36)}`,`:alpha='${fade(hookStart,hookDuration)}'`),
+    dt(files.word,"extraBold",104,"(w-text_w)/2",`405+${rise(wordStart,wordDuration,28)}`,`:alpha='${fade(wordStart,wordDuration)}'`),
     `drawbox=x=160:y=540:w='min(680\,680*max(0\,min(1\,(t-1.15)/0.2)))':h=8:color=${p.accent}:t=fill:enable='gte(t,1.15)'`,
     `drawbox=x=210:y=565:w=620:h=64:color=${p.ipa}:t=fill:enable='gte(t,1.05)'`,
     dt(files.ipa,"regular",38,"(w-text_w)/2",575,`:alpha='${fade(1.05,0.4)}'`),
     dt(files.part,"bold",30,"(w-text_w)/2",646,`:fontcolor=${p.accent}:alpha='${fade(1.25,0.4)}'`),
-    dt(files.meaningLabel,"bold",26,148,`748+${rise(2.2,0.5,26)}`,`:alpha='${fade(2.2,0.5)}'`),
-    dt(files.meaning,"bold",44,148,`797+${rise(2.35,0.55,30)}`,`:line_spacing=8:alpha='${fade(2.35,0.55)}'`),
-    dt(files.exampleLabel,"bold",26,148,`1005+${rise(4,0.5,24)}`,`:alpha='${fade(4,0.5)}'`),
-    dt(files.en,"medium",36,148,`1054+${rise(4.15,0.55,28)}`,`:line_spacing=8:alpha='${fade(4.15,0.55)}'`),
-    ...(payload.exampleVi ? [dt(files.vi,"medium",30,148,`1176+${rise(4.35,0.55,24)}`,`:fontcolor=${p.secondary}:line_spacing=7:alpha='${fade(4.35,0.55)}'`)] : []),
-    `drawbox=x=160:y='1320+${rise(7.2,0.65,48)}':w=720:h=104:color=${p.card}:t=fill:enable='gte(t,7.2)'`,
-    dt(files.cta,"bold",34,"(w-text_w)/2",`1350+${rise(7.2,0.65,48)}`,`:alpha='${fade(7.2,0.65)}'`),
+    dt(files.meaningLabel,"bold",26,148,`748+${rise(meaningStart,meaningDuration,26)}`,`:alpha='${fade(meaningStart,meaningDuration)}'`),
+    dt(files.meaning,"bold",44,148,`797+${rise(meaningStart + 0.15,meaningDuration + 0.05,30)}`,`:line_spacing=8:alpha='${fade(meaningStart + 0.15,meaningDuration + 0.05)}'`),
+    dt(files.exampleLabel,"bold",26,148,`1005+${rise(exampleStart,exampleDuration,24)}`,`:alpha='${fade(exampleStart,exampleDuration)}'`),
+    dt(files.en,"medium",36,148,`1054+${rise(exampleStart + 0.15,exampleDuration + 0.05,28)}`,`:line_spacing=8:alpha='${fade(exampleStart + 0.15,exampleDuration + 0.05)}'`),
+    ...(payload.exampleVi ? [dt(files.vi,"medium",30,148,`1176+${rise(exampleStart + 0.35,exampleDuration + 0.05,24)}`,`:fontcolor=${p.secondary}:line_spacing=7:alpha='${fade(exampleStart + 0.35,exampleDuration + 0.05)}'`)] : []),
+    `drawbox=x=160:y='1320+${rise(ctaStart,ctaDuration,48)}':w=720:h=104:color=${p.card}:t=fill:enable='gte(t,${ctaStart})'`,
+    dt(files.cta,"bold",34,"(w-text_w)/2",`1350+${rise(ctaStart,ctaDuration,48)}`,`:alpha='${fade(ctaStart,ctaDuration)}'`),
     "format=yuv420p[out]"
   ];
   const filter = `${stages.slice(0, 3).join(";")};${stages.slice(3).join(",")}`;
