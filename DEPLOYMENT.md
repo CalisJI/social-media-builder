@@ -1,6 +1,6 @@
 # Deployment configuration
 
-Production domain: `https://tiktok-agent-calis-legal.chillpickle.org`
+Production domain: `https://social-agent-calis-legal.chillpickle.org`
 
 ## Add TikTok credentials
 
@@ -13,7 +13,7 @@ PROD_TIKTOK_CLIENT_KEY=paste_production_client_key_here
 PROD_TIKTOK_CLIENT_SECRET=paste_production_client_secret_here
 SANDBOX_TIKTOK_CLIENT_KEY=paste_sandbox_client_key_here
 SANDBOX_TIKTOK_CLIENT_SECRET=paste_sandbox_client_secret_here
-TIKTOK_REDIRECT_URI=https://tiktok-agent-calis-legal.chillpickle.org/api/tiktok/callback
+TIKTOK_REDIRECT_URI=https://social-agent-calis-legal.chillpickle.org/api/tiktok/callback
 TIKTOK_ALLOW_PUBLIC_POSTS=false
 SESSION_SECRET=paste_random_64_hex_characters_here
 N8N_SERVICE_TOKEN=paste_a_different_random_64_hex_characters_here
@@ -37,10 +37,10 @@ Start or update the app with `docker compose up -d --build`. Compose refuses to 
 
 ## TikTok Developer Portal values
 
-- Website URL: `https://tiktok-agent-calis-legal.chillpickle.org`
-- Redirect URI: `https://tiktok-agent-calis-legal.chillpickle.org/api/tiktok/callback`
-- Privacy Policy: `https://tiktok-agent-calis-legal.chillpickle.org/privacy/`
-- Terms of Service: `https://tiktok-agent-calis-legal.chillpickle.org/terms/`
+- Website URL: `https://social-agent-calis-legal.chillpickle.org`
+- Redirect URI: `https://social-agent-calis-legal.chillpickle.org/api/tiktok/callback`
+- Privacy Policy: `https://social-agent-calis-legal.chillpickle.org/privacy/`
+- Terms of Service: `https://social-agent-calis-legal.chillpickle.org/terms/`
 
 The redirect URI must match character-for-character in TikTok and `.env`.
 
