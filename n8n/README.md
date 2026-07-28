@@ -5,6 +5,14 @@ for the Social-Workspace workflow. It remains inactive and starts only from a
 manual trigger. The publish branch is additionally locked by both an explicit
 input approval and `N8N_CAL3_PUBLISH_ENABLED=true`.
 
+For Discord vocabulary intake, import
+`workflows/cal-52-discord-vocabulary-ingest.json` inactive, bind `Discord Bot
+Account` and `Google Service Account account`, then run its manual test path.
+After verification, activate only this workflow. Its schedule polls the approved
+Discord channel every minute, normalizes `!vocab` / `!vocab-batch`, deduplicates
+against the `Content` sheet, and appends at most one `needs_review` row per run
+with blank `publish_ok`.
+
 ## Why the flow is structured this way
 
 - Validation fans a batch of 1–50 entries into stable jobs. The deterministic
@@ -44,5 +52,6 @@ input approval and `N8N_CAL3_PUBLISH_ENABLED=true`.
   deleting execution evidence or rendered media.
 
 Run `npm run test:n8n` before importing changes. The suite includes local fault
-injection for renderer 5xx/timeout, temporary storage failure, retry exhaustion,
-and concurrent/replayed publish idempotency; it does not call real services.
+injection for renderer 5xx/timeout, temporary storage failure, retry
+exhaustion, concurrent/replayed publish idempotency, and the Discord ingest
+workflow contract; it does not call real services.
