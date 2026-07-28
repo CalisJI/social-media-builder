@@ -45,6 +45,13 @@ and `publish_id` are the dashboard/log. A manual retry clears a retryable
 `error_code`, sets `queued`, and preserves the idempotency key. Non-retryable
 validation and approval failures require editing/re-approval first.
 
+Import `workflows/cal-50-manual-retry.json` inactive for manual recovery. Set
+`CAL50_MANUAL_RETRY_CONTENT_ID` and `CAL50_MANUAL_RETRY_APPROVED_BY` for one
+execution, run it manually, then clear both values. It accepts only a `failed`
+row with an allow-listed renderer/storage error. It refuses rows with
+`publish_id`, `published_at`, or `RECONCILE_REQUIRED`, records who approved the
+retry, and preserves the original idempotency key.
+
 ## Safety gates
 
 - `SCHEDULER_DRY_RUN=true` is the default and suppresses every publisher call.

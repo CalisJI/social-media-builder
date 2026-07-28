@@ -1,0 +1,63 @@
+{
+  "name": "CAL-50 Manual Retry (Inactive)",
+  "active": false,
+  "settings": { "executionOrder": "v1", "saveExecutionProgress": true },
+  "nodes": [
+    {
+      "id": "manual",
+      "name": "Manual Retry Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-720, 0],
+      "parameters": {}
+    },
+    {
+      "id": "input",
+      "name": "Retry Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-520, 0],
+      "parameters": {
+        "jsCode": "const content_id=String($env.CAL50_MANUAL_RETRY_CONTENT_ID||'').trim();const approvedBy=String($env.CAL50_MANUAL_RETRY_APPROVED_BY||'').trim();if(!content_id||!approvedBy)throw new Error('NON_RETRYABLE: retry content ID and approver are required');return[{json:{content_id,approved_by:approvedBy}}];"
+      }
+    },
+    {
+      "id": "read",
+      "name": "Read Retry Target",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [-320, 0],
+      "credentials": { "googleApi": { "id": "CONFIGURE_IN_N8N", "name": "Google Service Account account" } },
+      "parameters": { "authentication": "serviceAccount", "resource": "sheet", "operation": "read", "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0", "range": "Content!A:AN", "rawData": true, "dataProperty": "data" }
+    },
+    {
+      "id": "validate",
+      "name": "Validate Safe Manual Retry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, 0],
+      "parameters": {
+        "jsCode": "const request=$('Retry Input').first().json;const matrix=$input.first().json.data||[];const [headers,...rows]=matrix;const col=name=>headers.indexOf(name);const raw=rows.find(row=>String(row[col('content_id')])===request.content_id);if(!raw)throw new Error('NON_RETRYABLE: content ID not found');const row=Object.fromEntries(headers.map((h,i)=>[h,raw[i]]));const retryable=new Set(['RENDER_TIMEOUT','RENDER_5XX','STORAGE_TIMEOUT','STORAGE_5XX','RETRY_EXHAUSTED']);if(row.status!=='failed'||!retryable.has(String(row.error_code)))throw new Error('NON_RETRYABLE: row is not a safe retry candidate');if(row.publish_id||row.published_at||row.error_code==='RECONCILE_REQUIRED')throw new Error('NON_RETRYABLE: reconcile publish outcome before retry');const now=new Date().toISOString();return[{json:{...row,status:'queued',claimed_at:'',claim_owner:'',retry_at:'',error_code:'',manual_retry_by:request.approved_by,manual_retry_at:now,updated_at:now}}];"
+      }
+    },
+    {
+      "id": "update",
+      "name": "Queue Existing Idempotency Key",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [120, 0],
+      "credentials": { "googleApi": { "id": "CONFIGURE_IN_N8N", "name": "Google Service Account account" } },
+      "parameters": { "authentication": "serviceAccount", "resource": "sheet", "operation": "update", "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0", "range": "Content!A:AN", "matchingColumns": ["content_id"], "options": { "valueInputMode": "RAW" } }
+    }
+  ],
+  "connections": {
+    "Manual Retry Trigger": { "main": [[{ "node": "Retry Input", "type": "main", "index": 0 }]] },
+    "Retry Input": { "main": [[{ "node": "Read Retry Target", "type": "main", "index": 0 }]] },
+    "Read Retry Target": { "main": [[{ "node": "Validate Safe Manual Retry", "type": "main", "index": 0 }]] },
+    "Validate Safe Manual Retry": { "main": [[{ "node": "Queue Existing Idempotency Key", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false },
+  "versionId": "e419db88-d781-4b72-8e8f-2875fd58dc1a"
+}
+
