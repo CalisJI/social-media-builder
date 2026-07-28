@@ -23,6 +23,26 @@ export type TikTokSession = {
   refreshExpiresAt?: number;
 };
 
+export type TikTokCreatorProfile = {
+  openId: string;
+  displayName: string | null;
+  channelHandle: string | null;
+  fetchedAt: number;
+};
+
+type UserInfoResponse = {
+  data: {
+    user?: {
+      open_id?: string;
+      display_name?: string;
+      username?: string;
+    };
+  };
+};
+
+const creatorProfileCache = new Map<string, TikTokCreatorProfile>();
+const CREATOR_PROFILE_TTL_MS = 15 * 60 * 1000;
+
 type TokenResponse = {
   access_token?: string;
   expires_in?: number;
@@ -174,4 +194,34 @@ export async function tiktokFetch<T>(
     throw new TikTokApiError(detail, code, logId);
   }
   return payload;
+}
+
+export function normalizeTikTokHandle(username: unknown): string | null {
+  if (typeof username !== "string") return null;
+  const normalized = username.trim().replace(/^@/, "");
+  return /^[A-Za-z0-9._]{1,24}$/.test(normalized) ? `@${normalized}` : null;
+}
+
+export async function getTikTokCreatorProfile(
+  session: TikTokSession,
+  options: { force?: boolean } = {},
+): Promise<TikTokCreatorProfile> {
+  const cached = creatorProfileCache.get(session.openId);
+  if (!options.force && cached && Date.now() - cached.fetchedAt < CREATOR_PROFILE_TTL_MS) {
+    return cached;
+  }
+
+  const result = await tiktokFetch<UserInfoResponse>(
+    "/v2/user/info/?fields=open_id,display_name,username",
+    session.accessToken,
+  );
+  const user = result.data.user ?? {};
+  const profile: TikTokCreatorProfile = {
+    openId: user.open_id || session.openId,
+    displayName: typeof user.display_name === "string" ? user.display_name : null,
+    channelHandle: normalizeTikTokHandle(user.username),
+    fetchedAt: Date.now(),
+  };
+  creatorProfileCache.set(session.openId, profile);
+  return profile;
 }

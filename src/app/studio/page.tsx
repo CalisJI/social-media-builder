@@ -2,7 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { accessTokenNeedsRefresh, decryptSession, SESSION_COOKIE, tiktokFetch } from "@/lib/tiktok";
+import {
+  accessTokenNeedsRefresh,
+  decryptSession,
+  getTikTokCreatorProfile,
+  SESSION_COOKIE,
+  tiktokFetch,
+} from "@/lib/tiktok";
 import PublishForm from "./PublishForm";
 import styles from "./studio.module.css";
 
@@ -25,7 +31,7 @@ export default async function StudioPage() {
   let privacyOptions: string[] = ["SELF_ONLY"];
   let apiError = "";
   try {
-    const [userResult, videoResult, creatorResult] = await Promise.all([
+    const [userResult, videoResult, creatorResult, profile] = await Promise.all([
       tiktokFetch<UserResponse>(`/v2/user/info/?fields=${userFields}`, session.accessToken),
       tiktokFetch<VideosResponse>(
         "/v2/video/list/?fields=id,title,cover_image_url,share_url,create_time,duration",
@@ -37,8 +43,10 @@ export default async function StudioPage() {
         session.accessToken,
         { method: "POST", body: "{}" },
       ),
+      getTikTokCreatorProfile(session).catch(() => null),
     ]);
     user = userResult.data.user;
+    if (profile?.channelHandle) user.username = profile.channelHandle;
     videos = videoResult.data.videos ?? [];
     privacyOptions = creatorResult.data.privacy_level_options ?? privacyOptions;
   } catch (error) {
@@ -58,6 +66,7 @@ export default async function StudioPage() {
         <div>
           <p className={styles.kicker}>Connected TikTok account</p>
           <h1>{String(user.display_name || "TikTok creator")}</h1>
+          {user.username && <p>{String(user.username)}</p>}
           <p>{String(user.bio_description || "Profile connected and ready for creator-controlled publishing.")}</p>
         </div>
         <div className={styles.stats}>

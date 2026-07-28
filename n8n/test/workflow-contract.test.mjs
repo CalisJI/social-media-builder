@@ -31,8 +31,20 @@ test("contract covers batch, schedule, idempotency, bounded retries and approval
   }
 });
 
+test("creator handle is resolved once with a manual override and safe fallback", () => {
+  const creator = byName.get("Resolve TikTok Creator Handle");
+  const validation = byName.get("Validate Batch 1-50").parameters.jsCode;
+  assert.match(creator.parameters.url, /internal\/tiktok\/creator/);
+  assert.equal(creator.credentials.httpHeaderAuth.name, "Social Publisher Backend (configure in n8n)");
+  assert.match(validation, /entry\.channel_handle\|\|body\.channel_handle\|\|automaticHandle/);
+  assert.match(validation, /channel_handle is unavailable/);
+  assert.match(validation, /Follow \$\{channel_handle\}/);
+});
+
 test("main path is validate to render to R2 to wait to gated backend publish", () => {
   const next = (name, branch=0) => workflow.connections[name]?.main?.[branch]?.[0]?.node;
+  assert.equal(next("Test Input (replace in production)"), "Resolve TikTok Creator Handle");
+  assert.equal(next("Resolve TikTok Creator Handle"), "Validate Batch 1-50");
   assert.equal(next("Validate Batch 1-50"), "Render Video");
   assert.equal(next("Classify Render Result"), "Retry Render?");
   assert.equal(next("Retry Render?", 0), "Render Retry Backoff");
