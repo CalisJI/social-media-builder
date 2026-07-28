@@ -1,0 +1,211 @@
+{
+  "name": "CAL-52 Discord Vocabulary Ingest",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "timezone": "Asia/Ho_Chi_Minh"
+  },
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Poll Discord Every Minute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-1260, -100],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "manual",
+      "name": "Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-1260, 100],
+      "parameters": {}
+    },
+    {
+      "id": "discord-read",
+      "name": "Get Recent Discord Messages",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [-1020, 0],
+      "credentials": {
+        "discordBotApi": {
+          "id": "lVCtQtc4KJQuQFOK",
+          "name": "Discord Bot Account"
+        }
+      },
+      "parameters": {
+        "authentication": "botToken",
+        "resource": "message",
+        "operation": "getAll",
+        "guildId": {
+          "mode": "id",
+          "value": "1527846926480052275"
+        },
+        "channelId": {
+          "mode": "id",
+          "value": "1529722358309584987"
+        },
+        "returnAll": false,
+        "limit": 25,
+        "options": {
+          "simplify": false
+        }
+      }
+    },
+    {
+      "id": "select-normalize",
+      "name": "Select One Vocabulary Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-780, 0],
+      "parameters": {
+        "jsCode": "const messages = $input.all().map((item) => item.json).filter((message) => !message.author?.bot && String(message.channel_id || '') === '1529722358309584987' && /^!(vocab|vocab-batch)\\s+/i.test(String(message.content || '').trim())).sort((a, b) => String(a.id).localeCompare(String(b.id)));\nif (!messages.length) return [];\nconst message = messages[0];\nconst content = String(message.content || '').trim().normalize('NFKC');\nconst match = content.match(/^!(vocab|vocab-batch)\\s+([\\s\\S]+)$/i);\nlet payload;\ntry { payload = JSON.parse(match[2].replace(/^```(?:json)?\\s*|\\s*```$/gi, '')); } catch { throw new Error('NON_RETRYABLE: payload must be valid JSON'); }\nconst rawEntries = match[1].toLowerCase() === 'vocab' ? [payload] : payload;\nif (!Array.isArray(rawEntries) || rawEntries.length < 1 || rawEntries.length > 50) throw new Error('NON_RETRYABLE: batch must contain 1-50 entries');\nconst text = (value) => typeof value === 'string' ? value.trim().normalize('NFKC') : '';\nconst safe = (value) => /^[=+\\-@]/.test(value) ? `'${value}` : value;\nconst hash = (value) => { let result = 2166136261; for (let index = 0; index < value.length; index++) { result ^= value.charCodeAt(index); result = Math.imul(result, 16777619); } return (result >>> 0).toString(16).padStart(8, '0'); };\nconst entries = rawEntries.map((raw, index) => {\n  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error(`NON_RETRYABLE: entry ${index + 1} must be an object`);\n  const word = text(raw.word);\n  const meaning = text(raw.meaning);\n  const context = text(raw.context);\n  if (!word) throw new Error(`NON_RETRYABLE: entry ${index + 1} requires word`);\n  if (word.length > 120 || meaning.length > 1000 || context.length > 1000) throw new Error(`NON_RETRYABLE: entry ${index + 1} exceeds field length`);\n  const normalizedWord = word.toLocaleLowerCase('en-US');\n  const dedupeKey = `discord:${hash([normalizedWord, meaning.toLocaleLowerCase('vi-VN'), context.toLocaleLowerCase('vi-VN')].join('\\u001f'))}`;\n  return { content_id: `discord-${message.id}-${index}`, word: safe(word), normalized_word: safe(normalizedWord), language: 'en', part_of_speech: safe(text(raw.part_of_speech)), sense_key: '', meaning_vi: safe(meaning), context_topic: safe(context), example_en: safe(text(raw.example_en)), example_vi: safe(text(raw.example_vi)), ipa: safe(text(raw.ipa)), source: 'discord', source_ref: `${message.id}:${index}`, publish_ok: '', review_status: 'needs_review', status: 'needs_review', dedupe_key: dedupeKey, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), source_message_id: String(message.id), source_channel_id: String(message.channel_id), source_user_id: String(message.author?.id || '') };\n});\nreturn [{ json: { message_id: String(message.id), channel_id: String(message.channel_id), user_id: String(message.author?.id || ''), entries } }];"
+      }
+    },
+    {
+      "id": "read-sheet",
+      "name": "Read Content Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [-540, 0],
+      "credentials": {
+        "googleApi": {
+          "id": "7frVxcS8Eb3CBDD9",
+          "name": "Google Service Account account"
+        }
+      },
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0",
+        "range": "Content!A:AD",
+        "rawData": true,
+        "dataProperty": "data",
+        "options": {
+          "continue": true
+        }
+      }
+    },
+    {
+      "id": "dedupe",
+      "name": "Build One New Sheet Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-300, 0],
+      "parameters": {
+        "jsCode": "const request = $('Select One Vocabulary Message').first().json;\nconst matrix = $input.first().json.data || [];\nconst headers = matrix[0] || [];\nconst rows = matrix.slice(1).filter((row) => Array.isArray(row) && row.some((value) => value !== ''));\nconst column = (name) => headers.indexOf(name);\nconst sourceRefs = new Set(rows.map((row) => String(row[column('source_ref')] || '')));\nconst dedupeKeys = new Set(rows.map((row) => String(row[column('dedupe_key')] || '')));\nconst entry = request.entries.find((candidate) => !sourceRefs.has(candidate.source_ref) && !dedupeKeys.has(candidate.dedupe_key));\nif (!entry) return [];\nreturn [{ json: { ...entry, hook: '', cta: '', template_id: '', license_note: '', reviewed_by: '', publish_at: '', claimed_at: '', render_id: '', publish_id: '', published_at: '', error_code: '' } }];"
+      }
+    },
+    {
+      "id": "append",
+      "name": "Append One Draft Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [-60, 0],
+      "credentials": {
+        "googleApi": {
+          "id": "7frVxcS8Eb3CBDD9",
+          "name": "Google Service Account account"
+        }
+      },
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "append",
+        "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0",
+        "range": "Content!A:AD",
+        "keyRow": 0,
+        "options": {
+          "valueInputMode": "RAW"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Poll Discord Every Minute": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Discord Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Test Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Discord Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Discord Messages": {
+      "main": [
+        [
+          {
+            "node": "Select One Vocabulary Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select One Vocabulary Message": {
+      "main": [
+        [
+          {
+            "node": "Read Content Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Content Sheet": {
+      "main": [
+        [
+          {
+            "node": "Build One New Sheet Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build One New Sheet Row": {
+      "main": [
+        [
+          {
+            "node": "Append One Draft Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
