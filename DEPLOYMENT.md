@@ -1,6 +1,6 @@
 # Deployment configuration
 
-Production domain: `https://tiktok-agent-calis-legal.chillpickle.org`
+Production domain: `https://social-agent-calis-legal.chillpickle.org`
 
 ## Add TikTok credentials
 
@@ -13,7 +13,7 @@ PROD_TIKTOK_CLIENT_KEY=paste_production_client_key_here
 PROD_TIKTOK_CLIENT_SECRET=paste_production_client_secret_here
 SANDBOX_TIKTOK_CLIENT_KEY=paste_sandbox_client_key_here
 SANDBOX_TIKTOK_CLIENT_SECRET=paste_sandbox_client_secret_here
-TIKTOK_REDIRECT_URI=https://tiktok-agent-calis-legal.chillpickle.org/api/tiktok/callback
+TIKTOK_REDIRECT_URI=https://social-agent-calis-legal.chillpickle.org/api/tiktok/callback
 TIKTOK_ALLOW_PUBLIC_POSTS=false
 SESSION_SECRET=paste_random_64_hex_characters_here
 N8N_SERVICE_TOKEN=paste_a_different_random_64_hex_characters_here
@@ -22,6 +22,7 @@ N8N_MEDIA_ALLOWED_PREFIXES=/cal-3/
 N8N_MEDIA_MAX_BYTES=524288000
 TIKTOK_SESSION_FILE=/app/data/tiktok-session.enc
 PUBLISH_IDEMPOTENCY_FILE=/app/data/publish-idempotency.json
+VOCABULARY_LEDGER_FILE=/app/data/vocabulary-ledger.json
 ```
 
 Generate `SESSION_SECRET` and `N8N_SERVICE_TOKEN` separately with
@@ -37,10 +38,10 @@ Start or update the app with `docker compose up -d --build`. Compose refuses to 
 
 ## TikTok Developer Portal values
 
-- Website URL: `https://tiktok-agent-calis-legal.chillpickle.org`
-- Redirect URI: `https://tiktok-agent-calis-legal.chillpickle.org/api/tiktok/callback`
-- Privacy Policy: `https://tiktok-agent-calis-legal.chillpickle.org/privacy/`
-- Terms of Service: `https://tiktok-agent-calis-legal.chillpickle.org/terms/`
+- Website URL: `https://social-agent-calis-legal.chillpickle.org`
+- Redirect URI: `https://social-agent-calis-legal.chillpickle.org/api/tiktok/callback`
+- Privacy Policy: `https://social-agent-calis-legal.chillpickle.org/privacy/`
+- Terms of Service: `https://social-agent-calis-legal.chillpickle.org/terms/`
 
 The redirect URI must match character-for-character in TikTok and `.env`.
 
@@ -61,6 +62,10 @@ The redirect URI must match character-for-character in TikTok and `.env`.
   - `POST /api/internal/tiktok/publish` with `videoUrl`, optional `caption`,
     `mode` (`draft` or `publish`), `privacy`, and a stable `idempotencyKey`.
   - `POST /api/internal/tiktok/status` with `publishId`.
+  - `POST /api/internal/vocabulary/ingest` with a `sheet`/`discord` source and
+    one or more vocabulary items to register.
+  - `POST /api/internal/vocabulary/published` to mark a source item as posted.
+  - `GET /api/internal/vocabulary/ledger` to review pending/published items.
   Both endpoints require `Authorization: Bearer <N8N_SERVICE_TOKEN>`. Media URLs
   must use HTTPS and an exact host listed in `N8N_MEDIA_ALLOWED_HOSTS`.
 

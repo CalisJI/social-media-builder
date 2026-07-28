@@ -7,5 +7,6 @@ test("applies nullable fallbacks",async()=>{const p=await normalizePayload({...s
 test("rejects batches",async()=>assert.rejects(normalizePayload({...sample,entries:[...sample.entries,...sample.entries]}),RenderError));
 test("rejects out-of-range duration",async()=>assert.rejects(normalizePayload({...sample,duration_seconds:30}),/duration_seconds/));
 test("registry swaps between two fixture packages",async()=>{assert.equal((await resolveTemplate("vocabulary-pastel-v1")).palette.accent,"#E85D75");assert.equal((await resolveTemplate("vocabulary-pastel-test-v1")).palette.accent,"#6E67D8");});
+test("registry applies theme.json overrides",async()=>{const template=await resolveTemplate("vocabulary-pastel-test-v1");assert.equal(template.copy.hook,"THEME OVERRIDE");assert.equal(template.copy.meaningLabel,"MEANING");assert.equal(template.timeline.hook[0],0.1);});
 test("rejects unknown template IDs",async()=>assert.rejects(resolveTemplate("missing-v1"),error=>error.status===400&&error.code==="unknown_template"));
 test("wraps long content and enforces line bounds",()=>{assert.equal(wrapText("one two three four",7),"one two\nthree\nfour");assert.throws(()=>wrapText("one two three",3,2),/2 lines/);});

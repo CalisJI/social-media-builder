@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --test src/lib/*.test.mjs renderer/test/*.test.mjs n8n/test/*.test.mjs",
     "test:n8n": "node --test n8n/test/*.test.mjs"
   },
   "dependencies": {
