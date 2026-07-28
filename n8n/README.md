@@ -40,6 +40,13 @@ with blank `publish_ok`.
 5. A separately authorized test may set `approved:true` and temporarily set
    `N8N_CAL3_PUBLISH_ENABLED=true`. Disable it immediately after the run.
 
+The workflow queries the backend's authenticated creator-info endpoint once per
+execution. An entry-level `channel_handle` remains an explicit manual override.
+When it is blank, the workflow uses TikTok's verified `username` field and
+generates the default CTA from that handle. If TikTok does not return a valid
+username, validation stops instead of guessing from the display name. Creator
+info is cached by the backend for 15 minutes, so this adds no per-video polling.
+
 ## Common failures and rollback
 
 - `NON_RETRYABLE`: fix the payload, HTTPS host/prefix, credential binding or
