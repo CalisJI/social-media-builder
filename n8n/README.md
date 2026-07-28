@@ -9,8 +9,9 @@ For Discord vocabulary intake, import
 `workflows/cal-52-discord-vocabulary-ingest.json` inactive, bind `Discord Bot
 Account` and `Google Service Account account`, then run its manual test path.
 After verification, activate only this workflow. Its schedule polls the approved
-Discord channel every minute, normalizes `!vocab` / `!vocab-batch`, deduplicates
-against the `Content` sheet, and appends at most one `needs_review` row per run
+Discord channel every minute and accepts one plain-text vocabulary word, with or
+without a bot mention. New words go to the three-column `AdminVocabulary` tab.
+Only rows explicitly approved there are copied to `Content` as `needs_review`,
 with blank `publish_ok`.
 
 ## Why the flow is structured this way

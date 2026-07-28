@@ -8,9 +8,20 @@ existing Google service-account credential.
 
 ## Message contract
 
-Only human-authored commands from Discord channel `1529722358309584987` are
+Only human-authored messages from Discord channel `1529722358309584987` are
 accepted. The server and channel use immutable IDs rather than display names.
-The bot accepts JSON after one command:
+For the normal Admin flow, send one word as plain text, with or without a bot
+mention:
+
+```text
+resilience
+```
+
+```text
+@Vocab-Bot resilience
+```
+
+The structured commands remain supported for compatibility:
 
 ```text
 !vocab {"word":"resilience","meaning":"khả năng phục hồi","context":"distributed systems","at":"2030-01-02T03:04:05Z"}
@@ -24,14 +35,16 @@ The bot accepts JSON after one command:
 `example_en`, and `example_vi` are optional. A batch contains 1–50 objects.
 Multi-sense words are separate objects with different meaning/context.
 
-## Adapter and Sheet contract
+## Admin and Sheet contract
 
-The Discord interaction handler should verify the request signature and reject
-stale timestamps before constructing `{messageId, channelId, userId, content}`.
-It then calls `ingestDiscordMessage` with a store implementing `findMessage`,
-`findDedupeKeys`, and atomic `appendRows`.
+Discord words are added to `AdminVocabulary`, a deliberately small Admin-facing
+tab with exactly these columns:
 
-Rows are appended to the existing `Content` tab in spreadsheet
+`Số thứ tự, Từ vựng, Approval`
+
+`Approval` is initially blank. Admin may enter `OK`, `Approved`, `Yes`, or
+`Đồng ý`. Only then does the approval-sync branch create a row in the existing
+`Content` tab in spreadsheet
 `1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0`. The workflow maps into the
 existing 30-column schema, including:
 
@@ -44,10 +57,10 @@ Protect the editorial columns. Discord-created rows are only `draft` or
 `publish_ok` blank. Downstream publication must independently require
 `publish_ok=OK` and editorial approval.
 
-The workflow handles at most one accepted Discord message per execution and
-deduplicates against both `source_ref` (Discord message ID plus batch index) and
-the normalized semantic `dedupe_key`. Message edits or deletes never delete or
-publish existing rows.
+The workflow handles at most one new normalized word per execution. It
+deduplicates Discord intake against the Admin tab and approval sync against
+`Content.normalized_word`. Message edits or deletes never delete or publish
+existing rows.
 
 ## Minimum permissions and secrets
 
