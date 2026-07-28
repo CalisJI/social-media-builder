@@ -7,6 +7,10 @@ terminal. The claim writes `queued`, `claimed_at`, `claim_owner`, and a stable
 production adapter: re-read the row after updating it and continue only when
 `claim_owner` still matches the current execution.
 
+The exported workflow implements that read-back explicitly with `Read Back
+Claims` and `Continue Only Owned Claims`. A losing execution produces no output
+and therefore cannot reach renderer, R2, or publisher.
+
 ## Sequence and rationale
 
 ```mermaid
@@ -75,4 +79,3 @@ Rollback: restore the prior inactive workflow, leave gates false, and reconcile
 every `rendering`/`scheduled` row by idempotency key. Reset only confirmed
 not-created jobs to `queued`; mark validation failures `failed`. Never blindly
 retry an ambiguous TikTok timeout.
-
