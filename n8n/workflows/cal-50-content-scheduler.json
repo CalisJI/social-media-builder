@@ -1,0 +1,127 @@
+{
+  "name": "CAL-50 Approved Content Scheduler (Inactive / Dry Run)",
+  "active": false,
+  "settings": { "executionOrder": "v1", "saveExecutionProgress": true },
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Poll Due Content",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-1200, 0],
+      "parameters": { "rule": { "interval": [{ "field": "minutes", "minutesInterval": 5 }] } }
+    },
+    {
+      "id": "manual",
+      "name": "Manual Dry Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-1200, 180],
+      "parameters": {}
+    },
+    {
+      "id": "read",
+      "name": "Read Content Source",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [-960, 80],
+      "credentials": { "googleApi": { "id": "CONFIGURE_IN_N8N", "name": "Google Service Account account" } },
+      "parameters": { "authentication": "serviceAccount", "resource": "sheet", "operation": "read", "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0", "range": "Content!A:AN", "rawData": true, "dataProperty": "data" }
+    },
+    {
+      "id": "claim",
+      "name": "Select Validate and Claim Due",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-720, 80],
+      "parameters": {
+        "jsCode": "const matrix=$input.first().json.data||[];const [headers,...rows]=matrix;const col=n=>headers.indexOf(n);const now=Date.now();const lease=15*60*1000;const eligible=rows.filter(r=>r[col('review_status')]==='approved'&&r[col('publish_ok')]==='OK'&&Date.parse(r[col('publish_at')])<=now&&!['published','failed'].includes(r[col('status')])&&(!['queued','rendering','scheduled'].includes(r[col('status')])||(r[col('claimed_at')]&&now-Date.parse(r[col('claimed_at')])>lease))).sort((a,b)=>Date.parse(a[col('publish_at')])-Date.parse(b[col('publish_at')])).slice(0,20);return eligible.map(r=>({json:Object.fromEntries(headers.map((h,i)=>[h,r[i]])),pairedItem:{item:0}}));"
+      }
+    },
+    {
+      "id": "claim-write",
+      "name": "Atomic Claim Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [-480, 80],
+      "credentials": { "googleApi": { "id": "CONFIGURE_IN_N8N", "name": "Google Service Account account" } },
+      "parameters": { "authentication": "serviceAccount", "resource": "sheet", "operation": "update", "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0", "range": "Content!A:AN", "matchingColumns": ["content_id"], "options": { "valueInputMode": "RAW" } }
+    },
+    {
+      "id": "render",
+      "name": "Render with Stable Key",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-240, 80],
+      "parameters": { "method": "POST", "url": "={{$env.RENDERER_BASE_URL}}/jobs", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{$json.idempotency_key}}" }] }, "sendBody": true, "specifyBody": "json", "jsonBody": "={{$json}}", "options": { "timeout": 30000, "response": { "response": { "neverError": true } } } }
+    },
+    {
+      "id": "r2",
+      "name": "Upload Deterministic R2 Object",
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [0, 80],
+      "credentials": { "s3": { "id": "CONFIGURE_IN_N8N", "name": "CAL-3 R2 (configure in n8n)" } },
+      "parameters": { "operation": "upload", "bucketName": "={{$env.CAL3_R2_BUCKET}}", "fileName": "=scheduled/{{$json.idempotency_key}}.mp4" }
+    },
+    {
+      "id": "gate",
+      "name": "QA Mode Feature and Approval Gate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [240, 80],
+      "parameters": { "conditions": { "combinator": "and", "conditions": [{ "leftValue": "={{$env.SCHEDULER_DRY_RUN}}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "false" }, { "leftValue": "={{$json.approval_token}}", "operator": { "type": "string", "operation": "equals" }, "rightValue": "={{$env.SCHEDULER_APPROVAL_TOKEN}}" }, { "leftValue": "={{$json.publish_mode === 'DRAFT' || ($json.publish_mode === 'SELF_ONLY' && $env.SELF_ONLY_ENABLED === 'true') || ($json.publish_mode === 'PUBLIC' && $env.PUBLIC_PUBLISH_ENABLED === 'true')}}", "operator": { "type": "boolean", "operation": "true", "singleValue": true }, "rightValue": "" }] } }
+    },
+    {
+      "id": "publish",
+      "name": "Schedule via Idempotent Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 0],
+      "credentials": { "httpHeaderAuth": { "id": "CONFIGURE_IN_N8N", "name": "Social Publisher Backend (configure in n8n)" } },
+      "parameters": { "method": "POST", "url": "={{$env.SOCIAL_PUBLISHER_BASE_URL}}/internal/tiktok/publish", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{$json.idempotency_key}}" }] }, "sendBody": true, "specifyBody": "json", "jsonBody": "={{$json}}", "options": { "timeout": 30000, "response": { "response": { "neverError": true } } } }
+    },
+    {
+      "id": "hold",
+      "name": "Dry Run or Approval Hold",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 180],
+      "parameters": { "jsCode": "return $input.all().map(i=>({json:{...i.json,status:'queued',error_code:$env.SCHEDULER_DRY_RUN==='true'?'DRY_RUN':'APPROVAL_REQUIRED'}}));" }
+    },
+    {
+      "id": "reconcile",
+      "name": "Reconcile Before Retry",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [760, 0],
+      "credentials": { "httpHeaderAuth": { "id": "CONFIGURE_IN_N8N", "name": "Social Publisher Backend (configure in n8n)" } },
+      "parameters": { "method": "GET", "url": "={{$env.SOCIAL_PUBLISHER_BASE_URL}}/internal/tiktok/publish/by-idempotency/{{$json.idempotency_key}}", "options": { "timeout": 30000, "response": { "response": { "neverError": true } } } }
+    },
+    {
+      "id": "state",
+      "name": "Update Lifecycle Dashboard",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [1020, 80],
+      "credentials": { "googleApi": { "id": "CONFIGURE_IN_N8N", "name": "Google Service Account account" } },
+      "parameters": { "authentication": "serviceAccount", "resource": "sheet", "operation": "update", "sheetId": "1bfzprj4G7VrnPZmC3qMXwF5hL8qLHNYbmr8z1lAoSU0", "range": "Content!A:AN", "matchingColumns": ["content_id"], "options": { "valueInputMode": "RAW" } }
+    }
+  ],
+  "connections": {
+    "Poll Due Content": { "main": [[{ "node": "Read Content Source", "type": "main", "index": 0 }]] },
+    "Manual Dry Run": { "main": [[{ "node": "Read Content Source", "type": "main", "index": 0 }]] },
+    "Read Content Source": { "main": [[{ "node": "Select Validate and Claim Due", "type": "main", "index": 0 }]] },
+    "Select Validate and Claim Due": { "main": [[{ "node": "Atomic Claim Row", "type": "main", "index": 0 }]] },
+    "Atomic Claim Row": { "main": [[{ "node": "Render with Stable Key", "type": "main", "index": 0 }]] },
+    "Render with Stable Key": { "main": [[{ "node": "Upload Deterministic R2 Object", "type": "main", "index": 0 }]] },
+    "Upload Deterministic R2 Object": { "main": [[{ "node": "QA Mode Feature and Approval Gate", "type": "main", "index": 0 }]] },
+    "QA Mode Feature and Approval Gate": { "main": [[{ "node": "Schedule via Idempotent Backend", "type": "main", "index": 0 }], [{ "node": "Dry Run or Approval Hold", "type": "main", "index": 0 }]] },
+    "Schedule via Idempotent Backend": { "main": [[{ "node": "Reconcile Before Retry", "type": "main", "index": 0 }]] },
+    "Reconcile Before Retry": { "main": [[{ "node": "Update Lifecycle Dashboard", "type": "main", "index": 0 }]] },
+    "Dry Run or Approval Hold": { "main": [[{ "node": "Update Lifecycle Dashboard", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false },
+  "versionId": "4e0545b0-e845-4cdb-8ce2-bacff0eb2b5c"
+}
