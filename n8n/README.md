@@ -19,6 +19,9 @@ Discord channel every minute, normalizes `!vocab` / `!vocab-batch`, deduplicates
 against the `Content` sheet, and appends at most one `needs_review` row per run
 with blank `publish_ok`.
 
+Copy enrichment rules, quality limits, optional AI prompt and deterministic
+fallback are documented in `VOCABULARY_COPY.md`.
+
 ## Why the flow is structured this way
 
 - Validation fans a batch of 1–50 entries into stable jobs. The deterministic
