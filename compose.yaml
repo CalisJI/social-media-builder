@@ -14,6 +14,7 @@ services:
       HTTP_REQUEST_TIMEOUT_MS: ${HTTP_REQUEST_TIMEOUT_MS:-130000}
       RENDER_PRESET: ${RENDER_PRESET:-medium}
       RENDER_CRF: ${RENDER_CRF:-20}
+      RENDER_TEMPLATE_ADMIN_TOKEN: ${RENDER_TEMPLATE_ADMIN_TOKEN:?set RENDER_TEMPLATE_ADMIN_TOKEN in .env}
     volumes:
       - renderer-output:/data/renders
 
@@ -38,6 +39,8 @@ services:
       N8N_MEDIA_MAX_BYTES: ${N8N_MEDIA_MAX_BYTES:-524288000}
       TIKTOK_SESSION_FILE: ${TIKTOK_SESSION_FILE:-/app/data/tiktok-session.enc}
       PUBLISH_IDEMPOTENCY_FILE: ${PUBLISH_IDEMPOTENCY_FILE:-/app/data/publish-idempotency.json}
+      RENDERER_BASE_URL: http://renderer:3100
+      RENDER_TEMPLATE_ADMIN_TOKEN: ${RENDER_TEMPLATE_ADMIN_TOKEN:?set RENDER_TEMPLATE_ADMIN_TOKEN in .env}
     volumes:
       - tiktok-session:/app/data
 

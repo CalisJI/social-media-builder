@@ -1,0 +1,8 @@
+{
+  "id": "vocabulary-dark-reference-v1",
+  "assets": { "background": "assets/background.png", "petal": "assets/petal.png" },
+  "palette": { "ink": "#F7F4F5", "secondary": "#B9BCD4", "accent": "#FF595E", "card": "#13131B", "ipa": "#221920" },
+  "layout": { "variant": "dark-slide", "safeZone": [80, 160, 920, 1570] },
+  "timeline": { "hook": [0, 0.45], "word": [0.45, 0.45], "meaning": [1.4, 0.5], "example": [3.5, 0.5], "cta": [7.2, 0.65] },
+  "copy": { "hook": "TỪ MỚI MỖI NGÀY:", "meaningLabel": "NGHĨA TIẾNG VIỆT", "exampleLabel": "VÍ DỤ", "cta": "{handle} • Học từ mới mỗi ngày" }
+}

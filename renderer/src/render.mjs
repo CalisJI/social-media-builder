@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
-import { access, mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -102,6 +102,25 @@ export async function resolveTemplate(id) {
   return template;
 }
 
+export async function importTemplate({ id, baseTemplateId = "vocabulary-dark-reference-v1", theme }) {
+  if (typeof id !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*-v[1-9][0-9]*$/.test(id)) throw new RenderError("template id must be a versioned lowercase slug", 400, "invalid_template");
+  if (!theme || typeof theme !== "object" || Array.isArray(theme)) throw new RenderError("theme must be a JSON object", 400, "invalid_template");
+  const base = await resolveTemplate(baseTemplateId);
+  const target = path.join(templatesRoot, id); const temp = `${target}.tmp-${process.pid}`;
+  try { await access(target); throw new RenderError(`template already exists: ${id}`, 409, "template_exists"); } catch (error) { if (error.code !== "ENOENT") throw error; }
+  await rm(temp, { recursive: true, force: true });
+  try {
+    await cp(base.packageRoot, temp, { recursive: true });
+    const manifest = JSON.parse(await readFile(path.join(temp, "manifest.json"), "utf8"));
+    manifest.id = id;
+    await writeFile(path.join(temp, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+    await writeFile(path.join(temp, "theme.json"), `${JSON.stringify(theme, null, 2)}\n`, "utf8");
+    await rename(temp, target); registryPromise = undefined;
+    await resolveTemplate(id);
+    return { id, baseTemplateId };
+  } catch (error) { await rm(temp, { recursive: true, force: true }); await rm(target, { recursive: true, force: true }); registryPromise = undefined; throw error; }
+}
+
 export async function normalizePayload(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new RenderError("JSON object required", 400, "invalid_payload");
   const entry = Array.isArray(input.entries) ? input.entries[0] : input.entry ?? input;
@@ -146,10 +165,32 @@ async function fonts() {
   return Object.fromEntries(Object.entries(result).map(([key, value]) => [key, escapePath(value)]));
 }
 
+function darkSlideStages({ template, font, files, payload, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) {
+  const p = template.palette;
+  const dt = (file, weight, size, x, y, opts = "") => `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${p.ink}:fontsize=${size}:x='${x}':y='${y}'${opts}`;
+  return [
+    "[0:v]scale=1160:2062,crop=1080:1920:x='40+12*t/10':y='71+18*t/10',setsar=1[bg]",
+    "[bg]drawbox=x=420:y=100:w=16:h=16:color=#645d68:t=fill,drawbox=x=450:y=100:w=16:h=16:color=#645d68:t=fill,drawbox=x=480:y=100:w=48:h=16:color=#FF595E:t=fill,drawbox=x=540:y=100:w=16:h=16:color=#645d68:t=fill,drawbox=x=570:y=100:w=16:h=16:color=#645d68:t=fill,drawbox=x=600:y=100:w=16:h=16:color=#645d68:t=fill,drawbox=x=630:y=100:w=16:h=16:color=#645d68:t=fill,drawbox=x=660:y=100:w=16:h=16:color=#645d68:t=fill[decor]",
+    `[decor]drawbox=x=84:y=238:w=146:h=114:color=${p.card}:t=fill,drawbox=x=85:y=239:w=144:h=112:color=${p.accent}:t=3[badge]`,
+    `[badge]${dt(files.step, "extraBold", 64, 112, 256, `:fontcolor=#F3BF9A:alpha='${fade(hookStart, hookDuration)}'`)}`,
+    dt(files.hook, "extraBold", 68, 84, `470+${rise(hookStart, hookDuration, 30)}`, `:alpha='${fade(hookStart, hookDuration)}'`),
+    dt(files.word, "extraBold", 78, 84, `590+${rise(wordStart, wordDuration, 30)}`, `:fontcolor=${p.accent}:alpha='${fade(wordStart, wordDuration)}'`),
+    `drawtext=fontfile='${font.bold}':text='•':fontcolor=${p.secondary}:fontsize=58:x=84:y=760:alpha='${fade(meaningStart, meaningDuration)}'`,
+    dt(files.meaning, "bold", 47, 120, `765+${rise(meaningStart, meaningDuration, 24)}`, `:line_spacing=14:fontcolor=${p.secondary}:alpha='${fade(meaningStart, meaningDuration)}'`),
+    `drawbox=x=86:y=1070:w=690:h=98:color=${p.card}:t=fill:enable='gte(t,${exampleStart})'`,
+    dt(files.ipa, "medium", 34, 108, `1101+${rise(exampleStart, exampleDuration, 20)}`, `:fontcolor=#EF8C87:alpha='${fade(exampleStart, exampleDuration)}'`),
+    `drawtext=fontfile='${font.bold}':text='•':fontcolor=${p.secondary}:fontsize=58:x=84:y=1240:alpha='${fade(exampleStart + 0.15, exampleDuration)}'`,
+    dt(files.en, "bold", 43, 120, `1245+${rise(exampleStart + 0.15, exampleDuration, 24)}`, `:line_spacing=12:fontcolor=${p.secondary}:alpha='${fade(exampleStart + 0.15, exampleDuration)}'`),
+    ...(payload.exampleVi ? [dt(files.vi, "medium", 34, 120, `1400+${rise(exampleStart + 0.3, exampleDuration, 20)}`, `:fontcolor=${p.secondary}:line_spacing=9:alpha='${fade(exampleStart + 0.3, exampleDuration)}'`)] : []),
+    dt(files.cta, "bold", 34, "(w-text_w)/2", `1660+${rise(ctaStart, ctaDuration, 36)}`, `:fontcolor=#7F81A7:alpha='${fade(ctaStart, ctaDuration)}'`),
+    "format=yuv420p[out]",
+  ];
+}
+
 export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FFMPEG_PATH || "ffmpeg", timeoutMs = Number(process.env.RENDER_TIMEOUT_MS || 120000) } = {}) {
   const template = await resolveTemplate(payload.template); const font = await fonts(); const work = `${outputFile}.work`;
   await rm(work, { recursive: true, force: true }); await mkdir(work, { recursive: true });
-  const display = { hook: template.copy?.hook || defaultCopy.hook, word: payload.word.toUpperCase(), ipa: payload.ipa, part: payload.part, meaningLabel: template.copy?.meaningLabel || defaultCopy.meaningLabel, meaning: wrapText(payload.meaning, 31, 3), exampleLabel: template.copy?.exampleLabel || defaultCopy.exampleLabel, en: wrapText(payload.exampleEn, 40, 2), vi: payload.exampleVi ? wrapText(payload.exampleVi, 44, 2) : "", cta: payload.cta };
+  const display = { step: "01", hook: template.copy?.hook || defaultCopy.hook, word: payload.word.toUpperCase(), ipa: payload.ipa, part: payload.part, meaningLabel: template.copy?.meaningLabel || defaultCopy.meaningLabel, meaning: wrapText(payload.meaning, template.layout?.variant === "dark-slide" ? 29 : 31, 3), exampleLabel: template.copy?.exampleLabel || defaultCopy.exampleLabel, en: wrapText(payload.exampleEn, template.layout?.variant === "dark-slide" ? 34 : 40, 2), vi: payload.exampleVi ? wrapText(payload.exampleVi, 44, 2) : "", cta: payload.cta };
   const files = {}; for (const [key, value] of Object.entries(display)) files[key] = await saveText(work, key, value);
   const p = template.palette; const dt = (file, weight, size, x, y, opts = "") => `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${p.ink}:fontsize=${size}:x='${x}':y='${y}'${opts}`;
   const [hookStart, hookDuration] = template.timeline?.hook || defaultTimeline.hook;
@@ -157,7 +198,7 @@ export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FF
   const [meaningStart, meaningDuration] = template.timeline?.meaning || defaultTimeline.meaning;
   const [exampleStart, exampleDuration] = template.timeline?.example || defaultTimeline.example;
   const [ctaStart, ctaDuration] = template.timeline?.cta || defaultTimeline.cta;
-  const stages = [
+  const stages = template.layout?.variant === "dark-slide" ? darkSlideStages({ template, font, files, payload, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) : [
     "[0:v]scale=1160:2062,crop=1080:1920:x='40+20*t/10':y='71+35*t/10',setsar=1[bg]",
     `[1:v]scale=96:96,format=rgba,rotate='-0.10+0.20*t/10':ow=rotw(iw):oh=roth(ih):c=none[petal]`,
     "[bg][petal]overlay=x=55:y='330+32*t/10'[decor]",
@@ -179,7 +220,8 @@ export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FF
   ];
   const filter = `${stages.slice(0, 3).join(";")};${stages.slice(3).join(",")}`;
   const temp = `${outputFile}.tmp.mp4`; await mkdir(path.dirname(outputFile), { recursive: true });
-  const args = ["-hide_banner","-loglevel","error","-loop","1","-i",template.assets.background,"-loop","1","-i",template.assets.petal,"-filter_complex",filter,"-map","[out]","-t",String(payload.duration),"-an","-c:v","libx264","-profile:v","high","-preset",process.env.RENDER_PRESET||"medium","-crf",process.env.RENDER_CRF||"20","-pix_fmt","yuv420p","-movflags","+faststart","-r","30","-y",temp];
+  const inputs = template.layout?.variant === "dark-slide" ? ["-loop", "1", "-i", template.assets.background] : ["-loop", "1", "-i", template.assets.background, "-loop", "1", "-i", template.assets.petal];
+  const args = ["-hide_banner","-loglevel","error",...inputs,"-filter_complex",filter,"-map","[out]","-t",String(payload.duration),"-an","-c:v","libx264","-profile:v","high","-preset",process.env.RENDER_PRESET||"medium","-crf",process.env.RENDER_CRF||"20","-pix_fmt","yuv420p","-movflags","+faststart","-r","30","-y",temp];
   try {
     await new Promise((resolve,reject)=>{ const child=spawn(ffmpeg,args,{stdio:["ignore","ignore","pipe"]}); let stderr=""; child.stderr.on("data",c=>stderr=(stderr+c).slice(-8000)); const timer=setTimeout(()=>{child.kill("SIGKILL");reject(new RenderError(`render timed out after ${timeoutMs}ms`,504,"render_timeout"));},timeoutMs); child.on("error",e=>{clearTimeout(timer);reject(new RenderError(`cannot start ffmpeg: ${e.message}`));}); child.on("exit",code=>{clearTimeout(timer);if(code===0) resolve(); else reject(new RenderError(`ffmpeg exited ${code}: ${stderr.trim()}`));}); });
     await rename(temp,outputFile);
