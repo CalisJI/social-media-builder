@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <radialGradient id="glow" cx="18%" cy="28%" r="70%"><stop stop-color="#4a2029"/><stop offset=".55" stop-color="#17101a"/><stop offset="1" stop-color="#080a13"/></radialGradient>
+    <radialGradient id="corner" cx="100%" cy="100%" r="55%"><stop stop-color="#171b33" stop-opacity=".9"/><stop offset="1" stop-color="#080a13" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#glow)"/>
+  <rect width="1080" height="1920" fill="url(#corner)"/>
+</svg>

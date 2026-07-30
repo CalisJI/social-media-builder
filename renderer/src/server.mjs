@@ -1,7 +1,7 @@
 import http from "node:http";
 import path from "node:path";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
-import { normalizePayload, payloadHash, readJson, RenderError, renderVideo } from "./render.mjs";
+import { importTemplate, normalizePayload, payloadHash, readJson, RenderError, renderVideo } from "./render.mjs";
 
 const port = Number(process.env.RENDERER_PORT || 3100);
 const outputDir = path.resolve(process.env.RENDER_OUTPUT_DIR || "./data/renders");
@@ -32,11 +32,17 @@ async function createRender(req, res) {
   if(!running) { const promise=(async()=>{ await renderVideo(payload,output); await recordCompletion(key,{hash,filename,completedAt:new Date().toISOString()}); })().finally(()=>active.delete(key)); running={hash,promise}; active.set(key,running); }
   await running.promise; return json(res,201,{status:"completed",cached:false,idempotencyKey:key,sha256:hash,url:`${publicBase}/${filename}`});
 }
+async function createTemplate(req, res) {
+  const token = process.env.RENDER_TEMPLATE_ADMIN_TOKEN;
+  if (!token || req.headers["x-template-admin-token"] !== token) throw new RenderError("template import is not authorized", 401, "unauthorized");
+  return json(res, 201, await importTemplate(await body(req)));
+}
 
 const server=http.createServer(async(req,res)=>{ try {
   const url=new URL(req.url,"http://renderer");
   if(req.method==="GET" && url.pathname==="/healthz") return json(res,200,{status:"ok",activeRenders:active.size});
   if(req.method==="POST" && url.pathname==="/v1/renders") return await createRender(req,res);
+  if(req.method==="POST" && url.pathname==="/v1/templates/import") return await createTemplate(req,res);
   if(req.method==="GET" && url.pathname.startsWith("/files/")) { const name=decodeURIComponent(url.pathname.slice(7)); if(!/^[A-Za-z0-9][A-Za-z0-9._-]*\.mp4$/.test(name)) throw new RenderError("not found",404,"not_found"); const data=await readFile(path.join(outputDir,name)); res.writeHead(200,{"content-type":"video/mp4","content-length":data.length,"cache-control":"public, max-age=31536000, immutable"}); return res.end(data); }
   throw new RenderError("not found",404,"not_found");
 } catch(error) { const status=error.status||500; console.error(JSON.stringify({level:"error",code:error.code||"internal_error",message:error.message,path:req.url})); if(!res.headersSent) json(res,status,{error:error.code||"internal_error",message:status<500?error.message:"render failed"}); else res.end(); } });

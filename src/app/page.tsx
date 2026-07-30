@@ -8,6 +8,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       <header className={styles.header}>
         <Link className={styles.brand} href="/">Social Media Builder</Link>
         <nav aria-label="Legal links">
+          <Link href="/template-import">Template import</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
         </nav>
