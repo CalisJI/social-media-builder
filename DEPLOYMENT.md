@@ -23,6 +23,9 @@ N8N_MEDIA_MAX_BYTES=524288000
 TIKTOK_SESSION_FILE=/app/data/tiktok-session.enc
 PUBLISH_IDEMPOTENCY_FILE=/app/data/publish-idempotency.json
 VOCABULARY_LEDGER_FILE=/app/data/vocabulary-ledger.json
+RENDER_DEFAULT_TEMPLATE_ID=vocabulary-editorial-v1
+VOCABULARY_DEFAULT_TEMPLATE_ID=vocabulary-editorial-v1
+RENDER_TEMPLATE_ADMIN_TOKEN=paste_a_third_random_64_hex_characters_here
 ```
 
 Generate `SESSION_SECRET` and `N8N_SERVICE_TOKEN` separately with
@@ -33,6 +36,10 @@ Use `TIKTOK_ENV=sandbox` while testing and recording the review video. Change on
 this selector to `production` after approval. Docker requires a normal UTF-8
 dotenv file; do not save `.env` using Vim encryption. Protect it with
 `chmod 600 .env` instead.
+
+Set n8n variable `DEFAULT_TEMPLATE_ID=vocabulary-editorial-v1` before importing
+`n8n/workflows/cal-50-content-scheduler.json`; it overrides stale
+`template_key` values already present in Sheet rows.
 
 Start or update the app with `docker compose up -d --build`. Compose refuses to start when any required secret is missing.
 

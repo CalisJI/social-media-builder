@@ -125,7 +125,7 @@ export async function normalizePayload(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new RenderError("JSON object required", 400, "invalid_payload");
   const entry = Array.isArray(input.entries) ? input.entries[0] : input.entry ?? input;
   if (!entry || (Array.isArray(input.entries) && input.entries.length !== 1)) throw new RenderError("exactly one vocabulary entry is required", 400, "invalid_payload");
-  const template = await resolveTemplate(clean(input.template_id ?? "vocabulary-pastel-v1", "template_id", 60));
+  const template = await resolveTemplate(clean(input.template_id ?? process.env.RENDER_DEFAULT_TEMPLATE_ID ?? "vocabulary-editorial-v1", "template_id", 60));
   const duration = Number(input.duration_seconds ?? 10);
   if (!Number.isFinite(duration) || duration < 9.8 || duration > 10.2) throw new RenderError("duration_seconds must be between 9.8 and 10.2", 400, "invalid_payload");
   const handle = clean(input.brand_handle ?? input.channel_handle, "brand_handle", 32);

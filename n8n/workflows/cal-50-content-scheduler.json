@@ -83,7 +83,7 @@
       "typeVersion": 4.2,
       "position": [0, 80],
       "onError": "continueRegularOutput",
-      "parameters": { "method": "POST", "url": "={{$env.RENDERER_BASE_URL + '/v1/renders'}}", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{$json.idempotency_key}}" }] }, "sendBody": true, "contentType": "raw", "rawContentType": "application/json", "body": "={{JSON.stringify({...$json,job_id:$json.idempotency_key})}}", "options": { "timeout": 130000, "response": { "response": { "fullResponse": true, "neverError": true } } } }
+      "parameters": { "method": "POST", "url": "={{$env.RENDERER_BASE_URL + '/v1/renders'}}", "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{$json.idempotency_key}}" }] }, "sendBody": true, "contentType": "raw", "rawContentType": "application/json", "body": "={{JSON.stringify({...$json,template_id:$env.DEFAULT_TEMPLATE_ID||$json.template_key||'vocabulary-editorial-v1',job_id:$json.idempotency_key})}}", "options": { "timeout": 130000, "response": { "response": { "fullResponse": true, "neverError": true } } } }
     },
     {
       "id": "render-classify",

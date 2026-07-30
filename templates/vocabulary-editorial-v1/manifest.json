@@ -1,0 +1,8 @@
+{
+  "id": "vocabulary-editorial-v1",
+  "assets": { "background": "assets/background.png", "petal": "assets/petal.png" },
+  "palette": { "ink": "#FFF8F5", "secondary": "#D5D0E5", "accent": "#F47B77", "card": "#1B1A27", "ipa": "#342B42" },
+  "layout": { "safeZone": [80, 220, 920, 1500], "card": [96, 300, 888, 1150] },
+  "timeline": { "hook": [0, 0.55], "word": [0.8, 0.45], "meaning": [2.2, 0.5], "example": [4, 0.5], "cta": [7.2, 0.65] },
+  "copy": { "hook": "TỪ MỚI MỖI NGÀY", "meaningLabel": "NGHĨA TIẾNG VIỆT", "exampleLabel": "NGỮ CẢNH", "cta": "Follow {handle} • học từ mới mỗi ngày" }
+}
