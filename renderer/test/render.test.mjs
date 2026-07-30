@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { normalizePayload, payloadHash, RenderError, resolveTemplate, wrapText } from "../src/render.mjs";
 const sample={template_id:"vocabulary-pastel-v1",duration_seconds:10,brand_handle:"@daily",entries:[{word:"resilient",ipa:"/test/",part_of_speech:"adjective",meaning_vi:"kiên cường",example_en:"Stay resilient.",example_vi:"Hãy kiên cường."}]};
 test("normalizes CAL-30 payload and derives CTA",async()=>{const p=await normalizePayload(sample);assert.equal(p.duration,10);assert.match(p.cta,/@daily/);assert.equal(payloadHash(p),payloadHash(await normalizePayload(sample)));});
@@ -9,6 +12,7 @@ test("rejects out-of-range duration",async()=>assert.rejects(normalizePayload({.
 test("registry swaps between two fixture packages",async()=>{assert.equal((await resolveTemplate("vocabulary-pastel-v1")).palette.accent,"#E85D75");assert.equal((await resolveTemplate("vocabulary-pastel-test-v1")).palette.accent,"#6E67D8");});
 test("registry applies theme.json overrides",async()=>{const template=await resolveTemplate("vocabulary-pastel-test-v1");assert.equal(template.copy.hook,"THEME OVERRIDE");assert.equal(template.copy.meaningLabel,"MEANING");assert.equal(template.timeline.hook[0],0.1);});
 test("uses the editorial template when no template id is supplied",async()=>{const p=await normalizePayload({...sample,template_id:undefined});assert.equal(p.template,"vocabulary-editorial-v1");});
+test("uses the imported template as the default",async()=>{const previous=process.env.RENDER_OUTPUT_DIR;const dir=await mkdtemp(path.join(os.tmpdir(),"renderer-template-"));try{process.env.RENDER_OUTPUT_DIR=dir;await writeFile(path.join(dir,"active-template.json"),'{"id":"vocabulary-pastel-v1"}');const p=await normalizePayload({...sample,template_id:undefined});assert.equal(p.template,"vocabulary-pastel-v1");}finally{if(previous===undefined)delete process.env.RENDER_OUTPUT_DIR;else process.env.RENDER_OUTPUT_DIR=previous;await rm(dir,{recursive:true,force:true});}});
 test("registers the dark reference layout",async()=>{const template=await resolveTemplate("vocabulary-dark-reference-v1");assert.equal(template.layout.variant,"dark-slide");assert.equal(template.palette.accent,"#FF595E");});
 test("rejects unknown template IDs",async()=>assert.rejects(resolveTemplate("missing-v1"),error=>error.status===400&&error.code==="unknown_template"));
 test("wraps long content and enforces line bounds",()=>{assert.equal(wrapText("one two three four",7),"one two\nthree\nfour");assert.throws(()=>wrapText("one two three",3,2),/2 lines/);});
