@@ -66,4 +66,9 @@ test("publisher is gated and ambiguous outcomes reconcile before state update", 
   assert.equal(next("Dry Run or Approval Hold"), "Normalize Lifecycle State");
   assert.equal(next("Normalize Lifecycle State"), "Update Lifecycle Dashboard");
   assert.match(byName.get("Normalize Lifecycle State").parameters.jsCode, /content_id/);
+  for (const name of ["Schedule via Idempotent Backend", "Reconcile Before Retry"]) {
+    const url = byName.get(name).parameters.url;
+    assert.match(url, /SOCIAL_PUBLISHER_BASE_URL is required and must be an HTTPS URL/);
+    assert.doesNotMatch(url, /\$env\.SOCIAL_PUBLISHER_BASE_URL \+ '\/api/);
+  }
 });
