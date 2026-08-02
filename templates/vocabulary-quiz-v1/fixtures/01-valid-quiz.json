@@ -1,0 +1,16 @@
+{
+  "template_id": "vocabulary-quiz-v1",
+  "strategy_id": "quiz-reveal-v1",
+  "duration_seconds": 10,
+  "brand_handle": "@daily",
+  "entries": [
+    {
+      "word": "resilient",
+      "ipa": "/rɪˈzɪliənt/",
+      "part_of_speech": "adjective",
+      "meaning_vi": "kiên cường",
+      "example_en": "She stayed resilient through setbacks.",
+      "example_vi": "Cô ấy vẫn kiên cường qua những trở ngại."
+    }
+  ]
+}

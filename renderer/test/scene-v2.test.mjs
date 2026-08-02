@@ -84,3 +84,28 @@ test("pastel scene-v2 preview fixtures render and retain the TikTok video contra
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("quiz-reveal fixture declares its guess window and renders", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "quiz-reveal-fixture-"));
+  const fixture = path.resolve(import.meta.dirname, "../../templates/vocabulary-quiz-v1/fixtures/01-valid-quiz.json");
+  const strategyFile = path.resolve(import.meta.dirname, "../../strategies/quiz-reveal-v1.json");
+  const fontFile = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+  const previousFonts = Object.fromEntries(["REGULAR", "MEDIUM", "BOLD", "EXTRABOLD"].map(weight => [`RENDER_FONT_${weight}`, process.env[`RENDER_FONT_${weight}`]]));
+  try {
+    await access(fontFile);
+    for (const key of Object.keys(previousFonts)) process.env[key] = fontFile;
+    const strategy = JSON.parse(await readFile(strategyFile, "utf8"));
+    assert.deepEqual(strategy.stages.filter(({ id }) => id === "guess" || id === "reveal"), [
+      { id: "guess", role: "word", start: 0.6, duration: 3.4 },
+      { id: "reveal", role: "meaning_vi", start: 4, duration: 0.5 },
+    ]);
+    const payload = await normalizePayload(JSON.parse(await readFile(fixture, "utf8")));
+    await renderVideo({ ...payload, duration: 0.2 }, path.join(dir, "quiz.mp4"), { timeoutMs: 120000 });
+    await access(path.join(dir, "quiz.mp4"));
+  } finally {
+    for (const [key, value] of Object.entries(previousFonts)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+    await rm(dir, { recursive: true, force: true });
+  }
+});

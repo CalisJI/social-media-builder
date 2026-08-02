@@ -33,6 +33,12 @@ test("normalizes mistake-correction content declared by its compatible scene tem
   assert.equal(payload.strategy, "mistake-correction-v1");
   assert.equal(payload.common_mistake, request.entries[0].common_mistake);
 });
+test("normalizes vocabulary quiz content declared by its compatible template",async()=>{
+  const request = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-quiz-v1/fixtures/01-valid-quiz.json"), "utf8"));
+  const payload = await normalizePayload(request);
+  assert.equal(payload.strategy, "quiz-reveal-v1");
+  assert.equal(payload.template, "vocabulary-quiz-v1");
+});
 test("reports the missing common_mistake required by mistake correction",async()=>{
   await assert.rejects(
     normalizePayload({ ...sample, template_id: "vocabulary-mistake-correction-scene-v2", strategy_id: "mistake-correction-v1" }),
