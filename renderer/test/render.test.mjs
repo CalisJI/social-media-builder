@@ -6,6 +6,8 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
+import { normalizePayload, payloadHash, prepareTextLayout, RenderError, renderVideo, resolveTemplate, validateStrategy, wrapText } from "../src/render.mjs";
+import { resolveAdaptiveText } from "../src/layout/adaptive-text.mjs";
 import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplate, validateStrategy, wrapText } from "../src/render.mjs";
 import { buildRenderManifestRecord, renderResponseMetadata } from "../src/model/render-record.mjs";
 import { ConstraintError, resolveConstraints } from "../src/validation/resolve-constraints.mjs";
@@ -104,10 +106,11 @@ test("uses manifest constraints instead of shared content limits",async()=>{
   assert.equal((await normalizePayload(constrained)).word, "short");
   await assert.rejects(normalizePayload({ ...constrained, entries: [{ ...constrained.entries[0], word: "toolong" }] }), /word.*constraints\.maxLength.*5/);
 });
-test("legacy manifest preserves its meaning constraint without truncating",async()=>{
-  const meaning = "a".repeat(91);
-  await assert.rejects(normalizePayload({ ...sample, entries: [{ ...sample.entries[0], meaning_vi: meaning }] }), /meaning_vi.*constraints\.maxLength.*90/);
-  assert.equal((await normalizePayload({ ...sample, entries: [{ ...sample.entries[0], meaning_vi: "a".repeat(90) }] })).meaning.length, 90);
+test("accepts long valid meaning beyond the retired global 90-character limit",async()=>{
+  const meaning = "Khả năng phục hồi và thích nghi trước khó khăn ".repeat(3).trim();
+  const payload = await normalizePayload({ ...sample, entries: [{ ...sample.entries[0], meaning_vi: meaning }] });
+  assert.equal(payload.meaning, meaning);
+  assert.ok(payload.meaning.length > 90);
 });
 test("rejects malformed manifest constraints with the field and constraint",()=>{
   assert.throws(() => resolveConstraints({ meaning_vi: { maxLength: 0 } }), error => error instanceof ConstraintError && /meaning_vi.*constraints\.maxLength/.test(error.message));
@@ -119,6 +122,26 @@ test("registry applies theme.json overrides",async()=>{const template=await reso
 test("registers the dark reference layout",async()=>{const template=await resolveTemplate("vocabulary-dark-reference-v1");assert.equal(template.layout.variant,"dark-slide");assert.equal(template.palette.accent,"#FF595E");});
 test("rejects unknown template IDs",async()=>assert.rejects(resolveTemplate("missing-v1"),error=>error.status===400&&error.code==="unknown_template"));
 test("wraps long content and enforces line bounds",()=>{assert.equal(wrapText("one two three four",7),"one two\nthree\nfour");assert.throws(()=>wrapText("one two three",3,2),/2 lines/);});
+test("lays out Vietnamese diacritics without losing characters",async()=>{
+  const payload = await normalizePayload({ ...sample, entries: [{ ...sample.entries[0], meaning_vi: "Sự kiên cường giúp chúng ta vượt qua những thử thách bất ngờ." }] });
+  const layout = prepareTextLayout(payload, await resolveTemplate(payload.template));
+  assert.equal(layout.meaning.text.replaceAll("\n", " "), payload.meaning);
+});
+test("shrinks long meaning and example but never below their declared minimum",async()=>{
+  const payload = await normalizePayload({ ...sample, entries: [{ ...sample.entries[0], meaning_vi: "Khả năng duy trì sự bình tĩnh và tiếp tục tiến về phía trước khi gặp hoàn cảnh khó khăn.", example_en: "She stayed resilient when unexpected obstacles made the project harder." }] });
+  const layout = prepareTextLayout(payload, await resolveTemplate(payload.template));
+  assert.ok(layout.meaning.fontSize >= 30); assert.ok(layout.en.fontSize >= 26);
+  assert.equal(layout.meaning.text.replaceAll("\n", " "), payload.meaning);
+  assert.equal(layout.en.text.replaceAll("\n", " "), payload.exampleEn);
+});
+test("returns structured text_overflow when no policy can fit all educational content",()=>{
+  assert.throws(() => resolveAdaptiveText({ value: "nội dung học tập không được cắt bỏ", field: "meaning", policy: { maxWidth: 40, maxLines: 1, fontSize: 20, minFontSize: 20 } }), error => error.code === "text_overflow" && error.details.field === "meaning");
+});
+test("tries declared alternate layouts before reporting overflow",()=>{
+  const layout = resolveAdaptiveText({ value: "một hai ba bốn", field: "meaning", policy: { maxWidth: 20, maxLines: 1, fontSize: 20, minFontSize: 20, alternate: { maxWidth: 200, maxLines: 1, fontSize: 20, minFontSize: 20 } } });
+  assert.equal(layout.policy, "alternate");
+  assert.equal(layout.text, "một hai ba bốn");
+});
 
 test("honors template_key from workflow payloads",async()=>{
   const payload=await normalizePayload({...sample,template_id:undefined,template_key:"vocabulary-dark-reference-v1"});
