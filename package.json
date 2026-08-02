@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test src/lib/*.test.mjs renderer/test/*.test.mjs n8n/test/*.test.mjs",
-    "test:n8n": "node --test n8n/test/*.test.mjs"
+    "test:n8n": "node --test n8n/test/*.test.mjs",
+    "governance:validate": "node scripts/governance/validate-project-data.mjs",
+    "governance:generate": "node scripts/governance/generate-roadmap.mjs && node scripts/governance/generate-project-status.mjs && node scripts/governance/generate-capability-matrix.mjs"
   },
   "dependencies": {
     "next": "16.2.10",

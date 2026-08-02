@@ -1,0 +1,16 @@
+name: Bug report
+description: Report an objectively reproducible defect.
+title: "[Bug]: "
+body:
+  - type: textarea
+    attributes: { label: Product impact }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Reproduction steps }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Expected and actual behavior }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Evidence, environment, and regression test }
+    validations: { required: true }

@@ -1,0 +1,37 @@
+name: Implementation task
+description: Create an objectively reviewable implementation task.
+title: "[Task]: "
+body:
+  - type: input
+    attributes: { label: Task ID }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Goal }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Product outcome }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Scope }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Out of scope }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Dependencies and tasks unlocked }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Acceptance criteria }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Required tests and evidence }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Risk and human verification instructions }
+    validations: { required: true }
+  - type: checkboxes
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Acceptance criteria, tests, evidence, compatibility, and independent review are required before verification.
+          required: true

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "category", "status", "implementedBy", "evidence", "humanVerificationRequired", "notes"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "name": {"type": "string", "minLength": 1},
+    "category": {"type": "string", "minLength": 1},
+    "status": {"enum": ["not_started", "partial", "available", "verified", "deprecated"]},
+    "implementedBy": {"type": "array", "items": {"type": "string"}},
+    "evidence": {"type": "object", "additionalProperties": false, "required": ["pullRequests", "tests"], "properties": {"pullRequests": {"type": "array", "items": {"type": "integer"}}, "tests": {"type": "array", "items": {"type": "string"}}}},
+    "humanVerificationRequired": {"type": "boolean"},
+    "notes": {"type": "string"}
+  }
+}

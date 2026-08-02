@@ -1,0 +1,364 @@
+[
+  {
+    "id": "legacy-rendering",
+    "name": "Legacy rendering",
+    "category": "renderer",
+    "status": "available",
+    "implementedBy": [
+      "TIKTOK-000"
+    ],
+    "evidence": {
+      "pullRequests": [
+        25
+      ],
+      "tests": [
+        "Repository tests are present; independent evidence review remains required."
+      ]
+    },
+    "humanVerificationRequired": true,
+    "notes": "Available from merged code; not marked verified without accepted evidence."
+  },
+  {
+    "id": "normalized-render-job",
+    "name": "Normalized render-job adapter",
+    "category": "renderer",
+    "status": "available",
+    "implementedBy": [
+      "TIKTOK-010"
+    ],
+    "evidence": {
+      "pullRequests": [
+        26
+      ],
+      "tests": [
+        "Repository tests are present; independent evidence review remains required."
+      ]
+    },
+    "humanVerificationRequired": true,
+    "notes": "Available from merged code; not marked verified without accepted evidence."
+  },
+  {
+    "id": "template-engine-routing",
+    "name": "Template engine routing",
+    "category": "renderer",
+    "status": "available",
+    "implementedBy": [
+      "TIKTOK-020"
+    ],
+    "evidence": {
+      "pullRequests": [
+        27
+      ],
+      "tests": [
+        "Repository tests are present; independent evidence review remains required."
+      ]
+    },
+    "humanVerificationRequired": true,
+    "notes": "Available from merged code; not marked verified without accepted evidence."
+  },
+  {
+    "id": "template-defined-constraints",
+    "name": "Template-defined constraints",
+    "category": "renderer",
+    "status": "available",
+    "implementedBy": [
+      "TIKTOK-030"
+    ],
+    "evidence": {
+      "pullRequests": [
+        28
+      ],
+      "tests": [
+        "Repository tests are present; independent evidence review remains required."
+      ]
+    },
+    "humanVerificationRequired": true,
+    "notes": "Available from merged code; not marked verified without accepted evidence."
+  },
+  {
+    "id": "strategy-registry",
+    "name": "Strategy registry",
+    "category": "renderer",
+    "status": "available",
+    "implementedBy": [
+      "TIKTOK-050"
+    ],
+    "evidence": {
+      "pullRequests": [
+        29
+      ],
+      "tests": [
+        "Repository tests are present; independent evidence review remains required."
+      ]
+    },
+    "humanVerificationRequired": true,
+    "notes": "Available from merged code; not marked verified without accepted evidence."
+  },
+  {
+    "id": "adaptive-layout",
+    "name": "Adaptive layout",
+    "category": "renderer",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "scene-v2-compiler",
+    "name": "Scene-v2 compiler",
+    "category": "renderer",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "artifact-qa",
+    "name": "Artifact QA",
+    "category": "renderer",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "component-registry",
+    "name": "Component registry",
+    "category": "template platform",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "animation-registry",
+    "name": "Animation registry",
+    "category": "template platform",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "design-tokens",
+    "name": "Design tokens",
+    "category": "template platform",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "presentation-schema",
+    "name": "Presentation schema",
+    "category": "template platform",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "template-preview",
+    "name": "Template preview",
+    "category": "template platform",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "template-activation",
+    "name": "Template activation",
+    "category": "template platform",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "template-rollback",
+    "name": "Template rollback",
+    "category": "template platform",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "classic-definition",
+    "name": "Classic definition",
+    "category": "TikTok retention",
+    "status": "available",
+    "implementedBy": [
+      "TIKTOK-050"
+    ],
+    "evidence": {
+      "pullRequests": [
+        29
+      ],
+      "tests": [
+        "Repository tests are present; independent evidence review remains required."
+      ]
+    },
+    "humanVerificationRequired": true,
+    "notes": "Available from merged code; not marked verified without accepted evidence."
+  },
+  {
+    "id": "quiz-reveal",
+    "name": "Quiz reveal",
+    "category": "TikTok retention",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "mistake-correction",
+    "name": "Mistake correction",
+    "category": "TikTok retention",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "pronunciation-challenge",
+    "name": "Pronunciation challenge",
+    "category": "TikTok retention",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "deterministic-strategy-selection",
+    "name": "Deterministic strategy selection",
+    "category": "TikTok retention",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "template-list",
+    "name": "Template list",
+    "category": "Admin UI",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "template-editor",
+    "name": "Template editor",
+    "category": "Admin UI",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "template-lifecycle-management",
+    "name": "Lifecycle management",
+    "category": "Admin UI",
+    "status": "not_started",
+    "implementedBy": [],
+    "evidence": {
+      "pullRequests": [],
+      "tests": []
+    },
+    "humanVerificationRequired": false,
+    "notes": "UNKNOWN"
+  },
+  {
+    "id": "template-strategy-compatibility", "name": "Template-strategy compatibility", "category": "renderer", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  },
+  {
+    "id": "scene-v2-parity-template", "name": "Scene-v2 parity template", "category": "renderer", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  },
+  {
+    "id": "experiment-metadata", "name": "Experiment metadata", "category": "renderer", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  },
+  {
+    "id": "presentation-tree", "name": "Presentation tree", "category": "template platform", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  },
+  {
+    "id": "adaptive-typography", "name": "Adaptive typography", "category": "template platform", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  },
+  {
+    "id": "split-scene", "name": "Split-scene support", "category": "template platform", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  },
+  {
+    "id": "pr-evidence-report", "name": "PR evidence report", "category": "quality", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  },
+  {
+    "id": "visual-evidence", "name": "Visual evidence", "category": "quality", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  },
+  {
+    "id": "architecture-review-gate", "name": "Architecture reviewer gate", "category": "quality", "status": "not_started", "implementedBy": [], "evidence": {"pullRequests": [], "tests": []}, "humanVerificationRequired": false, "notes": "UNKNOWN"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "reference", "result"],
+  "properties": {
+    "type": {"enum": ["test-report", "payload-example", "screenshot", "preview-mp4", "ffprobe-output", "architecture-review"]},
+    "reference": {"type": "string", "minLength": 1},
+    "result": {"type": "string", "minLength": 1}
+  }
+}

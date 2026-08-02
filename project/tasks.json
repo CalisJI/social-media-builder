@@ -1,0 +1,1083 @@
+[
+  {
+    "id": "TIKTOK-000",
+    "title": "Baseline and architecture inventory",
+    "phase": "renderer-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "merged",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": 25,
+    "dependsOn": [],
+    "unlocks": [
+      "TIKTOK-010"
+    ],
+    "capabilities": [
+      "legacy-rendering"
+    ],
+    "acceptanceCriteria": [
+      "Baseline and architecture inventory is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": null,
+    "startedAt": null,
+    "completedAt": "2026-08-02T07:54:06Z",
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-010",
+    "title": "Extract normalized render job model",
+    "phase": "renderer-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "merged",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": 26,
+    "dependsOn": [
+      "TIKTOK-000"
+    ],
+    "unlocks": [
+      "TIKTOK-020",
+      "TIKTOK-030",
+      "TIKTOK-050",
+      "TIKTOK-120"
+    ],
+    "capabilities": [
+      "normalized-render-job"
+    ],
+    "acceptanceCriteria": [
+      "Extract normalized render job model is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": null,
+    "startedAt": null,
+    "completedAt": "2026-08-02T08:01:55Z",
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-020",
+    "title": "Add template engine router",
+    "phase": "renderer-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "merged",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": 27,
+    "dependsOn": [
+      "TIKTOK-010"
+    ],
+    "unlocks": [
+      "TIKTOK-060",
+      "TIKTOK-070"
+    ],
+    "capabilities": [
+      "template-engine-routing"
+    ],
+    "acceptanceCriteria": [
+      "Add template engine router is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": null,
+    "startedAt": null,
+    "completedAt": "2026-08-02T09:25:10Z",
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-030",
+    "title": "Move content constraints into template manifests",
+    "phase": "renderer-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "merged",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": 28,
+    "dependsOn": [
+      "TIKTOK-010"
+    ],
+    "unlocks": [
+      "TIKTOK-040"
+    ],
+    "capabilities": [
+      "template-defined-constraints"
+    ],
+    "acceptanceCriteria": [
+      "Move content constraints into template manifests is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": null,
+    "startedAt": null,
+    "completedAt": "2026-08-02T09:28:44Z",
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-040",
+    "title": "Implement adaptive text layout resolver",
+    "phase": "renderer-foundation",
+    "type": "feature",
+    "priority": "high",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-030"
+    ],
+    "unlocks": [
+      "TIKTOK-080"
+    ],
+    "capabilities": [
+      "adaptive-layout"
+    ],
+    "acceptanceCriteria": [
+      "Implement adaptive text layout resolver is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "high",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-050",
+    "title": "Create strategy registry and classic strategy",
+    "phase": "renderer-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "merged",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": 29,
+    "dependsOn": [
+      "TIKTOK-010"
+    ],
+    "unlocks": [
+      "TIKTOK-060",
+      "TIKTOK-120",
+      "RET-004"
+    ],
+    "capabilities": [
+      "strategy-registry"
+    ],
+    "acceptanceCriteria": [
+      "Create strategy registry and classic strategy is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": null,
+    "startedAt": null,
+    "completedAt": "2026-08-02T09:30:20Z",
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-060",
+    "title": "Add template capabilities and strategy compatibility",
+    "phase": "renderer-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-020",
+      "TIKTOK-050"
+    ],
+    "unlocks": [
+      "TIKTOK-070",
+      "UI-001"
+    ],
+    "capabilities": [
+      "template-strategy-compatibility"
+    ],
+    "acceptanceCriteria": [
+      "Add template capabilities and strategy compatibility is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-070",
+    "title": "Build minimal scene-v2 compiler",
+    "phase": "scene-engine",
+    "type": "feature",
+    "priority": "high",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-020",
+      "TIKTOK-060"
+    ],
+    "unlocks": [
+      "TIKTOK-080",
+      "TIKTOK-100",
+      "TIKTOK-110",
+      "TIKTOK-130"
+    ],
+    "capabilities": [
+      "scene-v2-compiler"
+    ],
+    "acceptanceCriteria": [
+      "Build minimal scene-v2 compiler is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "high",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-080",
+    "title": "Create scene-v2 pastel parity template",
+    "phase": "scene-engine",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-040",
+      "TIKTOK-070"
+    ],
+    "unlocks": [
+      "TIKTOK-090"
+    ],
+    "capabilities": [
+      "scene-v2-parity-template"
+    ],
+    "acceptanceCriteria": [
+      "Create scene-v2 pastel parity template is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-090",
+    "title": "Add quiz-reveal TikTok strategy and template",
+    "phase": "retention-formats",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-080"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "quiz-reveal"
+    ],
+    "acceptanceCriteria": [
+      "Add quiz-reveal TikTok strategy and template is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-100",
+    "title": "Add mistake-correction strategy",
+    "phase": "retention-formats",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-070"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "mistake-correction"
+    ],
+    "acceptanceCriteria": [
+      "Add mistake-correction strategy is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-110",
+    "title": "Implement template validate-preview-activate lifecycle",
+    "phase": "template-lifecycle",
+    "type": "feature",
+    "priority": "high",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-070"
+    ],
+    "unlocks": [
+      "ADMIN-001"
+    ],
+    "capabilities": [
+      "template-activation"
+    ],
+    "acceptanceCriteria": [
+      "Implement template validate-preview-activate lifecycle is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "high",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-120",
+    "title": "Persist experiment and render metadata",
+    "phase": "experiments-and-qa",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-010",
+      "TIKTOK-050"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "experiment-metadata"
+    ],
+    "acceptanceCriteria": [
+      "Persist experiment and render metadata is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "TIKTOK-130",
+    "title": "Add automated artifact QA",
+    "phase": "experiments-and-qa",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-070"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "artifact-qa"
+    ],
+    "acceptanceCriteria": [
+      "Add automated artifact QA is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-001",
+    "title": "Define presentation schema",
+    "phase": "presentation-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-060"
+    ],
+    "unlocks": [
+      "UI-002",
+      "UI-003"
+    ],
+    "capabilities": [
+      "presentation-schema"
+    ],
+    "acceptanceCriteria": [
+      "Define presentation schema is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-002",
+    "title": "Create component registry",
+    "phase": "presentation-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-001"
+    ],
+    "unlocks": [
+      "UI-010"
+    ],
+    "capabilities": [
+      "component-registry"
+    ],
+    "acceptanceCriteria": [
+      "Create component registry is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-003",
+    "title": "Add design-token system",
+    "phase": "presentation-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-001"
+    ],
+    "unlocks": [
+      "UI-010"
+    ],
+    "capabilities": [
+      "design-tokens"
+    ],
+    "acceptanceCriteria": [
+      "Add design-token system is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-010",
+    "title": "Build presentation tree",
+    "phase": "presentation-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-002",
+      "UI-003"
+    ],
+    "unlocks": [
+      "UI-011"
+    ],
+    "capabilities": [
+      "presentation-tree"
+    ],
+    "acceptanceCriteria": [
+      "Build presentation tree is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-011",
+    "title": "Build scene-v2 compiler",
+    "phase": "presentation-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-010"
+    ],
+    "unlocks": [
+      "UI-012",
+      "RET-002",
+      "RET-003"
+    ],
+    "capabilities": [
+      "scene-v2-compiler"
+    ],
+    "acceptanceCriteria": [
+      "Build scene-v2 compiler is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-012",
+    "title": "Build pastel scene-v2 parity template",
+    "phase": "presentation-foundation",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-011"
+    ],
+    "unlocks": [
+      "UI-020"
+    ],
+    "capabilities": [
+      "scene-v2-parity-template"
+    ],
+    "acceptanceCriteria": [
+      "Build pastel scene-v2 parity template is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-020",
+    "title": "Template-defined overflow policies",
+    "phase": "adaptive-layout",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-012"
+    ],
+    "unlocks": [
+      "UI-021"
+    ],
+    "capabilities": [
+      "adaptive-layout"
+    ],
+    "acceptanceCriteria": [
+      "Template-defined overflow policies is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-021",
+    "title": "Adaptive typography",
+    "phase": "adaptive-layout",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-020"
+    ],
+    "unlocks": [
+      "UI-022"
+    ],
+    "capabilities": [
+      "adaptive-typography"
+    ],
+    "acceptanceCriteria": [
+      "Adaptive typography is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "UI-022",
+    "title": "Split-scene support",
+    "phase": "adaptive-layout",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-021"
+    ],
+    "unlocks": [
+      "RET-001"
+    ],
+    "capabilities": [
+      "split-scene"
+    ],
+    "acceptanceCriteria": [
+      "Split-scene support is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "RET-001",
+    "title": "Quiz Reveal",
+    "phase": "retention-formats",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-022"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "quiz-reveal"
+    ],
+    "acceptanceCriteria": [
+      "Quiz Reveal is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "RET-002",
+    "title": "Mistake Correction",
+    "phase": "retention-formats",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-011"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "mistake-correction"
+    ],
+    "acceptanceCriteria": [
+      "Mistake Correction is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "RET-003",
+    "title": "Pronunciation Challenge",
+    "phase": "retention-formats",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "UI-011"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "pronunciation-challenge"
+    ],
+    "acceptanceCriteria": [
+      "Pronunciation Challenge is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "RET-004",
+    "title": "Deterministic strategy selector",
+    "phase": "retention-formats",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-050"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "deterministic-strategy-selection"
+    ],
+    "acceptanceCriteria": [
+      "Deterministic strategy selector is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "ADMIN-001",
+    "title": "Template list UI",
+    "phase": "admin-ui",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "TIKTOK-110"
+    ],
+    "unlocks": [
+      "ADMIN-002"
+    ],
+    "capabilities": [
+      "template-list"
+    ],
+    "acceptanceCriteria": [
+      "Template list UI is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "ADMIN-002",
+    "title": "Template editor UI",
+    "phase": "admin-ui",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "ADMIN-001"
+    ],
+    "unlocks": [
+      "ADMIN-003"
+    ],
+    "capabilities": [
+      "template-editor"
+    ],
+    "acceptanceCriteria": [
+      "Template editor UI is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "ADMIN-003",
+    "title": "Preview UI",
+    "phase": "admin-ui",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "ADMIN-002"
+    ],
+    "unlocks": [
+      "ADMIN-004"
+    ],
+    "capabilities": [
+      "template-preview"
+    ],
+    "acceptanceCriteria": [
+      "Preview UI is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "ADMIN-004",
+    "title": "Template lifecycle APIs",
+    "phase": "admin-ui",
+    "type": "feature",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "ADMIN-003"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "template-lifecycle-management"
+    ],
+    "acceptanceCriteria": [
+      "Template lifecycle APIs is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "QA-001",
+    "title": "PR evidence report",
+    "phase": "experiments-and-qa",
+    "type": "quality",
+    "priority": "medium",
+    "status": "ready",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [],
+    "unlocks": [
+      "QA-002",
+      "QA-003"
+    ],
+    "capabilities": [
+      "pr-evidence-report"
+    ],
+    "acceptanceCriteria": [
+      "PR evidence report is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": null,
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "QA-002",
+    "title": "Visual evidence",
+    "phase": "experiments-and-qa",
+    "type": "quality",
+    "priority": "medium",
+    "status": "backlog",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "QA-001"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "visual-evidence"
+    ],
+    "acceptanceCriteria": [
+      "Visual evidence is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": "Dependencies or implementation evidence are incomplete.",
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  },
+  {
+    "id": "QA-003",
+    "title": "Architecture reviewer gate",
+    "phase": "experiments-and-qa",
+    "type": "quality",
+    "priority": "medium",
+    "status": "ready",
+    "owner": null,
+    "issueNumber": null,
+    "pullRequestNumber": null,
+    "dependsOn": [
+      "QA-001"
+    ],
+    "unlocks": [],
+    "capabilities": [
+      "architecture-review-gate"
+    ],
+    "acceptanceCriteria": [
+      "Architecture reviewer gate is implemented according to its planning document and independently reviewable."
+    ],
+    "requiredEvidence": [
+      "test-report",
+      "architecture-review"
+    ],
+    "risk": "medium",
+    "blockedReason": null,
+    "startedAt": null,
+    "completedAt": null,
+    "verifiedAt": null
+  }
+]
