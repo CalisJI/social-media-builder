@@ -11,6 +11,8 @@ export function normalizeRenderJob(input) {
     template_id: presentation.template_id ?? input.template_id,
     template_key: presentation.template_key ?? input.template_key,
     strategy_id: presentation.strategy_id ?? input.strategy_id,
+    experiment_id: presentation.experiment_id ?? input.experiment_id,
+    variant_id: presentation.variant_id ?? input.variant_id,
     duration_seconds: presentation.duration_seconds ?? input.duration_seconds,
     brand_handle: presentation.brand_handle ?? input.brand_handle,
     channel_handle: presentation.channel_handle ?? input.channel_handle,
