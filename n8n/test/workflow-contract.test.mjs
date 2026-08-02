@@ -41,6 +41,14 @@ test("creator handle is resolved once with a manual override and safe fallback",
   assert.match(validation, /Follow \$\{channel_handle\}/);
 });
 
+test("publisher URL fails explicitly when its base URL is not configured", () => {
+  for (const name of ["Resolve TikTok Creator Handle", "Backend Schedule Publish"]) {
+    const url = byName.get(name).parameters.url;
+    assert.match(url, /SOCIAL_PUBLISHER_BASE_URL is required and must be an HTTPS URL/);
+    assert.doesNotMatch(url, /\$env\.SOCIAL_PUBLISHER_BASE_URL \+ '\/api/);
+  }
+});
+
 test("main path is validate to render to R2 to wait to gated backend publish", () => {
   const next = (name, branch=0) => workflow.connections[name]?.main?.[branch]?.[0]?.node;
   assert.equal(next("Test Input (replace in production)"), "Resolve TikTok Creator Handle");
