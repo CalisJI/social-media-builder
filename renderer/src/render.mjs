@@ -4,6 +4,7 @@ import { access, cp, mkdir, readFile, readdir, rename, rm, writeFile } from "nod
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeRenderJob } from "./model/normalize-render-job.mjs";
+import { ConstraintError, resolveConstraints } from "./validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "./template/resolve-template-engine.mjs";
 
 const rendererRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -27,14 +28,14 @@ export class RenderError extends Error {
   constructor(message, status = 500, code = "render_failed") { super(message); this.status = status; this.code = code; }
 }
 
-function clean(value, name, max, { required = true, fallback = null } = {}) {
+function clean(value, name, constraint, { required = true, fallback = null } = {}) {
   if (value == null || (typeof value === "string" && !value.trim())) {
     if (!required) return fallback;
     throw new RenderError(`${name} is required`, 400, "invalid_payload");
   }
   if (typeof value !== "string") throw new RenderError(`${name} must be a string`, 400, "invalid_payload");
   const result = value.trim().replace(/\s+/g, " ");
-  if (result.length > max) throw new RenderError(`${name} exceeds ${max} characters`, 400, "invalid_payload");
+  if (constraint && result.length > constraint.maxLength) throw new RenderError(`${name} violates constraints.maxLength (${constraint.maxLength}): received ${result.length} characters`, 400, "invalid_payload");
   return result;
 }
 
@@ -90,6 +91,10 @@ export async function loadTemplateRegistry(root = templatesRoot) {
     }
     manifest.copy = normalizeCopy(manifest.copy);
     manifest.timeline = normalizeTimeline(manifest.timeline);
+    try { manifest.constraints = resolveConstraints(manifest.constraints); } catch (error) {
+      if (error instanceof ConstraintError) throw new RenderError(`template ${manifest.id} ${error.message}`, 400, "invalid_template");
+      throw error;
+    }
     const [left, top, right, bottom] = manifest.layout?.safeZone || [];
     if (!(left >= 0 && top >= 0 && right <= 1080 && bottom <= 1920 && left < right && top < bottom)) throw new RenderError(`template ${manifest.id} has invalid safe zone`);
     manifest.packageRoot = packageRoot; registry.set(manifest.id, Object.freeze(manifest));
@@ -141,20 +146,20 @@ export async function normalizePayload(input) {
   if (!entry || (Array.isArray(input.entries) && input.entries.length !== 1)) throw new RenderError("exactly one vocabulary entry is required", 400, "invalid_payload");
   const requestedTemplate = [input.template_id, input.template_key, await activeTemplateId(), process.env.RENDER_DEFAULT_TEMPLATE_ID, "vocabulary-pastel-v1"]
     .find((value) => typeof value === "string" && value.trim());
-  const template = await resolveTemplate(clean(requestedTemplate, "template_id", 60));
+  const template = await resolveTemplate(clean(requestedTemplate, "template_id", null));
   const duration = Number(input.duration_seconds ?? 10);
   if (!Number.isFinite(duration) || duration < 9.8 || duration > 10.2) throw new RenderError("duration_seconds must be between 9.8 and 10.2", 400, "invalid_payload");
-  const handle = clean(input.brand_handle ?? input.channel_handle, "brand_handle", 32);
-  if (!/^@[A-Za-z0-9._]{1,31}$/.test(handle)) throw new RenderError("brand_handle must start with @ and contain only letters, numbers, dot or underscore", 400, "invalid_payload");
-  const ipa = clean(entry.ipa, "ipa", 48, { required: false, fallback: "Phát âm đang cập nhật" });
-  const part = clean(entry.part_of_speech, "part_of_speech", 24, { required: false, fallback: "từ vựng" });
+  const handle = clean(input.brand_handle ?? input.channel_handle, "brand_handle", template.constraints.brand_handle);
+  if (!/^@[A-Za-z0-9._]+$/.test(handle)) throw new RenderError("brand_handle must start with @ and contain only letters, numbers, dot or underscore", 400, "invalid_payload");
+  const ipa = clean(entry.ipa, "ipa", template.constraints.ipa, { required: false, fallback: "Phát âm đang cập nhật" });
+  const part = clean(entry.part_of_speech, "part_of_speech", template.constraints.part_of_speech, { required: false, fallback: "từ vựng" });
   const ctaTemplate = template.copy?.cta || defaultCopy.cta;
   return {
-    template: template.id, duration, word: clean(entry.word, "word", 24), ipa,
-    part: partLabels[part.toLowerCase()] || part, meaning: clean(entry.meaning_vi, "meaning_vi", 90),
-    exampleEn: clean(entry.example_en, "example_en", 90, { required: false, fallback: "Ví dụ đang cập nhật" }),
-    exampleVi: clean(entry.example_vi, "example_vi", 100, { required: false, fallback: "" }),
-    handle, cta: clean(entry.cta ?? input.cta, "cta", 54, { required: false, fallback: ctaTemplate.replaceAll("{handle}", handle) }),
+    template: template.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
+    part: partLabels[part.toLowerCase()] || part, meaning: clean(entry.meaning_vi, "meaning_vi", template.constraints.meaning_vi),
+    exampleEn: clean(entry.example_en, "example_en", template.constraints.example_en, { required: false, fallback: "Ví dụ đang cập nhật" }),
+    exampleVi: clean(entry.example_vi, "example_vi", template.constraints.example_vi, { required: false, fallback: "" }),
+    handle, cta: clean(entry.cta ?? input.cta, "cta", template.constraints.cta, { required: false, fallback: ctaTemplate.replaceAll("{handle}", handle) }),
     pronunciationAudioUrl: entry.pronunciation_audio_url ?? input.pronunciation_audio_url ?? null,
     backgroundMusicUrl: entry.background_music_url ?? input.background_music_url ?? null,
   };

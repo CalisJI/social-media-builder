@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplate, wrapText } from "../src/render.mjs";
+import { ConstraintError, resolveConstraints } from "../src/validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
 const exec = promisify(execFile);
 const sample={template_id:"vocabulary-pastel-v1",duration_seconds:10,brand_handle:"@daily",entries:[{word:"resilient",ipa:"/test/",part_of_speech:"adjective",meaning_vi:"kiên cường",example_en:"Stay resilient.",example_vi:"Hãy kiên cường."}]};
@@ -18,6 +19,19 @@ test("normalizes nested content and presentation payloads like legacy payloads",
 test("applies nullable fallbacks",async()=>{const p=await normalizePayload({...sample,entries:[{...sample.entries[0],ipa:null,part_of_speech:null,example_en:null,example_vi:null}]});assert.equal(p.ipa,"Phát âm đang cập nhật");assert.equal(p.part,"từ vựng");assert.equal(p.exampleVi,"");});
 test("rejects batches",async()=>assert.rejects(normalizePayload({...sample,entries:[...sample.entries,...sample.entries]}),RenderError));
 test("rejects out-of-range duration",async()=>assert.rejects(normalizePayload({...sample,duration_seconds:30}),/duration_seconds/));
+test("uses manifest constraints instead of shared content limits",async()=>{
+  const constrained = { ...sample, template_id: "vocabulary-pastel-test-v1", entries: [{ ...sample.entries[0], word: "short", meaning_vi: "ngắn gọn" }] };
+  assert.equal((await normalizePayload(constrained)).word, "short");
+  await assert.rejects(normalizePayload({ ...constrained, entries: [{ ...constrained.entries[0], word: "toolong" }] }), /word.*constraints\.maxLength.*5/);
+});
+test("legacy manifest preserves its meaning constraint without truncating",async()=>{
+  const meaning = "a".repeat(91);
+  await assert.rejects(normalizePayload({ ...sample, entries: [{ ...sample.entries[0], meaning_vi: meaning }] }), /meaning_vi.*constraints\.maxLength.*90/);
+  assert.equal((await normalizePayload({ ...sample, entries: [{ ...sample.entries[0], meaning_vi: "a".repeat(90) }] })).meaning.length, 90);
+});
+test("rejects malformed manifest constraints with the field and constraint",()=>{
+  assert.throws(() => resolveConstraints({ meaning_vi: { maxLength: 0 } }), error => error instanceof ConstraintError && /meaning_vi.*constraints\.maxLength/.test(error.message));
+});
 test("registry swaps between two fixture packages",async()=>{assert.equal((await resolveTemplate("vocabulary-pastel-v1")).palette.accent,"#E85D75");assert.equal((await resolveTemplate("vocabulary-pastel-test-v1")).palette.accent,"#6E67D8");});
 test("template engine defaults old manifests to legacy-v1",()=>assert.equal(resolveTemplateEngine({}).id,"legacy-v1"));
 test("template engine rejects unknown engines structurally",()=>assert.throws(()=>resolveTemplateEngine({engine:"unknown-v1"}),error=>error.status===400&&error.code==="invalid_template"));
