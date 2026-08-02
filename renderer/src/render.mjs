@@ -9,6 +9,7 @@ import { resolveTemplateEngine } from "./template/resolve-template-engine.mjs";
 import { resolveTemplateCapabilities, validateTemplateStrategyCompatibility } from "./template/validate-capabilities.mjs";
 import { defaultStrategyId, resolveStrategy } from "./strategy/resolve-strategy.mjs";
 import { TextOverflowError, resolveTextLayout } from "./layout/adaptive-text.mjs";
+import { validateScene } from "./compiler/compile-scenes.mjs";
 
 export { validateStrategy } from "./strategy/resolve-strategy.mjs";
 
@@ -76,6 +77,7 @@ export async function loadTemplateRegistry(root = templatesRoot) {
     try { manifest = JSON.parse(await readFile(path.join(packageRoot, "manifest.json"), "utf8")); } catch (error) { if (error.code === "ENOENT") continue; throw error; }
     if (!manifest.id || registry.has(manifest.id)) throw new RenderError(`invalid or duplicate template id: ${manifest.id || item.name}`);
     manifest.engine = resolveTemplateEngine(manifest).id;
+    if (manifest.engine === "scene-v2") validateScene(manifest.scene, packageRoot);
     Object.assign(manifest, resolveTemplateCapabilities(manifest));
     for (const key of ["background", "petal"]) {
       const resolved = path.resolve(packageRoot, manifest.assets?.[key] || "");
@@ -236,6 +238,8 @@ function darkSlideStages({ template, font, files, payload, textLayout, hookStart
 
 export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FFMPEG_PATH || "ffmpeg", timeoutMs = Number(process.env.RENDER_TIMEOUT_MS || 120000) } = {}) {
   const template = await resolveTemplate(payload.template); const font = await fonts(); const work = `${outputFile}.work`;
+  const engine = resolveTemplateEngine(template);
+  if (engine.id !== "legacy-v1") return engine.render({ payload, template, outputFile, ffmpeg, timeoutMs, font, saveText, RenderError });
   await rm(work, { recursive: true, force: true }); await mkdir(work, { recursive: true });
   const textLayout = prepareTextLayout(payload, template);
   const display = { step: "01", hook: template.copy?.hook || defaultCopy.hook, word: payload.word.toUpperCase(), ipa: payload.ipa, part: payload.part, meaningLabel: template.copy?.meaningLabel || defaultCopy.meaningLabel, meaning: textLayout.meaning.text, exampleLabel: template.copy?.exampleLabel || defaultCopy.exampleLabel, en: textLayout.en.text, vi: textLayout.vi?.text || "", cta: payload.cta };

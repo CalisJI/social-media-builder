@@ -1,6 +1,7 @@
 import { legacyV1 } from "../engines/legacy-v1.mjs";
+import { sceneV2 } from "../engines/scene-v2.mjs";
 
-const engines = new Map([[legacyV1.id, legacyV1]]);
+const engines = new Map([[legacyV1.id, legacyV1], [sceneV2.id, sceneV2]]);
 
 export function resolveTemplateEngine(template) {
   const id = template.engine ?? legacyV1.id;
