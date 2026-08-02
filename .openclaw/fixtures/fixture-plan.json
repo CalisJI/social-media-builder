@@ -1,0 +1,10 @@
+{
+  "fixtures": [
+    {"id":"normal","word":"absorb","purpose":"normal layout"},
+    {"id":"long-word","word":"suspenseful","purpose":"adaptive hero typography"},
+    {"id":"long-meaning","word":"crunch","purpose":"adaptive meaning layout"},
+    {"id":"missing-ipa","word":"serene","purpose":"optional IPA"},
+    {"id":"long-cta","word":"elevate","purpose":"CTA wrapping"},
+    {"id":"diacritics","word":"diligent","purpose":"Vietnamese diacritics"}
+  ]
+}
