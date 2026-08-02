@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
@@ -26,6 +26,24 @@ test("defaults legacy requests to the classic definition strategy",async()=>{
 test("resolves an explicit known strategy",async()=>{
   const payload = await normalizePayload({ ...sample, presentation: { strategy_id: "classic-definition-v1" } });
   assert.equal(payload.strategy,"classic-definition-v1");
+});
+test("normalizes mistake-correction content declared by its compatible scene template",async()=>{
+  const request = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-mistake-correction-scene-v2/fixtures/01-valid-mistake.json"), "utf8"));
+  const payload = await normalizePayload(request);
+  assert.equal(payload.strategy, "mistake-correction-v1");
+  assert.equal(payload.common_mistake, request.entries[0].common_mistake);
+});
+test("reports the missing common_mistake required by mistake correction",async()=>{
+  await assert.rejects(
+    normalizePayload({ ...sample, template_id: "vocabulary-mistake-correction-scene-v2", strategy_id: "mistake-correction-v1" }),
+    error => error.status === 400 && error.code === "invalid_payload" && /mistake-correction-v1 requires common_mistake/.test(error.message),
+  );
+});
+test("rejects mistake-correction content that exceeds its template constraint",async()=>{
+  await assert.rejects(
+    normalizePayload({ ...sample, template_id: "vocabulary-mistake-correction-scene-v2", strategy_id: "mistake-correction-v1", entries: [{ ...sample.entries[0], common_mistake: "x".repeat(361) }] }),
+    /common_mistake.*constraints\.maxLength.*360/,
+  );
 });
 test("accepts a strategy declared compatible by a template",()=>{
   assert.doesNotThrow(() => validateTemplateStrategyCompatibility(
