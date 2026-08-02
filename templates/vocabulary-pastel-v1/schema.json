@@ -12,14 +12,14 @@
   "properties": {
     "template_id": { "const": "vocabulary-pastel-v1" },
     "duration_seconds": { "type": "number", "minimum": 9.8, "maximum": 10.2 },
-    "brand_handle": { "type": "string", "pattern": "^@[A-Za-z0-9._]{1,31}$", "maxLength": 32 },
-    "word": { "type": "string", "minLength": 1, "maxLength": 24 },
-    "ipa": { "type": ["string", "null"], "maxLength": 48 },
-    "part_of_speech": { "type": ["string", "null"], "maxLength": 24 },
-    "meaning_vi": { "type": "string", "minLength": 1, "maxLength": 90 },
-    "example_en": { "type": ["string", "null"], "maxLength": 90 },
-    "example_vi": { "type": ["string", "null"], "maxLength": 100 },
-    "cta": { "type": ["string", "null"], "maxLength": 54 },
+    "brand_handle": { "type": "string", "pattern": "^@[A-Za-z0-9._]+$" },
+    "word": { "type": "string", "minLength": 1 },
+    "ipa": { "type": ["string", "null"] },
+    "part_of_speech": { "type": ["string", "null"] },
+    "meaning_vi": { "type": "string", "minLength": 1 },
+    "example_en": { "type": ["string", "null"] },
+    "example_vi": { "type": ["string", "null"] },
+    "cta": { "type": ["string", "null"] },
     "pronunciation_audio_url": { "type": ["string", "null"], "format": "uri", "pattern": "^https://" },
     "background_music_url": { "type": ["string", "null"], "format": "uri", "pattern": "^https://" }
   }
