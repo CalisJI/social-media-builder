@@ -1,0 +1,32 @@
+{
+  "id": "TIKTOK-090",
+  "title": "Add quiz-reveal TikTok strategy and template",
+  "phase": 4,
+  "dependsOn": [
+    "TIKTOK-080"
+  ],
+  "objective": "Add the first new retention format without renderer core edits.",
+  "scope": {
+    "create": [
+      "strategies/quiz-reveal-v1.json",
+      "templates/vocabulary-quiz-v1/*"
+    ],
+    "modify": [
+      "fixtures",
+      "docs"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Quiz strategy includes guess window and reveal.",
+    "Template declares quizReveal capability.",
+    "Added entirely through strategy/template packages.",
+    "Legacy/classic behavior is unchanged."
+  ],
+  "tests": [
+    "quiz fixture renders",
+    "timing validation",
+    "compatibility tests"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}

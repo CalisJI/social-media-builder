@@ -1,0 +1,32 @@
+{
+  "id": "TIKTOK-130",
+  "title": "Add automated artifact QA",
+  "phase": 5,
+  "dependsOn": [
+    "TIKTOK-070"
+  ],
+  "objective": "Validate generated MP4 before returning completion.",
+  "scope": {
+    "create": [
+      "renderer/src/qa/inspect-artifact.mjs"
+    ],
+    "modify": [
+      "render completion path",
+      "tests"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Checks codec, dimensions, duration, frame rate and non-empty file.",
+    "QA failure prevents manifest completion.",
+    "Errors are structured.",
+    "Legacy successful outputs pass."
+  ],
+  "tests": [
+    "valid artifact",
+    "zero-byte file",
+    "wrong duration",
+    "wrong dimensions"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}

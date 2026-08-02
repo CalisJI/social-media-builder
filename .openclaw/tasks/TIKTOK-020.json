@@ -1,0 +1,32 @@
+{
+  "id": "TIKTOK-020",
+  "title": "Add template engine router",
+  "phase": 1,
+  "dependsOn": [
+    "TIKTOK-010"
+  ],
+  "objective": "Route templates to legacy-v1 or future scene-v2 without converting current templates.",
+  "scope": {
+    "create": [
+      "renderer/src/engines/legacy-v1.mjs",
+      "renderer/src/template/resolve-template-engine.mjs"
+    ],
+    "modify": [
+      "template manifest loader",
+      "existing manifests",
+      "tests"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Manifests without engine default to legacy-v1.",
+    "Existing templates render through legacy-v1.",
+    "Unknown engine returns structured invalid_template error.",
+    "No visual behavior change."
+  ],
+  "tests": [
+    "renderer unit tests",
+    "legacy fixture render smoke test"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}

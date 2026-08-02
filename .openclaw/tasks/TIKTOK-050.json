@@ -1,0 +1,34 @@
+{
+  "id": "TIKTOK-050",
+  "title": "Create strategy registry and classic strategy",
+  "phase": 2,
+  "dependsOn": [
+    "TIKTOK-010"
+  ],
+  "objective": "Separate retention sequence from visual template.",
+  "scope": {
+    "create": [
+      "strategies/classic-definition-v1.json",
+      "renderer/src/strategy/load-strategies.mjs",
+      "renderer/src/strategy/resolve-strategy.mjs"
+    ],
+    "modify": [
+      "normalized model",
+      "tests"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Legacy request defaults to classic-definition-v1.",
+    "Explicit known strategy is resolved.",
+    "Unknown strategy returns 400.",
+    "Strategy validation checks required content and capability requirements."
+  ],
+  "tests": [
+    "registry load",
+    "default strategy",
+    "unknown strategy",
+    "missing required field"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "TIKTOK-100",
+  "title": "Add mistake-correction strategy",
+  "phase": 4,
+  "dependsOn": [
+    "TIKTOK-070"
+  ],
+  "objective": "Support wrong-vs-right educational videos.",
+  "scope": {
+    "create": [
+      "strategies/mistake-correction-v1.json",
+      "compatible template package or scene variant"
+    ],
+    "modify": [
+      "content validation",
+      "fixtures"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Requires common_mistake metadata.",
+    "Missing metadata produces actionable validation error.",
+    "No hardcoded vocabulary examples.",
+    "Template compatibility is enforced."
+  ],
+  "tests": [
+    "valid mistake content",
+    "missing metadata",
+    "overflow stress"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}

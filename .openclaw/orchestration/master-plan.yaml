@@ -1,0 +1,38 @@
+version: 1
+project: CalisJI/social-media-builder
+target: TikTok vocabulary content platform
+policy:
+  implementation_mode: incremental
+  preserve_legacy_v1: true
+  one_task_per_branch: true
+  reviewer_required: true
+baseline_task: TIKTOK-000
+phases:
+  - id: 0
+    name: Baseline
+    tasks: [TIKTOK-000]
+  - id: 1
+    name: Compatibility foundation
+    tasks: [TIKTOK-010, TIKTOK-020, TIKTOK-030]
+  - id: 2
+    name: Constraints and strategies
+    tasks: [TIKTOK-040, TIKTOK-050, TIKTOK-060]
+  - id: 3
+    name: Scene engine
+    tasks: [TIKTOK-070, TIKTOK-080]
+  - id: 4
+    name: TikTok retention formats and template lifecycle
+    tasks: [TIKTOK-090, TIKTOK-100, TIKTOK-110]
+  - id: 5
+    name: Experiments and QA
+    tasks: [TIKTOK-120, TIKTOK-130]
+commands:
+  baseline:
+    - npm run lint
+    - npm test
+    - npm run build
+    - cd renderer && npm test
+merge_policy:
+  require_all_tests: true
+  require_reviewer_approval: true
+  prohibit_force_merge: true
