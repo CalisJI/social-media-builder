@@ -5,7 +5,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplate, wrapText } from "../src/render.mjs";
+import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplate, validateStrategy, wrapText } from "../src/render.mjs";
 import { ConstraintError, resolveConstraints } from "../src/validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
 const exec = promisify(execFile);

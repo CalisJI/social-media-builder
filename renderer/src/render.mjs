@@ -6,6 +6,9 @@ import { fileURLToPath } from "node:url";
 import { normalizeRenderJob } from "./model/normalize-render-job.mjs";
 import { ConstraintError, resolveConstraints } from "./validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "./template/resolve-template-engine.mjs";
+import { defaultStrategyId, resolveStrategy } from "./strategy/resolve-strategy.mjs";
+
+export { validateStrategy } from "./strategy/resolve-strategy.mjs";
 
 const rendererRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const templatesRoot = path.resolve(process.env.RENDER_TEMPLATES_DIR || path.join(rendererRoot, "../templates"));
@@ -156,7 +159,7 @@ export async function normalizePayload(input) {
   const ctaTemplate = template.copy?.cta || defaultCopy.cta;
   const strategy = await resolveStrategy(input.strategy_id ?? defaultStrategyId, { content: entry, capabilities: template.capabilities ?? [] });
   return {
-    template: template.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
+    template: template.id, strategy: strategy.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
     part: partLabels[part.toLowerCase()] || part, meaning: clean(entry.meaning_vi, "meaning_vi", template.constraints.meaning_vi),
     exampleEn: clean(entry.example_en, "example_en", template.constraints.example_en, { required: false, fallback: "Ví dụ đang cập nhật" }),
     exampleVi: clean(entry.example_vi, "example_vi", template.constraints.example_vi, { required: false, fallback: "" }),
