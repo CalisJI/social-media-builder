@@ -1,0 +1,30 @@
+{
+  "id": "TIKTOK-010",
+  "title": "Extract normalized render job model",
+  "phase": 1,
+  "dependsOn": [
+    "TIKTOK-000"
+  ],
+  "objective": "Introduce a stable internal model while accepting all existing payloads.",
+  "scope": {
+    "create": [
+      "renderer/src/model/normalize-render-job.mjs"
+    ],
+    "modify": [
+      "renderer/src/render.mjs",
+      "tests"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Legacy payloads normalize to the same effective values.",
+    "New nested content/presentation payload is accepted.",
+    "Public endpoint and idempotency behavior are unchanged.",
+    "Unit tests cover legacy and v2 payload adapters."
+  ],
+  "tests": [
+    "cd renderer && npm test",
+    "npm test"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}

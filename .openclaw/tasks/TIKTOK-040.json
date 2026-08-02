@@ -1,0 +1,34 @@
+{
+  "id": "TIKTOK-040",
+  "title": "Implement adaptive text layout resolver",
+  "phase": 2,
+  "dependsOn": [
+    "TIKTOK-030"
+  ],
+  "objective": "Handle long content using declared wrap, shrink, alternate layout and split-scene policies.",
+  "scope": {
+    "create": [
+      "renderer/src/layout/adaptive-text.mjs",
+      "renderer/src/layout/text-measure.mjs"
+    ],
+    "modify": [
+      "render text preparation",
+      "tests"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Long valid meaning no longer fails only because of global 90-character limit.",
+    "Minimum font size is respected.",
+    "Educational content is not silently truncated.",
+    "Unresolvable overflow returns structured text_overflow."
+  ],
+  "tests": [
+    "Vietnamese diacritics",
+    "long meaning",
+    "long example",
+    "minimum font",
+    "overflow failure"
+  ],
+  "risk": "high",
+  "status": "blocked"
+}

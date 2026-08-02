@@ -1,0 +1,34 @@
+{
+  "id": "TIKTOK-110",
+  "title": "Implement template validate-preview-activate lifecycle",
+  "phase": 4,
+  "dependsOn": [
+    "TIKTOK-070"
+  ],
+  "objective": "Prevent imported templates from becoming active before QA.",
+  "scope": {
+    "create": [
+      "template lifecycle service",
+      "validate/preview/activate/list endpoints"
+    ],
+    "modify": [
+      "existing import endpoint",
+      "admin UI",
+      "tests"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Import does not auto-activate.",
+    "Preview renders mandatory fixtures.",
+    "Activate rejects unpreviewed or failed templates.",
+    "Existing import endpoint remains compatible or clearly deprecated."
+  ],
+  "tests": [
+    "API lifecycle tests",
+    "unauthorized requests",
+    "failed preview",
+    "successful activation"
+  ],
+  "risk": "high",
+  "status": "blocked"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "TIKTOK-000",
+  "title": "Baseline and architecture inventory",
+  "phase": 0,
+  "dependsOn": [],
+  "objective": "Create a verified baseline before architectural edits.",
+  "scope": {
+    "inspect": [
+      "renderer/src/server.mjs",
+      "renderer/src/render.mjs",
+      "renderer tests",
+      "templates/*",
+      "template import API"
+    ],
+    "change": [
+      "Add architecture inventory and baseline report only; no runtime behavior changes."
+    ]
+  },
+  "acceptanceCriteria": [
+    "Current lint, test and build results are recorded.",
+    "Existing renderer fixtures and public endpoints are documented.",
+    "Known legacy templates and their engines are inventoried.",
+    "No production code behavior changes."
+  ],
+  "tests": [
+    "npm run lint",
+    "npm test",
+    "npm run build",
+    "cd renderer && npm test"
+  ],
+  "risk": "low",
+  "status": "ready"
+}

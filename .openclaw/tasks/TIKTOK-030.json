@@ -1,0 +1,32 @@
+{
+  "id": "TIKTOK-030",
+  "title": "Move content constraints into template manifests",
+  "phase": 1,
+  "dependsOn": [
+    "TIKTOK-010"
+  ],
+  "objective": "Replace global hardcoded text capacities with template-specific constraints.",
+  "scope": {
+    "modify": [
+      "template manifests",
+      "payload normalization",
+      "schema validation"
+    ],
+    "create": [
+      "renderer/src/validation/resolve-constraints.mjs"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Legacy template retains current limits via manifest.",
+    "A test template can declare different limits.",
+    "Errors include field and constraint.",
+    "No silent truncation."
+  ],
+  "tests": [
+    "short/long meaning tests",
+    "legacy schema tests",
+    "invalid constraint tests"
+  ],
+  "risk": "high",
+  "status": "blocked"
+}

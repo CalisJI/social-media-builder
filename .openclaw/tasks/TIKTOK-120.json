@@ -1,0 +1,33 @@
+{
+  "id": "TIKTOK-120",
+  "title": "Persist experiment and render metadata",
+  "phase": 5,
+  "dependsOn": [
+    "TIKTOK-010",
+    "TIKTOK-050"
+  ],
+  "objective": "Prepare A/B testing and future TikTok analytics.",
+  "scope": {
+    "modify": [
+      "render manifest",
+      "normalized model",
+      "response metadata"
+    ],
+    "create": [
+      "metadata schema/tests"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Manifest stores template, strategy, experiment and variant IDs.",
+    "Artifact and payload hashes remain present.",
+    "Legacy jobs receive safe null/default metadata.",
+    "Idempotency hash reflects presentation variant."
+  ],
+  "tests": [
+    "manifest persistence",
+    "cached response",
+    "idempotency conflict across variant"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}

@@ -1,0 +1,40 @@
+{
+  "id": "TIKTOK-070",
+  "title": "Build minimal scene-v2 compiler",
+  "phase": 3,
+  "dependsOn": [
+    "TIKTOK-020",
+    "TIKTOK-060"
+  ],
+  "objective": "Compile declarative scenes using a small safe primitive set.",
+  "scope": {
+    "create": [
+      "renderer/src/engines/scene-v2.mjs",
+      "renderer/src/compiler/compile-scenes.mjs",
+      "compile-text.mjs",
+      "compile-shape.mjs",
+      "compile-image.mjs",
+      "compile-animation.mjs"
+    ],
+    "modify": [
+      "engine router",
+      "tests"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Supports text, box, image, progress and group.",
+    "Supports declared initial animations.",
+    "Unknown primitive/animation fails validation.",
+    "Asset path containment remains enforced.",
+    "No arbitrary code execution from templates."
+  ],
+  "tests": [
+    "compiler snapshots",
+    "unsafe path",
+    "unknown primitive",
+    "unknown animation",
+    "render smoke test"
+  ],
+  "risk": "high",
+  "status": "blocked"
+}

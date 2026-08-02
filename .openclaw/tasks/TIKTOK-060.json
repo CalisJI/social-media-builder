@@ -1,0 +1,33 @@
+{
+  "id": "TIKTOK-060",
+  "title": "Add template capabilities and strategy compatibility",
+  "phase": 2,
+  "dependsOn": [
+    "TIKTOK-020",
+    "TIKTOK-050"
+  ],
+  "objective": "Prevent incompatible template/strategy combinations.",
+  "scope": {
+    "modify": [
+      "template manifests",
+      "template loader",
+      "strategy resolver"
+    ],
+    "create": [
+      "renderer/src/template/validate-capabilities.mjs"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Templates declare capabilities and compatible strategies.",
+    "Incompatible requests fail before FFmpeg.",
+    "Legacy template remains compatible with classic strategy.",
+    "No template-ID conditionals in core."
+  ],
+  "tests": [
+    "compatible pair",
+    "incompatible pair",
+    "legacy fallback"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}

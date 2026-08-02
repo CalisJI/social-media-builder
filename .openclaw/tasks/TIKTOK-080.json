@@ -1,0 +1,31 @@
+{
+  "id": "TIKTOK-080",
+  "title": "Create scene-v2 pastel parity template",
+  "phase": 3,
+  "dependsOn": [
+    "TIKTOK-040",
+    "TIKTOK-070"
+  ],
+  "objective": "Prove scene-v2 by reproducing the current pastel output without replacing legacy.",
+  "scope": {
+    "create": [
+      "templates/vocabulary-pastel-scene-v2/*"
+    ],
+    "modify": [
+      "preview fixtures only"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Template is package-only; no template-specific core branch.",
+    "All preview fixtures render.",
+    "Visual comparison is acceptably close and documented.",
+    "Legacy pastel remains available."
+  ],
+  "tests": [
+    "fixture renders",
+    "ffprobe",
+    "visual snapshot/approval"
+  ],
+  "risk": "medium",
+  "status": "blocked"
+}
