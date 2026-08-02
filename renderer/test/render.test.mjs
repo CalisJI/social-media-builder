@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
@@ -119,6 +119,34 @@ test("cached render response preserves persisted metadata and hashes",async()=>{
     const conflict = await fetch(`http://127.0.0.1:${port}/v1/renders`, { method: "POST", headers: { "content-type": "application/json", "idempotency-key": key }, body: JSON.stringify({ ...sample, presentation: { experiment_id: "cta-test", variant_id: "c" } }) });
     assert.equal(conflict.status, 409);
     assert.equal((await conflict.json()).error, "idempotency_conflict");
+  } finally {
+    server.kill(); await new Promise(resolve => server.exitCode !== null ? resolve() : server.once("exit", resolve));
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+test("does not complete the manifest when artifact QA fails", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "renderer-artifact-qa-"));
+  const port = await new Promise((resolve, reject) => {
+    const listener = net.createServer(); listener.once("error", reject); listener.listen(0, "127.0.0.1", () => {
+      const value = listener.address().port; listener.close(error => error ? reject(error) : resolve(value));
+    });
+  });
+  const fakeFfmpeg = path.join(dir, "ffmpeg.mjs");
+  await writeFile(fakeFfmpeg, `#!/usr/bin/env node\nimport { writeFile } from "node:fs/promises"; await writeFile(process.argv.at(-1), "");`);
+  await chmod(fakeFfmpeg, 0o755);
+  const font = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+  const server = spawn(process.execPath, ["src/server.mjs"], { cwd: path.resolve(import.meta.dirname, ".."), env: { ...process.env, RENDERER_PORT: String(port), RENDER_OUTPUT_DIR: dir, FFMPEG_PATH: fakeFfmpeg, RENDER_FONT_REGULAR: font, RENDER_FONT_MEDIUM: font, RENDER_FONT_BOLD: font, RENDER_FONT_EXTRABOLD: font } });
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("renderer did not start")), 5000);
+      server.stdout.on("data", data => { if (data.toString().includes("renderer listening")) { clearTimeout(timer); resolve(); } });
+      server.once("error", error => { clearTimeout(timer); reject(error); });
+      server.once("exit", code => { clearTimeout(timer); reject(new Error(`renderer exited early: ${code}`)); });
+    });
+    const response = await fetch(`http://127.0.0.1:${port}/v1/renders`, { method: "POST", headers: { "content-type": "application/json", "idempotency-key": "artifact-qa-failure" }, body: JSON.stringify(sample) });
+    assert.equal(response.status, 500);
+    assert.deepEqual(await response.json(), { error: "artifact_qa_failed", message: "render failed", details: { field: "size", expected: "> 0", actual: 0 } });
+    await assert.rejects(readFile(path.join(dir, "manifest.json")));
   } finally {
     server.kill(); await new Promise(resolve => server.exitCode !== null ? resolve() : server.once("exit", resolve));
     await rm(dir, { recursive: true, force: true });
