@@ -10,6 +10,7 @@ import { resolveTemplateCapabilities, validateTemplateStrategyCompatibility } fr
 import { defaultStrategyId, resolveStrategy } from "./strategy/resolve-strategy.mjs";
 import { TextOverflowError, resolveTextLayout } from "./layout/adaptive-text.mjs";
 import { validatePresentationSchema } from "./template/validate-presentation-schema.mjs";
+import { resolveDesignTokens } from "./template/resolve-design-tokens.mjs";
 
 export { validateStrategy } from "./strategy/resolve-strategy.mjs";
 
@@ -77,6 +78,7 @@ export async function loadTemplateRegistry(root = templatesRoot) {
     try { manifest = JSON.parse(await readFile(path.join(packageRoot, "manifest.json"), "utf8")); } catch (error) { if (error.code === "ENOENT") continue; throw error; }
     if (!manifest.id || registry.has(manifest.id)) throw new RenderError(`invalid or duplicate template id: ${manifest.id || item.name}`);
     manifest.engine = resolveTemplateEngine(manifest).id;
+    manifest = resolveDesignTokens(manifest);
     validatePresentationSchema(manifest, packageRoot);
     Object.assign(manifest, resolveTemplateCapabilities(manifest));
     for (const key of ["background", "petal"]) {

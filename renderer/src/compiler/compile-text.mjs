@@ -25,5 +25,5 @@ export async function compileText(node, { font, saveText, context, nextId }) {
   const animations = animationExpressions(compileAnimations(node.animations));
   const file = await saveText(`scene-${nextId()}`, interpolateText(node.text, context));
   const lineSpacing = node.lineSpacing == null ? "" : `:line_spacing=${number(node.lineSpacing, "text.lineSpacing")}`;
-  return `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${color(node.color ?? "#FFFFFF")}:fontsize=${fontSize}:x='${x}':y='${y}+${animations.yOffset}':alpha='${animations.alpha}'${lineSpacing}`;
+  return `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${color(node.color)}:fontsize=${fontSize}:x='${x}':y='${y}+${animations.yOffset}':alpha='${animations.alpha}'${lineSpacing}`;
 }
