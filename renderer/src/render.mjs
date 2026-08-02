@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { normalizeRenderJob } from "./model/normalize-render-job.mjs";
 import { ConstraintError, resolveConstraints } from "./validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "./template/resolve-template-engine.mjs";
+import { resolveTemplateCapabilities, validateTemplateStrategyCompatibility } from "./template/validate-capabilities.mjs";
 import { defaultStrategyId, resolveStrategy } from "./strategy/resolve-strategy.mjs";
 import { TextOverflowError, resolveTextLayout } from "./layout/adaptive-text.mjs";
 
@@ -75,6 +76,7 @@ export async function loadTemplateRegistry(root = templatesRoot) {
     try { manifest = JSON.parse(await readFile(path.join(packageRoot, "manifest.json"), "utf8")); } catch (error) { if (error.code === "ENOENT") continue; throw error; }
     if (!manifest.id || registry.has(manifest.id)) throw new RenderError(`invalid or duplicate template id: ${manifest.id || item.name}`);
     manifest.engine = resolveTemplateEngine(manifest).id;
+    Object.assign(manifest, resolveTemplateCapabilities(manifest));
     for (const key of ["background", "petal"]) {
       const resolved = path.resolve(packageRoot, manifest.assets?.[key] || "");
       if (!contained(root, resolved)) throw new RenderError(`template ${manifest.id} has unsafe ${key} path`);
@@ -160,6 +162,7 @@ export async function normalizePayload(input) {
   const part = clean(entry.part_of_speech, "part_of_speech", template.constraints.part_of_speech, { required: false, fallback: "từ vựng" });
   const ctaTemplate = template.copy?.cta || defaultCopy.cta;
   const strategy = await resolveStrategy(input.strategy_id ?? defaultStrategyId, { content: entry, capabilities: template.capabilities ?? [] });
+  validateTemplateStrategyCompatibility(template, strategy);
   return {
     template: template.id, strategy: strategy.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
     experimentId: optionalIdentifier(input.experiment_id, "experiment_id"),

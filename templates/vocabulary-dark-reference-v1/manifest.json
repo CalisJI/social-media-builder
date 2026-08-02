@@ -1,5 +1,7 @@
 {
   "id": "vocabulary-dark-reference-v1",
+  "capabilities": [],
+  "compatibleStrategies": ["classic-definition-v1"],
   "assets": { "background": "assets/background.png", "petal": "assets/petal.png" },
   "palette": { "ink": "#F7F4F5", "secondary": "#B9BCD4", "accent": "#FF595E", "card": "#13131B", "ipa": "#221920" },
   "layout": { "variant": "dark-slide", "safeZone": [80, 160, 920, 1570], "text": { "meaning": { "maxWidth": 680, "maxLines": 3, "fontSize": 47, "minFontSize": 30 }, "en": { "maxWidth": 680, "maxLines": 2, "fontSize": 43, "minFontSize": 26 }, "vi": { "maxWidth": 680, "maxLines": 2, "fontSize": 34, "minFontSize": 22 } } },
