@@ -6,6 +6,7 @@ import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { compileScenes } from "../src/compiler/compile-scenes.mjs";
+import { componentRegistry } from "../src/compiler/component-registry.mjs";
 import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
 import { sceneV2 } from "../src/engines/scene-v2.mjs";
 import { normalizePayload, renderVideo } from "../src/render.mjs";
@@ -35,6 +36,19 @@ test("scene-v2 rejects unsafe image paths and unknown declarations", async () =>
   await assert.rejects(compileScenes({ template, payload, font, saveText, scene: [{ type: "image", asset: "../secret.png", x: 0, y: 0, width: 1, height: 1 }] }), /unsafe image asset path/);
   await assert.rejects(compileScenes({ template, payload, font, saveText, scene: [{ type: "script", source: "process.exit()" }] }), /unknown scene primitive/);
   await assert.rejects(compileScenes({ template, payload, font, saveText, scene: [{ type: "text", text: "x", x: 0, y: 0, fontSize: 1, animations: [{ type: "eval" }] }] }), /unknown animation/);
+});
+
+test("component registry uses stable declarative component IDs", () => {
+  assert.deepEqual([...componentRegistry.keys()], ["text", "box", "image", "progress", "group"]);
+  for (const component of componentRegistry.values()) {
+    assert.equal(component.id, component.type);
+    assert.ok(component.input.layout);
+    assert.ok(component.input.style);
+    assert.equal(component.input.timeline, "animations");
+    assert.equal(typeof component.validate, "function");
+    assert.equal(typeof component.compile, "function");
+  }
+  assert.throws(() => validatePresentationSchema({ engine: "scene-v2", templateSchemaVersion: 2, capabilities: [], scene: [{ type: "script" }] }, "/templates/test"), error => error.code === "invalid_template");
 });
 
 test("presentation schema versions scene templates and rejects invalid declarations", () => {
