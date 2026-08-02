@@ -3,6 +3,7 @@ import path from "node:path";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { importTemplate, normalizePayload, payloadHash, readJson, RenderError, renderVideo } from "./render.mjs";
 import { buildRenderManifestRecord, renderResponseMetadata } from "./model/render-record.mjs";
+import { inspectArtifact } from "./qa/inspect-artifact.mjs";
 
 const port = Number(process.env.RENDERER_PORT || 3100);
 const outputDir = path.resolve(process.env.RENDER_OUTPUT_DIR || "./data/renders");
@@ -36,6 +37,7 @@ async function createRender(req, res) {
   if(running && running.hash!==hash) throw new RenderError("idempotency key is rendering a different payload",409,"idempotency_conflict");
   if(!running) { const promise=(async()=>{
     await renderVideo(payload,output);
+    await inspectArtifact(output, { codec: "h264", width: 1080, height: 1920, duration: payload.duration, frameRate: 30 });
     await recordCompletion(key,buildRenderManifestRecord({ payload, payloadSha256: hash, artifactSha256: await sha256File(output), filename, completedAt: new Date().toISOString() }));
   })().finally(()=>active.delete(key)); running={hash,promise}; active.set(key,running); }
   await running.promise;
@@ -55,6 +57,6 @@ const server=http.createServer(async(req,res)=>{ try {
   if(req.method==="POST" && url.pathname==="/v1/templates/import") return await createTemplate(req,res);
   if(req.method==="GET" && url.pathname.startsWith("/files/")) { const name=decodeURIComponent(url.pathname.slice(7)); if(!/^[A-Za-z0-9][A-Za-z0-9._-]*\.mp4$/.test(name)) throw new RenderError("not found",404,"not_found"); const data=await readFile(path.join(outputDir,name)); res.writeHead(200,{"content-type":"video/mp4","content-length":data.length,"cache-control":"public, max-age=31536000, immutable"}); return res.end(data); }
   throw new RenderError("not found",404,"not_found");
-} catch(error) { const status=error.status||500; console.error(JSON.stringify({level:"error",code:error.code||"internal_error",message:error.message,path:req.url})); if(!res.headersSent) json(res,status,{error:error.code||"internal_error",message:status<500?error.message:"render failed"}); else res.end(); } });
+} catch(error) { const status=error.status||500; console.error(JSON.stringify({level:"error",code:error.code||"internal_error",message:error.message,details:error.details,path:req.url})); if(!res.headersSent) json(res,status,{error:error.code||"internal_error",message:status<500?error.message:"render failed",...(error.details && {details:error.details})}); else res.end(); } });
 server.requestTimeout=Number(process.env.HTTP_REQUEST_TIMEOUT_MS||130000); server.headersTimeout=10000;
 server.listen(port,"0.0.0.0",()=>console.log(JSON.stringify({level:"info",message:"renderer listening",port,outputDir})));
