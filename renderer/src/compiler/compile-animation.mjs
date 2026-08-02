@@ -1,7 +1,7 @@
 const animations = new Set(["fade-in", "fade-out", "slide-up"]);
 
 export class SceneCompileError extends Error {
-  constructor(message) { super(message); this.status = 400; this.code = "invalid_scene"; }
+  constructor(message) { super(message); this.status = 400; this.code = "invalid_template"; }
 }
 
 const finite = (value, name) => {
