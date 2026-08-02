@@ -2,6 +2,7 @@ import http from "node:http";
 import path from "node:path";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { importTemplate, normalizePayload, payloadHash, readJson, RenderError, renderVideo } from "./render.mjs";
+import { buildRenderManifestRecord, renderResponseMetadata } from "./model/render-record.mjs";
 
 const port = Number(process.env.RENDERER_PORT || 3100);
 const outputDir = path.resolve(process.env.RENDER_OUTPUT_DIR || "./data/renders");
@@ -15,6 +16,7 @@ await mkdir(outputDir, { recursive: true });
 const json = (res, status, body) => { res.writeHead(status, { "content-type": "application/json; charset=utf-8" }); res.end(JSON.stringify(body)); };
 async function body(req) { const chunks=[]; let size=0; for await (const chunk of req) { size += chunk.length; if(size>maxBody) throw new RenderError("request body too large",413,"body_too_large"); chunks.push(chunk); } try{return JSON.parse(Buffer.concat(chunks).toString("utf8"));}catch{throw new RenderError("invalid JSON",400,"invalid_json");} }
 const safeKey = key => typeof key === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]{7,127}$/.test(key);
+const sha256File = async file => (await import("node:crypto")).createHash("sha256").update(await readFile(file)).digest("hex");
 async function saveManifest(manifest) { const tmp=`${manifestFile}.tmp`; await writeFile(tmp, JSON.stringify(manifest,null,2)); await rename(tmp,manifestFile); }
 function recordCompletion(key, record) {
   manifestWrites = manifestWrites.then(async () => { const current=await readJson(manifestFile,{}); current[key]=record; await saveManifest(current); });
@@ -26,11 +28,19 @@ async function createRender(req, res) {
   const payload=await normalizePayload(await body(req)); const hash=payloadHash(payload); const filename=`${key}.mp4`; const output=path.join(outputDir,filename);
   const manifest=await readJson(manifestFile,{}); const existing=manifest[key];
   if(existing && existing.hash!==hash) throw new RenderError("idempotency key was already used with a different payload",409,"idempotency_conflict");
-  if(existing) { try { await stat(output); return json(res,200,{status:"completed",cached:true,idempotencyKey:key,sha256:hash,url:`${publicBase}/${filename}`}); } catch {} }
+  if(existing) { try {
+    await stat(output);
+    return json(res,200,{status:"completed",cached:true,idempotencyKey:key,sha256:hash,payloadSha256:existing.payloadSha256 ?? existing.hash,artifactSha256:existing.artifactSha256 ?? null,metadata:existing.metadata ?? renderResponseMetadata(payload),url:`${publicBase}/${filename}`});
+  } catch {} }
   let running=active.get(key);
   if(running && running.hash!==hash) throw new RenderError("idempotency key is rendering a different payload",409,"idempotency_conflict");
-  if(!running) { const promise=(async()=>{ await renderVideo(payload,output); await recordCompletion(key,{hash,filename,completedAt:new Date().toISOString()}); })().finally(()=>active.delete(key)); running={hash,promise}; active.set(key,running); }
-  await running.promise; return json(res,201,{status:"completed",cached:false,idempotencyKey:key,sha256:hash,url:`${publicBase}/${filename}`});
+  if(!running) { const promise=(async()=>{
+    await renderVideo(payload,output);
+    await recordCompletion(key,buildRenderManifestRecord({ payload, payloadSha256: hash, artifactSha256: await sha256File(output), filename, completedAt: new Date().toISOString() }));
+  })().finally(()=>active.delete(key)); running={hash,promise}; active.set(key,running); }
+  await running.promise;
+  const completed=await readJson(manifestFile,{}); const record=completed[key];
+  return json(res,201,{status:"completed",cached:false,idempotencyKey:key,sha256:hash,payloadSha256:hash,artifactSha256:record?.artifactSha256 ?? null,metadata:record?.metadata ?? renderResponseMetadata(payload),url:`${publicBase}/${filename}`});
 }
 async function createTemplate(req, res) {
   const token = process.env.RENDER_TEMPLATE_ADMIN_TOKEN;

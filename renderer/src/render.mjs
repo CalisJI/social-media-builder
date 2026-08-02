@@ -162,6 +162,8 @@ export async function normalizePayload(input) {
   const strategy = await resolveStrategy(input.strategy_id ?? defaultStrategyId, { content: entry, capabilities: template.capabilities ?? [] });
   return {
     template: template.id, strategy: strategy.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
+    experimentId: optionalIdentifier(input.experiment_id, "experiment_id"),
+    variantId: optionalIdentifier(input.variant_id, "variant_id"),
     part: partLabels[part.toLowerCase()] || part, meaning: clean(entry.meaning_vi, "meaning_vi", template.constraints.meaning_vi),
     exampleEn: clean(entry.example_en, "example_en", template.constraints.example_en, { required: false, fallback: "Ví dụ đang cập nhật" }),
     exampleVi: clean(entry.example_vi, "example_vi", template.constraints.example_vi, { required: false, fallback: "" }),
@@ -169,6 +171,15 @@ export async function normalizePayload(input) {
     pronunciationAudioUrl: entry.pronunciation_audio_url ?? input.pronunciation_audio_url ?? null,
     backgroundMusicUrl: entry.background_music_url ?? input.background_music_url ?? null,
   };
+}
+
+function optionalIdentifier(value, name) {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string") throw new RenderError(`${name} must be a string`, 400, "invalid_payload");
+  const result = value.trim();
+  if (!result) return null;
+  if (result.length > 128) throw new RenderError(`${name} must be at most 128 characters`, 400, "invalid_payload");
+  return result;
 }
 
 export function payloadHash(payload) { return createHash("sha256").update(JSON.stringify(payload)).digest("hex"); }

@@ -1,12 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { normalizePayload, payloadHash, prepareTextLayout, RenderError, renderVideo, resolveTemplate, validateStrategy, wrapText } from "../src/render.mjs";
 import { resolveAdaptiveText } from "../src/layout/adaptive-text.mjs";
+import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplate, validateStrategy, wrapText } from "../src/render.mjs";
+import { buildRenderManifestRecord, renderResponseMetadata } from "../src/model/render-record.mjs";
 import { ConstraintError, resolveConstraints } from "../src/validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
 const exec = promisify(execFile);
@@ -23,6 +26,67 @@ test("defaults legacy requests to the classic definition strategy",async()=>{
 test("resolves an explicit known strategy",async()=>{
   const payload = await normalizePayload({ ...sample, presentation: { strategy_id: "classic-definition-v1" } });
   assert.equal(payload.strategy,"classic-definition-v1");
+});
+test("normalizes experiment and variant identifiers from presentation metadata",async()=>{
+  const payload = await normalizePayload({ ...sample, presentation: {
+    template_id: "vocabulary-dark-reference-v1", strategy_id: "classic-definition-v1",
+    experiment_id: "hook-test-2026", variant_id: "dark-control"
+  }});
+  assert.deepEqual(renderResponseMetadata(payload), {
+    template_id: "vocabulary-dark-reference-v1", strategy_id: "classic-definition-v1",
+    experiment_id: "hook-test-2026", variant_id: "dark-control"
+  });
+});
+test("legacy jobs receive null experiment metadata and variants affect the payload hash",async()=>{
+  const legacy = await normalizePayload(sample);
+  assert.deepEqual(renderResponseMetadata(legacy), {
+    template_id: "vocabulary-pastel-v1", strategy_id: "classic-definition-v1",
+    experiment_id: null, variant_id: null
+  });
+  const control = await normalizePayload({ ...sample, presentation: { variant_id: "control" } });
+  const treatment = await normalizePayload({ ...sample, presentation: { variant_id: "treatment" } });
+  assert.notEqual(payloadHash(control), payloadHash(treatment));
+});
+test("manifest records retain payload and artifact hashes with render metadata",async()=>{
+  const payload = await normalizePayload({ ...sample, presentation: { experiment_id: "copy-test", variant_id: "a" } });
+  assert.deepEqual(buildRenderManifestRecord({ payload, payloadSha256: "payload-hash", artifactSha256: "artifact-hash", filename: "render.mp4", completedAt: "2026-08-02T00:00:00.000Z" }), {
+    hash: "payload-hash", payloadSha256: "payload-hash", artifactSha256: "artifact-hash", filename: "render.mp4", completedAt: "2026-08-02T00:00:00.000Z",
+    metadata: { template_id: "vocabulary-pastel-v1", strategy_id: "classic-definition-v1", experiment_id: "copy-test", variant_id: "a" }
+  });
+});
+test("cached render response preserves persisted metadata and hashes",async()=>{
+  const dir = await mkdtemp(path.join(os.tmpdir(), "renderer-cache-metadata-"));
+  const port = await new Promise((resolve, reject) => {
+    const listener = net.createServer(); listener.once("error", reject); listener.listen(0, "127.0.0.1", () => {
+      const value = listener.address().port; listener.close(error => error ? reject(error) : resolve(value));
+    });
+  });
+  const key = "metadata-cache-key";
+  const payload = await normalizePayload({ ...sample, presentation: { experiment_id: "cta-test", variant_id: "b" } });
+  const hash = payloadHash(payload);
+  await writeFile(path.join(dir, `${key}.mp4`), "cached artifact");
+  await writeFile(path.join(dir, "manifest.json"), JSON.stringify({ [key]: buildRenderManifestRecord({ payload, payloadSha256: hash, artifactSha256: "artifact-hash", filename: `${key}.mp4`, completedAt: "2026-08-02T00:00:00.000Z" }) }));
+  const server = spawn(process.execPath, ["src/server.mjs"], { cwd: path.resolve(import.meta.dirname, ".."), env: { ...process.env, RENDERER_PORT: String(port), RENDER_OUTPUT_DIR: dir } });
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("renderer did not start")), 5000);
+      server.stdout.on("data", data => { if (data.toString().includes("renderer listening")) { clearTimeout(timer); resolve(); } });
+      server.once("error", error => { clearTimeout(timer); reject(error); });
+      server.once("exit", code => { clearTimeout(timer); reject(new Error(`renderer exited early: ${code}`)); });
+    });
+    const response = await fetch(`http://127.0.0.1:${port}/v1/renders`, { method: "POST", headers: { "content-type": "application/json", "idempotency-key": key }, body: JSON.stringify({ ...sample, presentation: { experiment_id: "cta-test", variant_id: "b" } }) });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), {
+      status: "completed", cached: true, idempotencyKey: key, sha256: hash, payloadSha256: hash, artifactSha256: "artifact-hash",
+      metadata: { template_id: "vocabulary-pastel-v1", strategy_id: "classic-definition-v1", experiment_id: "cta-test", variant_id: "b" }, url: `http://localhost:${port}/files/${key}.mp4`
+    });
+    const conflict = await fetch(`http://127.0.0.1:${port}/v1/renders`, { method: "POST", headers: { "content-type": "application/json", "idempotency-key": key }, body: JSON.stringify({ ...sample, presentation: { experiment_id: "cta-test", variant_id: "c" } }) });
+    assert.equal(conflict.status, 409);
+    assert.equal((await conflict.json()).error, "idempotency_conflict");
+  } finally {
+    server.kill(); await new Promise(resolve => server.exitCode !== null ? resolve() : server.once("exit", resolve));
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 test("rejects an unknown strategy",async()=>{
   await assert.rejects(normalizePayload({ ...sample, strategy_id: "missing-v1" }), error => error.status === 400 && error.code === "unknown_strategy");
