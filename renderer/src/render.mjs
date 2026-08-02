@@ -165,7 +165,9 @@ export async function normalizePayload(input) {
   const ctaTemplate = template.copy?.cta || defaultCopy.cta;
   const strategy = await resolveStrategy(input.strategy_id ?? defaultStrategyId, { content: entry, capabilities: template.capabilities ?? [] });
   validateTemplateStrategyCompatibility(template, strategy);
+  const requiredContent = Object.fromEntries(strategy.requires.map(field => [field, clean(entry[field], field, template.constraints[field])]));
   return {
+    ...requiredContent,
     template: template.id, strategy: strategy.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
     experimentId: optionalIdentifier(input.experiment_id, "experiment_id"),
     variantId: optionalIdentifier(input.variant_id, "variant_id"),

@@ -1,6 +1,7 @@
 const constrainedFields = Object.freeze([
-  "brand_handle", "word", "ipa", "part_of_speech", "meaning_vi", "example_en", "example_vi", "cta",
+  "brand_handle", "word", "ipa", "part_of_speech", "meaning_vi", "common_mistake", "example_en", "example_vi", "cta",
 ]);
+const requiredConstraintFields = Object.freeze(constrainedFields.filter(field => field !== "common_mistake"));
 
 export class ConstraintError extends Error {}
 
@@ -22,7 +23,7 @@ export function resolveConstraints(value) {
     if (Object.keys(constraint).some((key) => key !== "maxLength")) throw invalid(field, "only maxLength is supported");
     resolved[field] = Object.freeze({ maxLength: constraint.maxLength });
   }
-  for (const field of constrainedFields) {
+  for (const field of requiredConstraintFields) {
     if (!resolved[field]) throw invalid(field, "a declaration is required");
   }
   return Object.freeze(resolved);
