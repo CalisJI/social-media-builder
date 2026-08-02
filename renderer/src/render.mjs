@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { access, cp, mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { normalizeRenderJob } from "./model/normalize-render-job.mjs";
 
 const rendererRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const templatesRoot = path.resolve(process.env.RENDER_TEMPLATES_DIR || path.join(rendererRoot, "../templates"));
@@ -132,6 +133,7 @@ export async function importTemplate({ id, baseTemplateId = "vocabulary-dark-ref
 }
 
 export async function normalizePayload(input) {
+  input = normalizeRenderJob(input);
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new RenderError("JSON object required", 400, "invalid_payload");
   const entry = Array.isArray(input.entries) ? input.entries[0] : input.entry ?? input;
   if (!entry || (Array.isArray(input.entries) && input.entries.length !== 1)) throw new RenderError("exactly one vocabulary entry is required", 400, "invalid_payload");
