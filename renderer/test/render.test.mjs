@@ -9,6 +9,11 @@ import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplat
 const exec = promisify(execFile);
 const sample={template_id:"vocabulary-pastel-v1",duration_seconds:10,brand_handle:"@daily",entries:[{word:"resilient",ipa:"/test/",part_of_speech:"adjective",meaning_vi:"kiên cường",example_en:"Stay resilient.",example_vi:"Hãy kiên cường."}]};
 test("normalizes CAL-30 payload and derives CTA",async()=>{const p=await normalizePayload(sample);assert.equal(p.duration,10);assert.match(p.cta,/@daily/);assert.equal(payloadHash(p),payloadHash(await normalizePayload(sample)));});
+test("normalizes nested content and presentation payloads like legacy payloads",async()=>{
+  const { entries, template_id, duration_seconds, ...request } = sample;
+  const v2 = { ...request, content: entries[0], presentation: { template_id, duration_seconds } };
+  assert.deepEqual(await normalizePayload(v2), await normalizePayload(sample));
+});
 test("applies nullable fallbacks",async()=>{const p=await normalizePayload({...sample,entries:[{...sample.entries[0],ipa:null,part_of_speech:null,example_en:null,example_vi:null}]});assert.equal(p.ipa,"Phát âm đang cập nhật");assert.equal(p.part,"từ vựng");assert.equal(p.exampleVi,"");});
 test("rejects batches",async()=>assert.rejects(normalizePayload({...sample,entries:[...sample.entries,...sample.entries]}),RenderError));
 test("rejects out-of-range duration",async()=>assert.rejects(normalizePayload({...sample,duration_seconds:30}),/duration_seconds/));
@@ -29,7 +34,7 @@ test("uses the last imported template when the workflow omits a template id",asy
   try {
     process.env.RENDER_OUTPUT_DIR=dir;
     await writeFile(path.join(dir,"active-template.json"),JSON.stringify({id:"vocabulary-dark-reference-v1"}));
-    const {template_id,...withoutTemplate}=sample;
+    const withoutTemplate = { ...sample }; delete withoutTemplate.template_id;
     assert.equal((await normalizePayload(withoutTemplate)).template,"vocabulary-dark-reference-v1");
   } finally {
     if (previous === undefined) delete process.env.RENDER_OUTPUT_DIR; else process.env.RENDER_OUTPUT_DIR=previous;
