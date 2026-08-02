@@ -1,0 +1,92 @@
+[
+  {
+    "id": "renderer-foundation",
+    "name": "Renderer Foundation",
+    "order": 6,
+    "taskIds": [
+      "TIKTOK-000",
+      "TIKTOK-010",
+      "TIKTOK-020",
+      "TIKTOK-030",
+      "TIKTOK-040",
+      "TIKTOK-050",
+      "TIKTOK-060"
+    ]
+  },
+  {
+    "id": "scene-engine",
+    "name": "Scene Engine",
+    "order": 8,
+    "taskIds": [
+      "TIKTOK-070",
+      "TIKTOK-080"
+    ]
+  },
+  {
+    "id": "retention-formats",
+    "name": "Retention Formats",
+    "order": 26,
+    "taskIds": [
+      "TIKTOK-090",
+      "TIKTOK-100",
+      "RET-001",
+      "RET-002",
+      "RET-003",
+      "RET-004"
+    ]
+  },
+  {
+    "id": "template-lifecycle",
+    "name": "Template Lifecycle",
+    "order": 11,
+    "taskIds": [
+      "TIKTOK-110"
+    ]
+  },
+  {
+    "id": "experiments-and-qa",
+    "name": "Experiments And Qa",
+    "order": 33,
+    "taskIds": [
+      "TIKTOK-120",
+      "TIKTOK-130",
+      "QA-001",
+      "QA-002",
+      "QA-003"
+    ]
+  },
+  {
+    "id": "presentation-foundation",
+    "name": "Presentation Foundation",
+    "order": 19,
+    "taskIds": [
+      "UI-001",
+      "UI-002",
+      "UI-003",
+      "UI-010",
+      "UI-011",
+      "UI-012"
+    ]
+  },
+  {
+    "id": "adaptive-layout",
+    "name": "Adaptive Layout",
+    "order": 22,
+    "taskIds": [
+      "UI-020",
+      "UI-021",
+      "UI-022"
+    ]
+  },
+  {
+    "id": "admin-ui",
+    "name": "Admin Ui",
+    "order": 30,
+    "taskIds": [
+      "ADMIN-001",
+      "ADMIN-002",
+      "ADMIN-003",
+      "ADMIN-004"
+    ]
+  }
+]

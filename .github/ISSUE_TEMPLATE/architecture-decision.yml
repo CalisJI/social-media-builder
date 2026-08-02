@@ -1,0 +1,13 @@
+name: Architecture decision
+description: Record a reviewable architecture decision.
+title: "[ADR]: "
+body:
+  - type: textarea
+    attributes: { label: Context and decision }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Alternatives and consequences }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Compatibility, evidence, and reviewer }
+    validations: { required: true }
