@@ -17,10 +17,12 @@ jobs:
       - run: npm run governance:validate
       - run: npm run governance:generate
       - run: git diff --exit-code -- docs/governance/ROADMAP.md docs/governance/PROJECT_STATUS.md docs/governance/CAPABILITY_MATRIX.md
-      - if: github.event_name == 'pull_request'
+      - name: Check PR evidence
+        if: github.event_name == 'pull_request'
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: node scripts/governance/check-pr-evidence.mjs
       - run: npm run lint
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: npm test
       - run: npm run build
