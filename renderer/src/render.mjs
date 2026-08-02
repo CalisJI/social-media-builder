@@ -4,6 +4,7 @@ import { access, cp, mkdir, readFile, readdir, rename, rm, writeFile } from "nod
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeRenderJob } from "./model/normalize-render-job.mjs";
+import { defaultStrategyId, resolveStrategy } from "./strategy/resolve-strategy.mjs";
 
 const rendererRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const templatesRoot = path.resolve(process.env.RENDER_TEMPLATES_DIR || path.join(rendererRoot, "../templates"));
@@ -147,8 +148,9 @@ export async function normalizePayload(input) {
   const ipa = clean(entry.ipa, "ipa", 48, { required: false, fallback: "Phát âm đang cập nhật" });
   const part = clean(entry.part_of_speech, "part_of_speech", 24, { required: false, fallback: "từ vựng" });
   const ctaTemplate = template.copy?.cta || defaultCopy.cta;
+  const strategy = await resolveStrategy(input.strategy_id ?? defaultStrategyId, { content: entry, capabilities: template.capabilities ?? [] });
   return {
-    template: template.id, duration, word: clean(entry.word, "word", 24), ipa,
+    template: template.id, strategy: strategy.id, duration, word: clean(entry.word, "word", 24), ipa,
     part: partLabels[part.toLowerCase()] || part, meaning: clean(entry.meaning_vi, "meaning_vi", 90),
     exampleEn: clean(entry.example_en, "example_en", 90, { required: false, fallback: "Ví dụ đang cập nhật" }),
     exampleVi: clean(entry.example_vi, "example_vi", 100, { required: false, fallback: "" }),

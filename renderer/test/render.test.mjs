@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplate, wrapText } from "../src/render.mjs";
+import { validateStrategy } from "../src/strategy/resolve-strategy.mjs";
 const exec = promisify(execFile);
 const sample={template_id:"vocabulary-pastel-v1",duration_seconds:10,brand_handle:"@daily",entries:[{word:"resilient",ipa:"/test/",part_of_speech:"adjective",meaning_vi:"kiên cường",example_en:"Stay resilient.",example_vi:"Hãy kiên cường."}]};
 test("normalizes CAL-30 payload and derives CTA",async()=>{const p=await normalizePayload(sample);assert.equal(p.duration,10);assert.match(p.cta,/@daily/);assert.equal(payloadHash(p),payloadHash(await normalizePayload(sample)));});
@@ -13,6 +14,23 @@ test("normalizes nested content and presentation payloads like legacy payloads",
   const { entries, template_id, duration_seconds, ...request } = sample;
   const v2 = { ...request, content: entries[0], presentation: { template_id, duration_seconds } };
   assert.deepEqual(await normalizePayload(v2), await normalizePayload(sample));
+});
+test("defaults legacy requests to the classic definition strategy",async()=>{
+  assert.equal((await normalizePayload(sample)).strategy,"classic-definition-v1");
+});
+test("resolves an explicit known strategy",async()=>{
+  const payload = await normalizePayload({ ...sample, presentation: { strategy_id: "classic-definition-v1" } });
+  assert.equal(payload.strategy,"classic-definition-v1");
+});
+test("rejects an unknown strategy",async()=>{
+  await assert.rejects(normalizePayload({ ...sample, strategy_id: "missing-v1" }), error => error.status === 400 && error.code === "unknown_strategy");
+});
+test("validates strategy-required content",async()=>{
+  const request = { ...sample, entries: [{ ...sample.entries[0], word: "" }] };
+  await assert.rejects(normalizePayload(request), /strategy classic-definition-v1 requires word/);
+});
+test("validates strategy capability requirements",()=>{
+  assert.throws(() => validateStrategy({ id: "quiz-v1", requires: [], capabilitiesRequired: ["quizReveal"] }, { capabilities: [] }), /requires capability quizReveal/);
 });
 test("applies nullable fallbacks",async()=>{const p=await normalizePayload({...sample,entries:[{...sample.entries[0],ipa:null,part_of_speech:null,example_en:null,example_vi:null}]});assert.equal(p.ipa,"Phát âm đang cập nhật");assert.equal(p.part,"từ vựng");assert.equal(p.exampleVi,"");});
 test("rejects batches",async()=>assert.rejects(normalizePayload({...sample,entries:[...sample.entries,...sample.entries]}),RenderError));
