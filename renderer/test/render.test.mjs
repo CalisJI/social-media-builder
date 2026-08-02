@@ -11,6 +11,7 @@ import { resolveAdaptiveText } from "../src/layout/adaptive-text.mjs";
 import { buildRenderManifestRecord, renderResponseMetadata } from "../src/model/render-record.mjs";
 import { ConstraintError, resolveConstraints } from "../src/validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
+import { validateTemplateStrategyCompatibility } from "../src/template/validate-capabilities.mjs";
 const exec = promisify(execFile);
 const sample={template_id:"vocabulary-pastel-v1",duration_seconds:10,brand_handle:"@daily",entries:[{word:"resilient",ipa:"/test/",part_of_speech:"adjective",meaning_vi:"kiên cường",example_en:"Stay resilient.",example_vi:"Hãy kiên cường."}]};
 test("normalizes CAL-30 payload and derives CTA",async()=>{const p=await normalizePayload(sample);assert.equal(p.duration,10);assert.match(p.cta,/@daily/);assert.equal(payloadHash(p),payloadHash(await normalizePayload(sample)));});
@@ -25,6 +26,24 @@ test("defaults legacy requests to the classic definition strategy",async()=>{
 test("resolves an explicit known strategy",async()=>{
   const payload = await normalizePayload({ ...sample, presentation: { strategy_id: "classic-definition-v1" } });
   assert.equal(payload.strategy,"classic-definition-v1");
+});
+test("accepts a strategy declared compatible by a template",()=>{
+  assert.doesNotThrow(() => validateTemplateStrategyCompatibility(
+    { id: "quiz-template-v1", capabilities: ["quizReveal"], compatibleStrategies: ["quiz-v1"] },
+    { id: "quiz-v1", capabilitiesRequired: ["quizReveal"] },
+  ));
+});
+test("rejects an incompatible template and strategy before rendering",()=>{
+  assert.throws(() => validateTemplateStrategyCompatibility(
+    { id: "definition-template-v1", capabilities: [], compatibleStrategies: [] },
+    { id: "classic-definition-v1", capabilitiesRequired: [] },
+  ), error => error.status === 400 && error.code === "incompatible_strategy");
+});
+test("falls back to classic compatibility for legacy manifests",()=>{
+  assert.doesNotThrow(() => validateTemplateStrategyCompatibility(
+    { id: "legacy-template-v1" },
+    { id: "classic-definition-v1", capabilitiesRequired: [] },
+  ));
 });
 test("normalizes experiment and variant identifiers from presentation metadata",async()=>{
   const payload = await normalizePayload({ ...sample, presentation: {
