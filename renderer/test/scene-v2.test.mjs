@@ -9,6 +9,7 @@ import { compileScenes } from "../src/compiler/compile-scenes.mjs";
 import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
 import { sceneV2 } from "../src/engines/scene-v2.mjs";
 import { normalizePayload, renderVideo } from "../src/render.mjs";
+import { validatePresentationSchema } from "../src/template/validate-presentation-schema.mjs";
 
 const exec = promisify(execFile);
 
@@ -34,6 +35,17 @@ test("scene-v2 rejects unsafe image paths and unknown declarations", async () =>
   await assert.rejects(compileScenes({ template, payload, font, saveText, scene: [{ type: "image", asset: "../secret.png", x: 0, y: 0, width: 1, height: 1 }] }), /unsafe image asset path/);
   await assert.rejects(compileScenes({ template, payload, font, saveText, scene: [{ type: "script", source: "process.exit()" }] }), /unknown scene primitive/);
   await assert.rejects(compileScenes({ template, payload, font, saveText, scene: [{ type: "text", text: "x", x: 0, y: 0, fontSize: 1, animations: [{ type: "eval" }] }] }), /unknown animation/);
+});
+
+test("presentation schema versions scene templates and rejects invalid declarations", () => {
+  const scene = [{ id: "title", type: "text", text: "x", x: 0, y: 0, fontSize: 1 }];
+  assert.equal(validatePresentationSchema({ engine: "scene-v2", templateSchemaVersion: 2, capabilities: [], scene }, "/templates/test"), 2);
+  assert.equal(validatePresentationSchema({}, "/templates/test"), 1);
+  assert.throws(() => validatePresentationSchema({ engine: "scene-v2", capabilities: [], scene }, "/templates/test"), /require templateSchemaVersion/);
+  assert.throws(() => validatePresentationSchema({ engine: "scene-v2", templateSchemaVersion: 2, capabilities: [], scene: [...scene, { ...scene[0] }] }, "/templates/test"), /duplicate.*component id/);
+  assert.throws(() => validatePresentationSchema({ engine: "scene-v2", templateSchemaVersion: 2, capabilities: [], scene: [{ type: "script" }] }, "/templates/test"), /unknown scene primitive/);
+  assert.throws(() => validatePresentationSchema({ engine: "scene-v2", templateSchemaVersion: 2, capabilities: ["admin"], scene }, "/templates/test"), /supported capabilities/);
+  assert.throws(() => validatePresentationSchema({ engine: "scene-v2", templateSchemaVersion: 2, capabilities: [], scene: [{ type: "image", asset: "../secret.png" }] }, "/templates/test"), /unsafe image asset path/);
 });
 
 test("scene-v2 is registered without changing the legacy default", () => {
