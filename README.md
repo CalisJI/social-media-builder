@@ -127,7 +127,7 @@ Gửi lại cùng key và nội dung sẽ trả file đã cache. Dùng cùng key
 
 ### Import template
 
-Mở `/template-import`, đặt version ID theo mẫu `ten-template-v2`, tải hoặc chỉnh theme JSON rồi chọn **Validate & apply template**. API cần `RENDER_TEMPLATE_ADMIN_TOKEN`; renderer chỉ nhận theme JSON đã được duyệt, không nhận trực tiếp ảnh tham chiếu.
+Mở `/template-import`, đặt version ID theo mẫu `ten-template-v2`, rồi tải hoặc chỉnh theme JSON và chọn **Import template**. Import không tự kích hoạt: cần lần lượt **Validate**, **Preview fixtures**, rồi **Activate**. API cần `RENDER_TEMPLATE_ADMIN_TOKEN`; renderer chỉ nhận theme JSON đã được duyệt, không nhận trực tiếp ảnh tham chiếu.
 
 ### Thiết lập n8n
 

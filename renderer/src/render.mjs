@@ -142,8 +142,6 @@ export async function importTemplate({ id, baseTemplateId = "vocabulary-dark-ref
     await writeFile(path.join(temp, "theme.json"), `${JSON.stringify(theme, null, 2)}\n`, "utf8");
     await rename(temp, target); registryPromise = undefined;
     await resolveTemplate(id);
-    await mkdir(path.dirname(activeTemplatePath()), { recursive: true });
-    await writeFile(activeTemplatePath(), `${JSON.stringify({ id })}\n`, "utf8");
     return { id, baseTemplateId };
   } catch (error) { await rm(temp, { recursive: true, force: true }); await rm(target, { recursive: true, force: true }); registryPromise = undefined; throw error; }
 }

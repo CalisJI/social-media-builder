@@ -1,8 +1,9 @@
 import http from "node:http";
 import path from "node:path";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
-import { importTemplate, normalizePayload, payloadHash, readJson, RenderError, renderVideo } from "./render.mjs";
+import { getTemplateRegistry, importTemplate, normalizePayload, payloadHash, readJson, RenderError, renderVideo, resolveTemplate } from "./render.mjs";
 import { buildRenderManifestRecord, renderResponseMetadata } from "./model/render-record.mjs";
+import { createTemplateLifecycle } from "./template/lifecycle.mjs";
 
 const port = Number(process.env.RENDERER_PORT || 3100);
 const outputDir = path.resolve(process.env.RENDER_OUTPUT_DIR || "./data/renders");
@@ -12,6 +13,7 @@ const publicBase = (process.env.RENDER_PUBLIC_BASE_URL || `http://localhost:${po
 const active = new Map();
 let manifestWrites = Promise.resolve();
 await mkdir(outputDir, { recursive: true });
+const lifecycle = createTemplateLifecycle({ outputDir, getRegistry: getTemplateRegistry, resolveTemplate, normalizePayload, renderVideo });
 
 const json = (res, status, body) => { res.writeHead(status, { "content-type": "application/json; charset=utf-8" }); res.end(JSON.stringify(body)); };
 async function body(req) { const chunks=[]; let size=0; for await (const chunk of req) { size += chunk.length; if(size>maxBody) throw new RenderError("request body too large",413,"body_too_large"); chunks.push(chunk); } try{return JSON.parse(Buffer.concat(chunks).toString("utf8"));}catch{throw new RenderError("invalid JSON",400,"invalid_json");} }
@@ -45,7 +47,19 @@ async function createRender(req, res) {
 async function createTemplate(req, res) {
   const token = process.env.RENDER_TEMPLATE_ADMIN_TOKEN;
   if (!token || req.headers["x-template-admin-token"] !== token) throw new RenderError("template import is not authorized", 401, "unauthorized");
-  return json(res, 201, await importTemplate(await body(req)));
+  const imported = await importTemplate(await body(req));
+  return json(res, 201, { ...imported, lifecycle: await lifecycle.markImported(imported.id) });
+}
+async function templateLifecycle(req, res, action) {
+  const token = process.env.RENDER_TEMPLATE_ADMIN_TOKEN;
+  if (!token || req.headers["x-template-admin-token"] !== token) throw new RenderError("template administration is not authorized", 401, "unauthorized");
+  if (action === "list") return json(res, 200, { templates: await lifecycle.list() });
+  const { id } = await body(req);
+  if (typeof id !== "string") throw new RenderError("template id is required", 400, "invalid_template");
+  if (action === "validate") return json(res, 200, await lifecycle.validate(id));
+  if (action === "preview") return json(res, 200, await lifecycle.preview(id));
+  if (action === "activate") return json(res, 200, await lifecycle.activate(id));
+  throw new RenderError("not found", 404, "not_found");
 }
 
 const server=http.createServer(async(req,res)=>{ try {
@@ -53,6 +67,8 @@ const server=http.createServer(async(req,res)=>{ try {
   if(req.method==="GET" && url.pathname==="/healthz") return json(res,200,{status:"ok",activeRenders:active.size});
   if(req.method==="POST" && url.pathname==="/v1/renders") return await createRender(req,res);
   if(req.method==="POST" && url.pathname==="/v1/templates/import") return await createTemplate(req,res);
+  if(req.method==="GET" && url.pathname==="/v1/templates") return await templateLifecycle(req,res,"list");
+  if(req.method==="POST" && /^\/v1\/templates\/(validate|preview|activate)$/.test(url.pathname)) return await templateLifecycle(req,res,url.pathname.split("/").pop());
   if(req.method==="GET" && url.pathname.startsWith("/files/")) { const name=decodeURIComponent(url.pathname.slice(7)); if(!/^[A-Za-z0-9][A-Za-z0-9._-]*\.mp4$/.test(name)) throw new RenderError("not found",404,"not_found"); const data=await readFile(path.join(outputDir,name)); res.writeHead(200,{"content-type":"video/mp4","content-length":data.length,"cache-control":"public, max-age=31536000, immutable"}); return res.end(data); }
   throw new RenderError("not found",404,"not_found");
 } catch(error) { const status=error.status||500; console.error(JSON.stringify({level:"error",code:error.code||"internal_error",message:error.message,path:req.url})); if(!res.headersSent) json(res,status,{error:error.code||"internal_error",message:status<500?error.message:"render failed"}); else res.end(); } });
