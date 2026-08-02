@@ -7,6 +7,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplate, wrapText } from "../src/render.mjs";
 import { ConstraintError, resolveConstraints } from "../src/validation/resolve-constraints.mjs";
+import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
 const exec = promisify(execFile);
 const sample={template_id:"vocabulary-pastel-v1",duration_seconds:10,brand_handle:"@daily",entries:[{word:"resilient",ipa:"/test/",part_of_speech:"adjective",meaning_vi:"kiên cường",example_en:"Stay resilient.",example_vi:"Hãy kiên cường."}]};
 test("normalizes CAL-30 payload and derives CTA",async()=>{const p=await normalizePayload(sample);assert.equal(p.duration,10);assert.match(p.cta,/@daily/);assert.equal(payloadHash(p),payloadHash(await normalizePayload(sample)));});
@@ -32,6 +33,8 @@ test("rejects malformed manifest constraints with the field and constraint",()=>
   assert.throws(() => resolveConstraints({ meaning_vi: { maxLength: 0 } }), error => error instanceof ConstraintError && /meaning_vi.*constraints\.maxLength/.test(error.message));
 });
 test("registry swaps between two fixture packages",async()=>{assert.equal((await resolveTemplate("vocabulary-pastel-v1")).palette.accent,"#E85D75");assert.equal((await resolveTemplate("vocabulary-pastel-test-v1")).palette.accent,"#6E67D8");});
+test("template engine defaults old manifests to legacy-v1",()=>assert.equal(resolveTemplateEngine({}).id,"legacy-v1"));
+test("template engine rejects unknown engines structurally",()=>assert.throws(()=>resolveTemplateEngine({engine:"unknown-v1"}),error=>error.status===400&&error.code==="invalid_template"));
 test("registry applies theme.json overrides",async()=>{const template=await resolveTemplate("vocabulary-pastel-test-v1");assert.equal(template.copy.hook,"THEME OVERRIDE");assert.equal(template.copy.meaningLabel,"MEANING");assert.equal(template.timeline.hook[0],0.1);});
 test("registers the dark reference layout",async()=>{const template=await resolveTemplate("vocabulary-dark-reference-v1");assert.equal(template.layout.variant,"dark-slide");assert.equal(template.palette.accent,"#FF595E");});
 test("rejects unknown template IDs",async()=>assert.rejects(resolveTemplate("missing-v1"),error=>error.status===400&&error.code==="unknown_template"));
