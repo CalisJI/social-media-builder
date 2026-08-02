@@ -1,0 +1,54 @@
+{
+  "id": "vocabulary-quiz-v1",
+  "engine": "scene-v2",
+  "templateSchemaVersion": 2,
+  "capabilities": ["quizReveal"],
+  "compatibleStrategies": ["quiz-reveal-v1"],
+  "assets": {
+    "background": "assets/background.png",
+    "petal": "assets/petal.png"
+  },
+  "palette": {
+    "ink": "#27243A",
+    "secondary": "#625D78",
+    "accent": "#E85D75",
+    "card": "#FFF8EC"
+  },
+  "layout": {
+    "safeZone": [80, 220, 920, 1500]
+  },
+  "constraints": {
+    "brand_handle": { "maxLength": 32 },
+    "word": { "maxLength": 24 },
+    "ipa": { "maxLength": 48 },
+    "part_of_speech": { "maxLength": 24 },
+    "meaning_vi": { "maxLength": 360 },
+    "example_en": { "maxLength": 240 },
+    "example_vi": { "maxLength": 240 },
+    "cta": { "maxLength": 54 }
+  },
+  "copy": {
+    "hook": "BẠN ĐOÁN ĐƯỢC KHÔNG?",
+    "meaningLabel": "ĐÁP ÁN",
+    "exampleLabel": "VÍ DỤ",
+    "cta": "Follow {handle} • 1 từ mỗi ngày"
+  },
+  "timeline": {
+    "hook": [0, 0.5],
+    "word": [0.6, 3.4],
+    "meaning": [4, 0.5],
+    "example": [4, 0.5],
+    "cta": [7.2, 0.65]
+  },
+  "scene": [
+    { "type": "image", "asset": "assets/petal.png", "x": 55, "y": 330, "width": 96, "height": 96 },
+    { "type": "box", "x": 96, "y": 300, "width": 888, "height": 1150, "color": "#FFF8EC", "opacity": 0.96 },
+    { "type": "text", "text": "BẠN ĐOÁN ĐƯỢC KHÔNG?", "x": 260, "y": 230, "fontSize": 36, "weight": "bold", "color": "#27243A", "animations": [{ "type": "fade-in", "start": 0, "duration": 0.5 }] },
+    { "type": "text", "text": "{word}", "x": 140, "y": 515, "fontSize": 88, "weight": "extraBold", "color": "#27243A", "animations": [{ "type": "fade-in", "start": 0.6, "duration": 0.5 }, { "type": "slide-up", "start": 0.6, "duration": 0.5, "distance": 28 }] },
+    { "type": "text", "text": "Suy nghĩ trong 3 giây...", "x": 290, "y": 710, "fontSize": 32, "weight": "medium", "color": "#625D78", "animations": [{ "type": "fade-in", "start": 0.6, "duration": 0.5 }, { "type": "fade-out", "start": 4, "duration": 0.2 }] },
+    { "type": "box", "x": 148, "y": 860, "width": 784, "height": 240, "color": "#E7D9FF", "opacity": 0.8 },
+    { "type": "text", "text": "ĐÁP ÁN", "x": 148, "y": 900, "fontSize": 26, "weight": "bold", "color": "#625D78", "animations": [{ "type": "fade-in", "start": 4, "duration": 0.5 }] },
+    { "type": "text", "text": "{meaning}", "x": 148, "y": 960, "fontSize": 48, "weight": "bold", "color": "#27243A", "lineSpacing": 12, "animations": [{ "type": "fade-in", "start": 4, "duration": 0.5 }, { "type": "slide-up", "start": 4, "duration": 0.5, "distance": 24 }] },
+    { "type": "text", "text": "{cta}", "x": 202, "y": 1355, "fontSize": 30, "weight": "bold", "color": "#27243A", "animations": [{ "type": "fade-in", "start": 7.2, "duration": 0.65 }, { "type": "slide-up", "start": 7.2, "duration": 0.65, "distance": 36 }] }
+  ]
+}
