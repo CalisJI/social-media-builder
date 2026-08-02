@@ -3,10 +3,10 @@
   "schema": "../vocabulary-pastel-v1/schema.json",
   "assets": { "background": "../vocabulary-pastel-v1/assets/background.png", "petal": "../vocabulary-pastel-v1/assets/petal.png" },
   "palette": { "ink": "#27243A", "secondary": "#625D78", "accent": "#6E67D8", "card": "#FFF8EC", "ipa": "#E7D9FF" },
-  "layout": { "safeZone": [80, 220, 920, 1500], "card": [96, 300, 888, 1150] },
+  "layout": { "safeZone": [80, 220, 920, 1500], "card": [96, 300, 888, 1150], "text": { "meaning": { "maxWidth": 760, "maxLines": 3, "fontSize": 44, "minFontSize": 30 }, "en": { "maxWidth": 760, "maxLines": 2, "fontSize": 36, "minFontSize": 26 }, "vi": { "maxWidth": 760, "maxLines": 2, "fontSize": 30, "minFontSize": 22 } } },
   "constraints": {
     "brand_handle": { "maxLength": 32 }, "word": { "maxLength": 5 }, "ipa": { "maxLength": 48 }, "part_of_speech": { "maxLength": 24 },
-    "meaning_vi": { "maxLength": 90 }, "example_en": { "maxLength": 90 }, "example_vi": { "maxLength": 100 }, "cta": { "maxLength": 54 }
+    "meaning_vi": { "maxLength": 360 }, "example_en": { "maxLength": 240 }, "example_vi": { "maxLength": 240 }, "cta": { "maxLength": 54 }
   },
   "timeline": { "hook": [0, 1.17], "word": [0.8, 2.8], "meaning": [2.2, 4.4], "example": [4, 7.47], "cta": [7.2, 9.4] }
 }

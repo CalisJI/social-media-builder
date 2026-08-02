@@ -2,10 +2,10 @@
   "id": "vocabulary-dark-reference-v1",
   "assets": { "background": "assets/background.png", "petal": "assets/petal.png" },
   "palette": { "ink": "#F7F4F5", "secondary": "#B9BCD4", "accent": "#FF595E", "card": "#13131B", "ipa": "#221920" },
-  "layout": { "variant": "dark-slide", "safeZone": [80, 160, 920, 1570] },
+  "layout": { "variant": "dark-slide", "safeZone": [80, 160, 920, 1570], "text": { "meaning": { "maxWidth": 680, "maxLines": 3, "fontSize": 47, "minFontSize": 30 }, "en": { "maxWidth": 680, "maxLines": 2, "fontSize": 43, "minFontSize": 26 }, "vi": { "maxWidth": 680, "maxLines": 2, "fontSize": 34, "minFontSize": 22 } } },
   "constraints": {
     "brand_handle": { "maxLength": 32 }, "word": { "maxLength": 24 }, "ipa": { "maxLength": 48 }, "part_of_speech": { "maxLength": 24 },
-    "meaning_vi": { "maxLength": 90 }, "example_en": { "maxLength": 90 }, "example_vi": { "maxLength": 100 }, "cta": { "maxLength": 54 }
+    "meaning_vi": { "maxLength": 360 }, "example_en": { "maxLength": 240 }, "example_vi": { "maxLength": 240 }, "cta": { "maxLength": 54 }
   },
   "timeline": { "hook": [0, 0.45], "word": [0.45, 0.45], "meaning": [1.4, 0.5], "example": [3.5, 0.5], "cta": [7.2, 0.65] },
   "copy": { "hook": "TỪ MỚI MỖI NGÀY:", "meaningLabel": "NGHĨA TIẾNG VIỆT", "exampleLabel": "VÍ DỤ", "cta": "{handle} • Học từ mới mỗi ngày" }

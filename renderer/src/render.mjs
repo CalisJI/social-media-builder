@@ -7,6 +7,7 @@ import { normalizeRenderJob } from "./model/normalize-render-job.mjs";
 import { ConstraintError, resolveConstraints } from "./validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "./template/resolve-template-engine.mjs";
 import { defaultStrategyId, resolveStrategy } from "./strategy/resolve-strategy.mjs";
+import { TextOverflowError, resolveTextLayout } from "./layout/adaptive-text.mjs";
 
 export { validateStrategy } from "./strategy/resolve-strategy.mjs";
 
@@ -28,8 +29,9 @@ const defaultTimeline = Object.freeze({
 });
 
 export class RenderError extends Error {
-  constructor(message, status = 500, code = "render_failed") { super(message); this.status = status; this.code = code; }
+  constructor(message, status = 500, code = "render_failed", details) { super(message); this.status = status; this.code = code; if (details) this.details = details; }
 }
+const defaultTextLayout = Object.freeze({ meaning: { maxWidth: 760, maxLines: 3, fontSize: 44, minFontSize: 30 }, en: { maxWidth: 760, maxLines: 2, fontSize: 36, minFontSize: 26 }, vi: { maxWidth: 760, maxLines: 2, fontSize: 30, minFontSize: 22 } });
 
 function clean(value, name, constraint, { required = true, fallback = null } = {}) {
   if (value == null || (typeof value === "string" && !value.trim())) {
@@ -177,6 +179,11 @@ export function wrapText(value, columns, maxLines = Infinity) {
   for (const word of words) { const next = line ? `${line} ${word}` : word; if (next.length <= columns || !line) line = next; else { lines.push(line); line = word; } }
   if (line) lines.push(line); if (lines.length > maxLines) throw new RenderError(`text exceeds ${maxLines} lines`, 400, "text_overflow"); return lines.join("\n");
 }
+export function prepareTextLayout(payload, template) {
+  const policy = mergeObject(defaultTextLayout, template.layout?.text);
+  try { return resolveTextLayout({ meaning: payload.meaning, en: payload.exampleEn, ...(payload.exampleVi ? { vi: payload.exampleVi } : {}) }, policy); }
+  catch (error) { if (error instanceof TextOverflowError) throw new RenderError(error.message, error.status, error.code, error.details); throw error; }
+}
 const rise = (start, duration, amount) => `if(lt(t,${start}),${amount},if(lt(t,${start + duration}),${amount}*(1-(t-${start})/${duration}),0))`;
 const fade = (start, duration) => `if(lt(t,${start}),0,if(lt(t,${start + duration}),(t-${start})/${duration},1))`;
 
@@ -191,7 +198,7 @@ async function fonts() {
   return Object.fromEntries(Object.entries(result).map(([key, value]) => [key, escapePath(value)]));
 }
 
-function darkSlideStages({ template, font, files, payload, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) {
+function darkSlideStages({ template, font, files, payload, textLayout, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) {
   const p = template.palette;
   const dt = (file, weight, size, x, y, opts = "") => `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${p.ink}:fontsize=${size}:x='${x}':y='${y}'${opts}`;
   return [
@@ -202,12 +209,12 @@ function darkSlideStages({ template, font, files, payload, hookStart, hookDurati
     dt(files.hook, "extraBold", 68, 84, `470+${rise(hookStart, hookDuration, 30)}`, `:alpha='${fade(hookStart, hookDuration)}'`),
     dt(files.word, "extraBold", 78, 84, `590+${rise(wordStart, wordDuration, 30)}`, `:fontcolor=${p.accent}:alpha='${fade(wordStart, wordDuration)}'`),
     `drawtext=fontfile='${font.bold}':text='•':fontcolor=${p.secondary}:fontsize=58:x=84:y=760:alpha='${fade(meaningStart, meaningDuration)}'`,
-    dt(files.meaning, "bold", 47, 120, `765+${rise(meaningStart, meaningDuration, 24)}`, `:line_spacing=14:fontcolor=${p.secondary}:alpha='${fade(meaningStart, meaningDuration)}'`),
+    dt(files.meaning, "bold", textLayout.meaning.fontSize, 120, `765+${rise(meaningStart, meaningDuration, 24)}`, `:line_spacing=14:fontcolor=${p.secondary}:alpha='${fade(meaningStart, meaningDuration)}'`),
     `drawbox=x=86:y=1070:w=690:h=98:color=${p.card}:t=fill:enable='gte(t,${exampleStart})'`,
     dt(files.ipa, "medium", 34, 108, `1101+${rise(exampleStart, exampleDuration, 20)}`, `:fontcolor=#EF8C87:alpha='${fade(exampleStart, exampleDuration)}'`),
     `drawtext=fontfile='${font.bold}':text='•':fontcolor=${p.secondary}:fontsize=58:x=84:y=1240:alpha='${fade(exampleStart + 0.15, exampleDuration)}'`,
-    dt(files.en, "bold", 43, 120, `1245+${rise(exampleStart + 0.15, exampleDuration, 24)}`, `:line_spacing=12:fontcolor=${p.secondary}:alpha='${fade(exampleStart + 0.15, exampleDuration)}'`),
-    ...(payload.exampleVi ? [dt(files.vi, "medium", 34, 120, `1400+${rise(exampleStart + 0.3, exampleDuration, 20)}`, `:fontcolor=${p.secondary}:line_spacing=9:alpha='${fade(exampleStart + 0.3, exampleDuration)}'`)] : []),
+    dt(files.en, "bold", textLayout.en.fontSize, 120, `1245+${rise(exampleStart + 0.15, exampleDuration, 24)}`, `:line_spacing=12:fontcolor=${p.secondary}:alpha='${fade(exampleStart + 0.15, exampleDuration)}'`),
+    ...(payload.exampleVi ? [dt(files.vi, "medium", textLayout.vi.fontSize, 120, `1400+${rise(exampleStart + 0.3, exampleDuration, 20)}`, `:fontcolor=${p.secondary}:line_spacing=9:alpha='${fade(exampleStart + 0.3, exampleDuration)}'`)] : []),
     dt(files.cta, "bold", 34, "(w-text_w)/2", `1660+${rise(ctaStart, ctaDuration, 36)}`, `:fontcolor=#7F81A7:alpha='${fade(ctaStart, ctaDuration)}'`),
     "format=yuv420p[out]",
   ];
@@ -216,7 +223,8 @@ function darkSlideStages({ template, font, files, payload, hookStart, hookDurati
 export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FFMPEG_PATH || "ffmpeg", timeoutMs = Number(process.env.RENDER_TIMEOUT_MS || 120000) } = {}) {
   const template = await resolveTemplate(payload.template); const font = await fonts(); const work = `${outputFile}.work`;
   await rm(work, { recursive: true, force: true }); await mkdir(work, { recursive: true });
-  const display = { step: "01", hook: template.copy?.hook || defaultCopy.hook, word: payload.word.toUpperCase(), ipa: payload.ipa, part: payload.part, meaningLabel: template.copy?.meaningLabel || defaultCopy.meaningLabel, meaning: wrapText(payload.meaning, template.layout?.variant === "dark-slide" ? 29 : 31, 3), exampleLabel: template.copy?.exampleLabel || defaultCopy.exampleLabel, en: wrapText(payload.exampleEn, template.layout?.variant === "dark-slide" ? 34 : 40, 2), vi: payload.exampleVi ? wrapText(payload.exampleVi, 44, 2) : "", cta: payload.cta };
+  const textLayout = prepareTextLayout(payload, template);
+  const display = { step: "01", hook: template.copy?.hook || defaultCopy.hook, word: payload.word.toUpperCase(), ipa: payload.ipa, part: payload.part, meaningLabel: template.copy?.meaningLabel || defaultCopy.meaningLabel, meaning: textLayout.meaning.text, exampleLabel: template.copy?.exampleLabel || defaultCopy.exampleLabel, en: textLayout.en.text, vi: textLayout.vi?.text || "", cta: payload.cta };
   const files = {}; for (const [key, value] of Object.entries(display)) files[key] = await saveText(work, key, value);
   const p = template.palette; const dt = (file, weight, size, x, y, opts = "") => `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${p.ink}:fontsize=${size}:x='${x}':y='${y}'${opts}`;
   const [hookStart, hookDuration] = template.timeline?.hook || defaultTimeline.hook;
@@ -224,7 +232,7 @@ export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FF
   const [meaningStart, meaningDuration] = template.timeline?.meaning || defaultTimeline.meaning;
   const [exampleStart, exampleDuration] = template.timeline?.example || defaultTimeline.example;
   const [ctaStart, ctaDuration] = template.timeline?.cta || defaultTimeline.cta;
-  const stages = template.layout?.variant === "dark-slide" ? darkSlideStages({ template, font, files, payload, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) : [
+  const stages = template.layout?.variant === "dark-slide" ? darkSlideStages({ template, font, files, payload, textLayout, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) : [
     "[0:v]scale=1160:2062,crop=1080:1920:x='40+20*t/10':y='71+35*t/10',setsar=1[bg]",
     `[1:v]scale=96:96,format=rgba,rotate='-0.10+0.20*t/10':ow=rotw(iw):oh=roth(ih):c=none[petal]`,
     "[bg][petal]overlay=x=55:y='330+32*t/10'[decor]",
@@ -236,10 +244,10 @@ export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FF
     dt(files.ipa,"regular",38,"(w-text_w)/2",575,`:alpha='${fade(1.05,0.4)}'`),
     dt(files.part,"bold",30,"(w-text_w)/2",646,`:fontcolor=${p.accent}:alpha='${fade(1.25,0.4)}'`),
     dt(files.meaningLabel,"bold",26,148,`748+${rise(meaningStart,meaningDuration,26)}`,`:alpha='${fade(meaningStart,meaningDuration)}'`),
-    dt(files.meaning,"bold",44,148,`797+${rise(meaningStart + 0.15,meaningDuration + 0.05,30)}`,`:line_spacing=8:alpha='${fade(meaningStart + 0.15,meaningDuration + 0.05)}'`),
+    dt(files.meaning,"bold",textLayout.meaning.fontSize,148,`797+${rise(meaningStart + 0.15,meaningDuration + 0.05,30)}`,`:line_spacing=8:alpha='${fade(meaningStart + 0.15,meaningDuration + 0.05)}'`),
     dt(files.exampleLabel,"bold",26,148,`1005+${rise(exampleStart,exampleDuration,24)}`,`:alpha='${fade(exampleStart,exampleDuration)}'`),
-    dt(files.en,"medium",36,148,`1054+${rise(exampleStart + 0.15,exampleDuration + 0.05,28)}`,`:line_spacing=8:alpha='${fade(exampleStart + 0.15,exampleDuration + 0.05)}'`),
-    ...(payload.exampleVi ? [dt(files.vi,"medium",30,148,`1176+${rise(exampleStart + 0.35,exampleDuration + 0.05,24)}`,`:fontcolor=${p.secondary}:line_spacing=7:alpha='${fade(exampleStart + 0.35,exampleDuration + 0.05)}'`)] : []),
+    dt(files.en,"medium",textLayout.en.fontSize,148,`1054+${rise(exampleStart + 0.15,exampleDuration + 0.05,28)}`,`:line_spacing=8:alpha='${fade(exampleStart + 0.15,exampleDuration + 0.05)}'`),
+    ...(payload.exampleVi ? [dt(files.vi,"medium",textLayout.vi.fontSize,148,`1176+${rise(exampleStart + 0.35,exampleDuration + 0.05,24)}`,`:fontcolor=${p.secondary}:line_spacing=7:alpha='${fade(exampleStart + 0.35,exampleDuration + 0.05)}'`)] : []),
     `drawbox=x=160:y='1320+${rise(ctaStart,ctaDuration,48)}':w=720:h=104:color=${p.card}:t=fill:enable='gte(t,${ctaStart})'`,
     dt(files.cta,"bold",34,"(w-text_w)/2",`1350+${rise(ctaStart,ctaDuration,48)}`,`:alpha='${fade(ctaStart,ctaDuration)}'`),
     "format=yuv420p[out]"
