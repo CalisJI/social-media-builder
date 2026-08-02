@@ -8,7 +8,6 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { normalizePayload, payloadHash, prepareTextLayout, RenderError, renderVideo, resolveTemplate, validateStrategy, wrapText } from "../src/render.mjs";
 import { resolveAdaptiveText } from "../src/layout/adaptive-text.mjs";
-import { normalizePayload, payloadHash, RenderError, renderVideo, resolveTemplate, validateStrategy, wrapText } from "../src/render.mjs";
 import { buildRenderManifestRecord, renderResponseMetadata } from "../src/model/render-record.mjs";
 import { ConstraintError, resolveConstraints } from "../src/validation/resolve-constraints.mjs";
 import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
