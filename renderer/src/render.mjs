@@ -154,6 +154,7 @@ export async function normalizePayload(input) {
   const ipa = clean(entry.ipa, "ipa", template.constraints.ipa, { required: false, fallback: "Phát âm đang cập nhật" });
   const part = clean(entry.part_of_speech, "part_of_speech", template.constraints.part_of_speech, { required: false, fallback: "từ vựng" });
   const ctaTemplate = template.copy?.cta || defaultCopy.cta;
+  const strategy = await resolveStrategy(input.strategy_id ?? defaultStrategyId, { content: entry, capabilities: template.capabilities ?? [] });
   return {
     template: template.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
     part: partLabels[part.toLowerCase()] || part, meaning: clean(entry.meaning_vi, "meaning_vi", template.constraints.meaning_vi),
