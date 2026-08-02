@@ -4,6 +4,7 @@ import { access, cp, mkdir, readFile, readdir, rename, rm, writeFile } from "nod
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeRenderJob } from "./model/normalize-render-job.mjs";
+import { resolveTemplateEngine } from "./template/resolve-template-engine.mjs";
 
 const rendererRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const templatesRoot = path.resolve(process.env.RENDER_TEMPLATES_DIR || path.join(rendererRoot, "../templates"));
@@ -67,6 +68,7 @@ export async function loadTemplateRegistry(root = templatesRoot) {
     const packageRoot = path.join(root, item.name); let manifest;
     try { manifest = JSON.parse(await readFile(path.join(packageRoot, "manifest.json"), "utf8")); } catch (error) { if (error.code === "ENOENT") continue; throw error; }
     if (!manifest.id || registry.has(manifest.id)) throw new RenderError(`invalid or duplicate template id: ${manifest.id || item.name}`);
+    manifest.engine = resolveTemplateEngine(manifest).id;
     for (const key of ["background", "petal"]) {
       const resolved = path.resolve(packageRoot, manifest.assets?.[key] || "");
       if (!contained(root, resolved)) throw new RenderError(`template ${manifest.id} has unsafe ${key} path`);
