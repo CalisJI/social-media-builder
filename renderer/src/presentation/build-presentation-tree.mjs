@@ -1,3 +1,5 @@
+import { resolveSplitScene } from "./resolve-split-scene.mjs";
+
 const object = value => value && typeof value === "object" && !Array.isArray(value);
 const aliases = { part: "part_of_speech", meaning: "meaning_vi", exampleEn: "example_en", exampleVi: "example_vi" };
 const field = (content, name) => content[name] ?? content[aliases[name]] ?? null;
@@ -29,17 +31,20 @@ function bind(component, content) {
   return bound;
 }
 
-export function buildPresentationTree({ job, strategy, template }) {
+export function buildPresentationTree({ job, strategy, template, splitScene }) {
   const content = contentFrom(job);
   if (!object(strategy) || !Array.isArray(strategy.requires) || !Array.isArray(strategy.stages)) throw new PresentationTreeError("strategy requires requires and stages arrays");
   if (!object(template) || !Array.isArray(template.scene)) throw new PresentationTreeError("template requires a scene array");
   for (const name of strategy.requires) {
     if (missing(field(content, name))) throw new PresentationTreeError(`strategy ${strategy.id} requires content.${name}`, "missing_strategy_field");
   }
+  const stages = strategy.stages.filter(stage => !missing(field(content, stage.role))).map(stage => ({ ...stage, value: field(content, stage.role) }));
+  const split = splitScene && resolveSplitScene({ strategy, stages, stageId: splitScene.stageId, parts: splitScene.parts });
   return {
     templateId: template.id,
     strategyId: strategy.id,
-    stages: strategy.stages.filter(stage => !missing(field(content, stage.role))).map(stage => ({ ...stage, value: field(content, stage.role) })),
+    stages: split?.stages ?? stages,
     components: template.scene.map(component => bind(component, content)).filter(Boolean),
+    ...(split && { warnings: split.warnings, metadata: split.metadata }),
   };
 }

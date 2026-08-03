@@ -31,3 +31,22 @@ test("binds scene aliases to canonical normalized content", () => {
   });
   assert.deepEqual(tree.components.map(component => component.text), ["kiên cường", "adjective", "Stay resilient.", "Hãy kiên cường."]);
 });
+
+test("splits only strategy-authorized stages, shifts the CTA, and records metadata", () => {
+  const tree = buildPresentationTree({
+    job: { content: { ...job.content, cta: "@daily" } },
+    strategy: { ...strategy, splitScene: true, duration: { max: 4 }, stages: [{ id: "meaning", role: "meaning_vi", start: 0, duration: 1 }, { id: "cta", role: "cta", start: 1, duration: 1 }] },
+    template,
+    splitScene: { stageId: "meaning", parts: ["kiên", "cường"] },
+  });
+  assert.deepEqual(tree.stages.map(({ id, start, value }) => [id, start, value]), [["meaning-1", 0, "kiên"], ["meaning-2", 1, "cường"], ["cta", 2, "@daily"]]);
+  assert.deepEqual(tree.warnings, [{ code: "split_scene", stageId: "meaning", sceneCount: 2 }]);
+  assert.deepEqual(tree.metadata, { split_scene: { stage_id: "meaning", scene_count: 2, duration: 3 } });
+});
+
+test("rejects unauthorized and overlong split scenes", () => {
+  const splitScene = { stageId: "meaning", parts: ["kiên", "cường"] };
+  const jobWithCta = { content: { ...job.content, cta: "@daily" } };
+  assert.throws(() => buildPresentationTree({ job: jobWithCta, strategy, template, splitScene }), /does not allow split scenes/);
+  assert.throws(() => buildPresentationTree({ job: jobWithCta, strategy: { ...strategy, splitScene: true, duration: { max: 2 }, stages: [{ id: "meaning", role: "meaning_vi", start: 0, duration: 1 }, { id: "cta", role: "cta", start: 1, duration: 1 }] }, template, splitScene }), /exceeds strategy maximum/);
+});

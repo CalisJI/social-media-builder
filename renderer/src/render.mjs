@@ -11,6 +11,7 @@ import { defaultStrategyId, resolveStrategy } from "./strategy/resolve-strategy.
 import { TextOverflowError, resolveTextLayout } from "./layout/adaptive-text.mjs";
 import { validatePresentationSchema } from "./template/validate-presentation-schema.mjs";
 import { resolveDesignTokens } from "./template/resolve-design-tokens.mjs";
+import { resolveSplitScene } from "./presentation/resolve-split-scene.mjs";
 
 export { validateStrategy } from "./strategy/resolve-strategy.mjs";
 
@@ -168,7 +169,7 @@ export async function normalizePayload(input) {
   const strategy = await resolveStrategy(input.strategy_id ?? defaultStrategyId, { content: entry, capabilities: template.capabilities ?? [] });
   validateTemplateStrategyCompatibility(template, strategy);
   const requiredContent = Object.fromEntries(strategy.requires.map(field => [field, clean(entry[field], field, template.constraints[field])]));
-  return {
+  const payload = {
     ...requiredContent,
     template: template.id, strategy: strategy.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
     experimentId: optionalIdentifier(input.experiment_id, "experiment_id"),
@@ -180,6 +181,16 @@ export async function normalizePayload(input) {
     pronunciationAudioUrl: entry.pronunciation_audio_url ?? input.pronunciation_audio_url ?? null,
     backgroundMusicUrl: entry.background_music_url ?? input.background_music_url ?? null,
   };
+  if (input.split_scene != null) {
+    if (!input.split_scene || typeof input.split_scene !== "object" || Array.isArray(input.split_scene)) throw new RenderError("split_scene must be an object", 400, "invalid_payload");
+    payload.splitScene = resolveSplitScene({
+      strategy,
+      stages: strategy.stages.map(stage => ({ ...stage, value: stage.role === "cta" ? payload.cta : entry[stage.role] })),
+      stageId: input.split_scene.stage_id ?? input.split_scene.stageId,
+      parts: input.split_scene.parts,
+    });
+  }
+  return payload;
 }
 
 function optionalIdentifier(value, name) {

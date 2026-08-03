@@ -20,6 +20,11 @@ test("normalizes nested content and presentation payloads like legacy payloads",
   const v2 = { ...request, content: entries[0], presentation: { template_id, duration_seconds } };
   assert.deepEqual(await normalizePayload(v2), await normalizePayload(sample));
 });
+test("records a strategy-authorized presentation split in render metadata",async()=>{
+  const payload = await normalizePayload({ ...sample, presentation: { split_scene: { stage_id: "meaning", parts: ["kiên", "cường"] } } });
+  assert.deepEqual(renderResponseMetadata(payload).split_scene,{stage_id:"meaning",scene_count:2,duration:8.35});
+  assert.deepEqual(renderResponseMetadata(payload).warnings,[{code:"split_scene",stageId:"meaning",sceneCount:2}]);
+});
 test("defaults legacy requests to the classic definition strategy",async()=>{
   assert.equal((await normalizePayload(sample)).strategy,"classic-definition-v1");
 });
