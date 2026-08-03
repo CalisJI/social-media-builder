@@ -33,6 +33,15 @@ test("scene-v2 compiles supported primitives and declared initial animations", a
   assert.match(filter, /format=yuv420p\[out\]/);
 });
 
+test("scene-v2 text wraps and shrinks within declared bounds", async () => {
+  let savedText;
+  const filter = await compileScenes({ template, payload: { ...payload, meaning: "nội dung học tập dài cần được xuống dòng để vừa khung" }, font, saveText: async (_, value) => { savedText = value; return "/work/text.txt"; }, scene: [
+    { type: "text", text: "{meaning}", x: 0, y: 0, fontSize: 40, minFontSize: 20, maxWidth: 160, maxHeight: 120, lineSpacing: 4, color: "#FFFFFF" },
+  ] });
+  assert.match(savedText, /\n/);
+  assert.doesNotMatch(filter, /fontsize='40\*/);
+});
+
 test("scene-v2 snapshots canonical animation filters for every primitive", async () => {
   const filter = await compileScenes({ template, payload, font, saveText, scene: [
     { type: "text", text: "{word}", x: 100, y: 200, fontSize: 52, color: "#FFFFFF", animations: [{ type: "none" }, { type: "fade", start: 0, duration: 0.5 }, { type: "scale", start: 0, duration: 0.5 }] },
