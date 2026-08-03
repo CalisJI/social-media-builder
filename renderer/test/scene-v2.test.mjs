@@ -12,6 +12,8 @@ import { sceneV2 } from "../src/engines/scene-v2.mjs";
 import { normalizePayload, renderVideo } from "../src/render.mjs";
 import { validatePresentationSchema } from "../src/template/validate-presentation-schema.mjs";
 import { resolveDesignTokens } from "../src/template/resolve-design-tokens.mjs";
+import { resolveAdaptiveText } from "../src/layout/adaptive-text.mjs";
+import { measureText } from "../src/layout/text-measure.mjs";
 
 const exec = promisify(execFile);
 
@@ -127,6 +129,20 @@ test("scene-v2 renders a declarative scene", async () => {
     });
     await access(output);
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test("boundary fixture keeps example text inside declared bounds", async () => {
+  const fixture = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-pastel-scene-v2/fixtures/07-boundary-stress.json"), "utf8"));
+  const normalized = await normalizePayload(fixture);
+  const manifest = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-pastel-scene-v2/manifest.json"), "utf8"));
+  for (const node of manifest.scene.filter(({ text }) => text === "{exampleEn}" || text === "{exampleVi}")) {
+    const value = node.text === "{exampleEn}" ? normalized.exampleEn : normalized.exampleVi;
+    const layout = resolveAdaptiveText({ value, field: node.text, policy: { fontSize: node.fontSize, minFontSize: node.minFontSize, maxWidth: node.maxWidth, maxHeight: node.maxHeight, maxLines: node.maxLines, lineSpacing: node.lineSpacing, mode: node.overflowPolicy } });
+    assert.ok(node.x + node.maxWidth <= 984);
+    assert.ok(node.y + node.maxHeight <= 1320);
+    assert.ok(layout.height <= node.maxHeight);
+    assert.ok(layout.text.split("\n").every(line => measureText(line, layout.fontSize) <= node.maxWidth));
+  }
 });
 
 test("pastel scene-v2 preview fixtures render and retain the TikTok video contract", async () => {
