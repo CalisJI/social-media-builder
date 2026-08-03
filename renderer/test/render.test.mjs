@@ -20,6 +20,30 @@ test("normalizes nested content and presentation payloads like legacy payloads",
   const v2 = { ...request, content: entries[0], presentation: { template_id, duration_seconds } };
   assert.deepEqual(await normalizePayload(v2), await normalizePayload(sample));
 });
+test("records a strategy-authorized presentation split in render metadata",async()=>{
+  const payload = await normalizePayload({ ...sample, presentation: { split_scene: { stage_id: "meaning", parts: ["kiên", "cường"] } } });
+  assert.deepEqual(renderResponseMetadata(payload).split_scene,{stage_id:"meaning",scene_count:2,duration:8.35});
+  assert.deepEqual(renderResponseMetadata(payload).warnings,[{code:"split_scene",stageId:"meaning",sceneCount:2}]);
+});
+test("renders split meaning parts and the shifted CTA from the resolved timeline",async()=>{
+  const dir=await mkdtemp(path.join(os.tmpdir(),"renderer-split-scene-"));
+  const capture=path.join(dir,"filter.txt"), ffmpeg=path.join(dir,"ffmpeg.mjs"), output=path.join(dir,"split.mp4"), font="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+  const previous=Object.fromEntries(["REGULAR","MEDIUM","BOLD","EXTRABOLD"].map(weight=>[`RENDER_FONT_${weight}`,process.env[`RENDER_FONT_${weight}`]]));
+  const previousCapture=process.env.FILTER_CAPTURE;
+  try {
+    await writeFile(ffmpeg,`#!/usr/bin/env node\nimport { writeFile } from "node:fs/promises"; const args=process.argv; await writeFile(process.env.FILTER_CAPTURE,args[args.indexOf("-filter_complex")+1]); await writeFile(args.at(-1),"");`); await chmod(ffmpeg,0o755);
+    process.env.FILTER_CAPTURE=capture;
+    for(const key of Object.keys(previous)) process.env[key]=font;
+    const payload=await normalizePayload({ ...sample, presentation: { split_scene: { stage_id: "meaning", parts: ["kiên", "cường"] } } });
+    await renderVideo(payload,output,{ffmpeg,timeoutMs:120000});
+    const filter=await readFile(capture,"utf8");
+    assert.match(filter,/meaning-1\.txt/); assert.match(filter,/meaning-2\.txt/); assert.match(filter,/between\(t,2\.2,2\.7\)/); assert.match(filter,/gte\(t,7\.7\)/);
+  } finally {
+    for(const [key,value] of Object.entries(previous)) { if(value===undefined) delete process.env[key]; else process.env[key]=value; }
+    if(previousCapture===undefined) delete process.env.FILTER_CAPTURE; else process.env.FILTER_CAPTURE=previousCapture;
+    await rm(dir,{recursive:true,force:true});
+  }
+});
 test("defaults legacy requests to the classic definition strategy",async()=>{
   assert.equal((await normalizePayload(sample)).strategy,"classic-definition-v1");
 });

@@ -11,6 +11,7 @@ export function renderResponseMetadata(payload = {}) {
     strategy_id: nullableId(payload.strategy),
     experiment_id: nullableId(payload.experimentId),
     variant_id: nullableId(payload.variantId),
+    ...(payload.splitScene && { split_scene: payload.splitScene.metadata.split_scene, warnings: payload.splitScene.warnings }),
   };
 }
 
