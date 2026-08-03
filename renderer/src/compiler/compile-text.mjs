@@ -1,4 +1,5 @@
 import { SceneCompileError, animationExpressions, compileAnimations } from "./compile-animation.mjs";
+import { resolveAdaptiveText } from "../layout/adaptive-text.mjs";
 
 const weights = new Set(["regular", "medium", "bold", "extraBold"]);
 const color = value => {
@@ -23,7 +24,11 @@ export async function compileText(node, { font, saveText, context, nextId }) {
   const weight = node.weight ?? "regular";
   if (!weights.has(weight)) throw new SceneCompileError(`unknown text.weight: ${weight}`);
   const animations = animationExpressions(compileAnimations(node.animations));
-  const file = await saveText(`scene-${nextId()}`, interpolateText(node.text, context));
-  const lineSpacing = node.lineSpacing == null ? "" : `:line_spacing=${number(node.lineSpacing, "text.lineSpacing")}`;
-  return `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${color(node.color)}:fontsize='${fontSize}*(${animations.scale})':x='${x}+${animations.xOffset}':y='${y}+${animations.yOffset}':alpha='${animations.alpha}'${lineSpacing}`;
+  const lineSpacing = node.lineSpacing == null ? 0 : number(node.lineSpacing, "text.lineSpacing");
+  const bounds = [node.maxWidth, node.maxHeight, node.minFontSize, node.maxLines].some(value => value != null);
+  if (bounds && (node.maxWidth == null || node.maxHeight == null)) throw new SceneCompileError("text adaptive layout requires maxWidth and maxHeight");
+  const layout = bounds ? resolveAdaptiveText({ value: interpolateText(node.text, context), field: "text", policy: { fontSize, minFontSize: node.minFontSize ?? fontSize, maxWidth: number(node.maxWidth, "text.maxWidth", 1), maxHeight: number(node.maxHeight, "text.maxHeight", 1), maxLines: node.maxLines ?? Infinity, lineSpacing } }) : { text: interpolateText(node.text, context), fontSize };
+  const file = await saveText(`scene-${nextId()}`, layout.text);
+  const spacing = node.lineSpacing == null ? "" : `:line_spacing=${lineSpacing}`;
+  return `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${color(node.color)}:fontsize='${layout.fontSize}*(${animations.scale})':x='${x}+${animations.xOffset}':y='${y}+${animations.yOffset}':alpha='${animations.alpha}'${spacing}`;
 }
