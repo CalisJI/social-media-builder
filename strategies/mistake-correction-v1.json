@@ -3,12 +3,15 @@
   "strategySchemaVersion": 1,
   "platform": "tiktok",
   "duration": { "min": 9.8, "max": 10.2, "default": 10 },
-  "requires": ["word", "meaning_vi", "common_mistake"],
+  "requires": ["word", "meaning_vi", "common_mistake", "corrected_usage"],
   "optional": ["ipa", "part_of_speech", "example_en", "example_vi"],
   "capabilitiesRequired": ["mistakeCorrection"],
   "stages": [
-    { "id": "mistake", "role": "common_mistake", "start": 0, "duration": 3 },
-    { "id": "correction", "role": "meaning_vi", "start": 3.2, "duration": 3 },
+    { "id": "mistake", "role": "common_mistake", "start": 0, "duration": 2.5 },
+    { "id": "pause", "role": "word", "start": 2.5, "duration": 0.7 },
+    { "id": "correction", "role": "corrected_usage", "start": 3.2, "duration": 0.5 },
+    { "id": "explanation", "role": "meaning_vi", "start": 4.2, "duration": 0.5 },
+    { "id": "example", "role": "example_en", "start": 5.3, "duration": 0.5 },
     { "id": "cta", "role": "cta", "start": 7.2, "duration": 0.65 }
   ]
 }

@@ -1,7 +1,7 @@
 const constrainedFields = Object.freeze([
-  "brand_handle", "word", "ipa", "part_of_speech", "meaning_vi", "common_mistake", "example_en", "example_vi", "cta",
+  "brand_handle", "word", "ipa", "part_of_speech", "meaning_vi", "common_mistake", "corrected_usage", "example_en", "example_vi", "cta",
 ]);
-const requiredConstraintFields = Object.freeze(constrainedFields.filter(field => field !== "common_mistake"));
+const requiredConstraintFields = Object.freeze(constrainedFields.filter(field => !["common_mistake", "corrected_usage"].includes(field)));
 
 export class ConstraintError extends Error {}
 
