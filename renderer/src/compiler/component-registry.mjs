@@ -24,7 +24,7 @@ const validateGroup = node => {
 const define = (type, input, validate, compile) => Object.freeze({ id: type, type, input: Object.freeze({ ...input, timeline: "animations" }), validate, compile });
 
 export const componentRegistry = new Map([
-  ["text", define("text", { layout: ["x", "y", "maxWidth", "maxHeight"], style: ["fontSize", "minFontSize", "maxLines", "weight", "color", "lineSpacing"], content: ["text"] }, validateBase, (node, context) => compileText(node, context))],
+  ["text", define("text", { layout: ["x", "y", "maxWidth", "maxHeight"], style: ["fontSize", "minFontSize", "maxLines", "weight", "color", "lineSpacing", "overflowPolicy", "alternateLayouts", "splitScene"], content: ["text"] }, validateBase, (node, context) => compileText(node, context))],
   ["box", define("box", { layout: ["x", "y", "width", "height"], style: ["color", "opacity"] }, validateBase, node => compileBox(node))],
   ["image", define("image", { layout: ["x", "y", "width", "height"], style: [], content: ["asset"] }, validateImage, (node, context) => compileImage(node, context))],
   ["progress", define("progress", { layout: ["x", "y", "width", "height"], style: ["background", "color"], content: ["value"] }, validateBase, node => compileProgress(node))],

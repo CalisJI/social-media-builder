@@ -42,6 +42,14 @@ test("scene-v2 text wraps and shrinks within declared bounds", async () => {
   assert.doesNotMatch(filter, /fontsize='40\*/);
 });
 
+test("scene-v2 honors a template-declared truncate policy", async () => {
+  let savedText;
+  await compileScenes({ template, payload: { ...payload, meaning: "một hai ba bốn" }, font, saveText: async (_, value) => { savedText = value; return "/work/text.txt"; }, scene: [
+    { type: "text", text: "{meaning}", x: 0, y: 0, fontSize: 20, maxWidth: 100, maxHeight: 20, maxLines: 1, overflowPolicy: "truncate", color: "#FFFFFF" },
+  ] });
+  assert.equal(savedText, "một hai…");
+});
+
 test("scene-v2 snapshots canonical animation filters for every primitive", async () => {
   const filter = await compileScenes({ template, payload, font, saveText, scene: [
     { type: "text", text: "{word}", x: 100, y: 200, fontSize: 52, color: "#FFFFFF", animations: [{ type: "none" }, { type: "fade", start: 0, duration: 0.5 }, { type: "scale", start: 0, duration: 0.5 }] },
