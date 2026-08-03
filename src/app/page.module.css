@@ -16,8 +16,17 @@
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 720;
   letter-spacing: -0.035em;
+}
+
+.brand img {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
 }
 
 .header nav { display: flex; gap: 28px; color: #4e5b73; font-size: 14px; }
