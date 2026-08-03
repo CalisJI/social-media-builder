@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Social Media Builder | Calis Content",
   description: "Prepare, review, and publish creator-owned social content.",
+  icons: {
+    icon: [
+      { url: "/app-icon-1024.png", type: "image/png", sizes: "1024x1024" },
+    ],
+  },
 };
 
 export default function RootLayout({

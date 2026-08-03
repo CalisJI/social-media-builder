@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./page.module.css";
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -6,7 +7,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link className={styles.brand} href="/">Social Media Builder</Link>
+        <Link className={styles.brand} href="/">
+          <Image src="/app-icon-1024.png" alt="" width={32} height={32} priority />
+          <span>Social Media Builder</span>
+        </Link>
         <nav aria-label="Legal links">
           <Link href="/template-import">Template import</Link>
           <Link href="/privacy">Privacy</Link>
