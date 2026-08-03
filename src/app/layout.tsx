@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   description: "Prepare, review, and publish creator-owned social content.",
   icons: {
     icon: [
-      { url: "/app-icon.svg", type: "image/svg+xml" },
       { url: "/app-icon-1024.png", type: "image/png", sizes: "1024x1024" },
     ],
   },

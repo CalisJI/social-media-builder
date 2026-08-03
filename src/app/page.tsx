@@ -8,7 +8,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
     <main className={styles.page}>
       <header className={styles.header}>
         <Link className={styles.brand} href="/">
-          <Image src="/app-icon.svg" alt="" width={32} height={32} priority />
+          <Image src="/app-icon-1024.png" alt="" width={32} height={32} priority />
           <span>Social Media Builder</span>
         </Link>
         <nav aria-label="Legal links">
