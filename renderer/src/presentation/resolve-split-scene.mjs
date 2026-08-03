@@ -9,7 +9,8 @@ const finite = (value, name) => {
 };
 
 export function resolveSplitScene({ strategy, stages, stageId, parts }) {
-  if (strategy?.splitScene !== true) throw new SplitSceneError(`strategy ${strategy?.id || "unknown"} does not allow split scenes`);
+  const allowed = strategy?.splitScene === true || strategy?.splitScene?.includes(stageId);
+  if (!allowed) throw new SplitSceneError(`strategy ${strategy?.id || "unknown"} does not allow split scenes for stage ${stageId}`);
   if (!Array.isArray(parts) || parts.length < 2 || parts.some(part => typeof part !== "string" || !part)) throw new SplitSceneError("split scene requires at least two non-empty parts");
   const maximumDuration = finite(strategy.duration?.max, "strategy.duration.max");
   const index = stages.findIndex(stage => stage.id === stageId);

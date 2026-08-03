@@ -217,6 +217,7 @@ export function prepareTextLayout(payload, template) {
 }
 const rise = (start, duration, amount) => `if(lt(t,${start}),${amount},if(lt(t,${start + duration}),${amount}*(1-(t-${start})/${duration}),0))`;
 const fade = (start, duration) => `if(lt(t,${start}),0,if(lt(t,${start + duration}),(t-${start})/${duration},1))`;
+const visible = (start, duration) => `if(between(t,${start},${start + duration}),1,0)`;
 
 async function fonts() {
   const result = {
@@ -229,7 +230,7 @@ async function fonts() {
   return Object.fromEntries(Object.entries(result).map(([key, value]) => [key, escapePath(value)]));
 }
 
-function darkSlideStages({ template, font, files, payload, textLayout, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) {
+function darkSlideStages({ template, font, files, payload, textLayout, splitMeaning, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) {
   const p = template.palette;
   const dt = (file, weight, size, x, y, opts = "") => `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${p.ink}:fontsize=${size}:x='${x}':y='${y}'${opts}`;
   return [
@@ -240,7 +241,7 @@ function darkSlideStages({ template, font, files, payload, textLayout, hookStart
     dt(files.hook, "extraBold", 68, 84, `470+${rise(hookStart, hookDuration, 30)}`, `:alpha='${fade(hookStart, hookDuration)}'`),
     dt(files.word, "extraBold", 78, 84, `590+${rise(wordStart, wordDuration, 30)}`, `:fontcolor=${p.accent}:alpha='${fade(wordStart, wordDuration)}'`),
     `drawtext=fontfile='${font.bold}':text='•':fontcolor=${p.secondary}:fontsize=58:x=84:y=760:alpha='${fade(meaningStart, meaningDuration)}'`,
-    dt(files.meaning, "bold", textLayout.meaning.fontSize, 120, `765+${rise(meaningStart, meaningDuration, 24)}`, `:line_spacing=14:fontcolor=${p.secondary}:alpha='${fade(meaningStart, meaningDuration)}'`),
+    ...(splitMeaning?.length ? splitMeaning.map(stage => dt(files[stage.id], "bold", textLayout.meaning.fontSize, 120, `765+${rise(stage.start, stage.duration, 24)}`, `:line_spacing=14:fontcolor=${p.secondary}:alpha='${visible(stage.start, stage.duration)}'`)) : [dt(files.meaning, "bold", textLayout.meaning.fontSize, 120, `765+${rise(meaningStart, meaningDuration, 24)}`, `:line_spacing=14:fontcolor=${p.secondary}:alpha='${fade(meaningStart, meaningDuration)}'`)]),
     `drawbox=x=86:y=1070:w=690:h=98:color=${p.card}:t=fill:enable='gte(t,${exampleStart})'`,
     dt(files.ipa, "medium", 34, 108, `1101+${rise(exampleStart, exampleDuration, 20)}`, `:fontcolor=#EF8C87:alpha='${fade(exampleStart, exampleDuration)}'`),
     `drawtext=fontfile='${font.bold}':text='•':fontcolor=${p.secondary}:fontsize=58:x=84:y=1240:alpha='${fade(exampleStart + 0.15, exampleDuration)}'`,
@@ -259,13 +260,17 @@ export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FF
   const textLayout = prepareTextLayout(payload, template);
   const display = { step: "01", hook: template.copy?.hook || defaultCopy.hook, word: payload.word.toUpperCase(), ipa: payload.ipa, part: payload.part, meaningLabel: template.copy?.meaningLabel || defaultCopy.meaningLabel, meaning: textLayout.meaning.text, exampleLabel: template.copy?.exampleLabel || defaultCopy.exampleLabel, en: textLayout.en.text, vi: textLayout.vi?.text || "", cta: payload.cta };
   const files = {}; for (const [key, value] of Object.entries(display)) files[key] = await saveText(work, key, value);
+  const splitMeaning = payload.splitScene?.stages.filter(stage => stage.id.startsWith("meaning-")) ?? [];
+  for (const stage of splitMeaning) files[stage.id] = await saveText(work, stage.id, stage.value);
   const p = template.palette; const dt = (file, weight, size, x, y, opts = "") => `drawtext=fontfile='${font[weight]}':textfile='${file}':fontcolor=${p.ink}:fontsize=${size}:x='${x}':y='${y}'${opts}`;
-  const [hookStart, hookDuration] = template.timeline?.hook || defaultTimeline.hook;
-  const [wordStart, wordDuration] = template.timeline?.word || defaultTimeline.word;
-  const [meaningStart, meaningDuration] = template.timeline?.meaning || defaultTimeline.meaning;
-  const [exampleStart, exampleDuration] = template.timeline?.example || defaultTimeline.example;
-  const [ctaStart, ctaDuration] = template.timeline?.cta || defaultTimeline.cta;
-  const stages = template.layout?.variant === "dark-slide" ? darkSlideStages({ template, font, files, payload, textLayout, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) : [
+  const splitTiming = id => payload.splitScene?.stages.find(stage => stage.id === id);
+  const timing = (id, fallback) => splitTiming(id) ? [splitTiming(id).start, splitTiming(id).duration] : fallback;
+  const [hookStart, hookDuration] = timing("hook", template.timeline?.hook || defaultTimeline.hook);
+  const [wordStart, wordDuration] = timing("word", template.timeline?.word || defaultTimeline.word);
+  const [meaningStart, meaningDuration] = timing("meaning-1", template.timeline?.meaning || defaultTimeline.meaning);
+  const [exampleStart, exampleDuration] = timing("example", template.timeline?.example || defaultTimeline.example);
+  const [ctaStart, ctaDuration] = timing("cta", template.timeline?.cta || defaultTimeline.cta);
+  const stages = template.layout?.variant === "dark-slide" ? darkSlideStages({ template, font, files, payload, textLayout, splitMeaning, hookStart, hookDuration, wordStart, wordDuration, meaningStart, meaningDuration, exampleStart, exampleDuration, ctaStart, ctaDuration }) : [
     "[0:v]scale=1160:2062,crop=1080:1920:x='40+20*t/10':y='71+35*t/10',setsar=1[bg]",
     `[1:v]scale=96:96,format=rgba,rotate='-0.10+0.20*t/10':ow=rotw(iw):oh=roth(ih):c=none[petal]`,
     "[bg][petal]overlay=x=55:y='330+32*t/10'[decor]",
@@ -277,7 +282,7 @@ export async function renderVideo(payload, outputFile, { ffmpeg = process.env.FF
     dt(files.ipa,"regular",38,"(w-text_w)/2",575,`:alpha='${fade(1.05,0.4)}'`),
     dt(files.part,"bold",30,"(w-text_w)/2",646,`:fontcolor=${p.accent}:alpha='${fade(1.25,0.4)}'`),
     dt(files.meaningLabel,"bold",26,148,`748+${rise(meaningStart,meaningDuration,26)}`,`:alpha='${fade(meaningStart,meaningDuration)}'`),
-    dt(files.meaning,"bold",textLayout.meaning.fontSize,148,`797+${rise(meaningStart + 0.15,meaningDuration + 0.05,30)}`,`:line_spacing=8:alpha='${fade(meaningStart + 0.15,meaningDuration + 0.05)}'`),
+    ...(splitMeaning.length ? splitMeaning.map(stage => dt(files[stage.id],"bold",textLayout.meaning.fontSize,148,`797+${rise(stage.start + 0.15,stage.duration + 0.05,30)}`,`:line_spacing=8:alpha='${visible(stage.start,stage.duration)}'`)) : [dt(files.meaning,"bold",textLayout.meaning.fontSize,148,`797+${rise(meaningStart + 0.15,meaningDuration + 0.05,30)}`,`:line_spacing=8:alpha='${fade(meaningStart + 0.15,meaningDuration + 0.05)}'`)]),
     dt(files.exampleLabel,"bold",26,148,`1005+${rise(exampleStart,exampleDuration,24)}`,`:alpha='${fade(exampleStart,exampleDuration)}'`),
     dt(files.en,"medium",textLayout.en.fontSize,148,`1054+${rise(exampleStart + 0.15,exampleDuration + 0.05,28)}`,`:line_spacing=8:alpha='${fade(exampleStart + 0.15,exampleDuration + 0.05)}'`),
     ...(payload.exampleVi ? [dt(files.vi,"medium",textLayout.vi.fontSize,148,`1176+${rise(exampleStart + 0.35,exampleDuration + 0.05,24)}`,`:fontcolor=${p.secondary}:line_spacing=7:alpha='${fade(exampleStart + 0.35,exampleDuration + 0.05)}'`)] : []),

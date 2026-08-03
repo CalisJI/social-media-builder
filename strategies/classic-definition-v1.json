@@ -3,7 +3,7 @@
   "strategySchemaVersion": 1,
   "platform": "tiktok",
   "duration": { "min": 9.8, "max": 10.2, "default": 10 },
-  "splitScene": true,
+  "splitScene": ["meaning"],
   "requires": ["word", "meaning_vi"],
   "optional": ["ipa", "part_of_speech", "example_en", "example_vi"],
   "capabilitiesRequired": [],

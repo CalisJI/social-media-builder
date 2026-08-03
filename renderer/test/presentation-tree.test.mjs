@@ -35,7 +35,7 @@ test("binds scene aliases to canonical normalized content", () => {
 test("splits only strategy-authorized stages, shifts the CTA, and records metadata", () => {
   const tree = buildPresentationTree({
     job: { content: { ...job.content, cta: "@daily" } },
-    strategy: { ...strategy, splitScene: true, duration: { max: 4 }, stages: [{ id: "meaning", role: "meaning_vi", start: 0, duration: 1 }, { id: "cta", role: "cta", start: 1, duration: 1 }] },
+    strategy: { ...strategy, splitScene: ["meaning"], duration: { max: 4 }, stages: [{ id: "meaning", role: "meaning_vi", start: 0, duration: 1 }, { id: "cta", role: "cta", start: 1, duration: 1 }] },
     template,
     splitScene: { stageId: "meaning", parts: ["kiên", "cường"] },
   });
@@ -48,5 +48,5 @@ test("rejects unauthorized and overlong split scenes", () => {
   const splitScene = { stageId: "meaning", parts: ["kiên", "cường"] };
   const jobWithCta = { content: { ...job.content, cta: "@daily" } };
   assert.throws(() => buildPresentationTree({ job: jobWithCta, strategy, template, splitScene }), /does not allow split scenes/);
-  assert.throws(() => buildPresentationTree({ job: jobWithCta, strategy: { ...strategy, splitScene: true, duration: { max: 2 }, stages: [{ id: "meaning", role: "meaning_vi", start: 0, duration: 1 }, { id: "cta", role: "cta", start: 1, duration: 1 }] }, template, splitScene }), /exceeds strategy maximum/);
+  assert.throws(() => buildPresentationTree({ job: jobWithCta, strategy: { ...strategy, splitScene: ["meaning"], duration: { max: 2 }, stages: [{ id: "meaning", role: "meaning_vi", start: 0, duration: 1 }, { id: "cta", role: "cta", start: 1, duration: 1 }] }, template, splitScene }), /exceeds strategy maximum/);
 });
