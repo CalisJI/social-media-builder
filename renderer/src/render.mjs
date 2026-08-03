@@ -171,7 +171,7 @@ export async function normalizePayload(input) {
   const requiredContent = Object.fromEntries(strategy.requires.map(field => [field, clean(entry[field], field, template.constraints[field])]));
   const payload = {
     ...requiredContent,
-    template: template.id, strategy: strategy.id, duration, word: clean(entry.word, "word", template.constraints.word), ipa,
+    template: template.id, strategy: strategy.id, duration, stageTimings: resolveStageTimings(strategy, input.guess_duration_seconds), word: clean(entry.word, "word", template.constraints.word), ipa,
     experimentId: optionalIdentifier(input.experiment_id, "experiment_id"),
     variantId: optionalIdentifier(input.variant_id, "variant_id"),
     part: partLabels[part.toLowerCase()] || part, meaning: clean(entry.meaning_vi, "meaning_vi", template.constraints.meaning_vi),
@@ -200,6 +200,16 @@ function optionalIdentifier(value, name) {
   if (!result) return null;
   if (result.length > 128) throw new RenderError(`${name} must be at most 128 characters`, 400, "invalid_payload");
   return result;
+}
+
+function resolveStageTimings(strategy, guessDuration) {
+  if (!strategy.guessDuration) return undefined;
+  const { min, max, default: fallback } = strategy.guessDuration;
+  const duration = guessDuration == null ? fallback : Number(guessDuration);
+  if (!Number.isFinite(duration) || duration < min || duration > max) throw new RenderError(`guess_duration_seconds must be between ${min} and ${max}`, 400, "invalid_payload");
+  const guess = strategy.stages.findIndex(stage => stage.id === "guess");
+  const delta = duration - strategy.stages[guess].duration;
+  return Object.fromEntries(strategy.stages.slice(guess).map((stage, index) => [stage.id, { start: Number((stage.start + (index ? delta : 0)).toFixed(3)), duration: index ? stage.duration : duration }]));
 }
 
 export function payloadHash(payload) { return createHash("sha256").update(JSON.stringify(payload)).digest("hex"); }

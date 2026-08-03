@@ -63,6 +63,12 @@ test("normalizes vocabulary quiz content declared by its compatible template",as
   assert.equal(payload.strategy, "quiz-reveal-v1");
   assert.equal(payload.template, "vocabulary-quiz-v1");
 });
+test("applies a valid quiz guess-duration override to subsequent stages",async()=>{
+  const request = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-quiz-v1/fixtures/01-valid-quiz.json"), "utf8"));
+  const payload = await normalizePayload({ ...request, guess_duration_seconds: 2 });
+  assert.deepEqual(payload.stageTimings, { guess: { start: 0.6, duration: 2 }, reveal: { start: 2.6, duration: 0.5 }, example: { start: 3.7, duration: 0.5 }, cta: { start: 5.8, duration: 0.65 } });
+  await assert.rejects(normalizePayload({ ...request, guess_duration_seconds: 5.1 }), /guess_duration_seconds must be between 2 and 5/);
+});
 test("reports the missing common_mistake required by mistake correction",async()=>{
   await assert.rejects(
     normalizePayload({ ...sample, template_id: "vocabulary-mistake-correction-scene-v2", strategy_id: "mistake-correction-v1" }),

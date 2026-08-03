@@ -14,6 +14,11 @@ export function validateScene(scene, packageRoot) {
 }
 
 export async function compileScenes({ scene, template, payload, font, saveText }) {
+  const bindTimings = node => ({ ...node, animations: node.animations?.map(animation => {
+    const timing = payload.stageTimings?.[animation.stage];
+    return timing ? { ...animation, start: timing.start + (animation.offset ?? 0) } : animation;
+  }), ...(node.children && { children: node.children.map(bindTimings) }) });
+  scene = scene.map(bindTimings);
   validateScene(scene, template.packageRoot);
   let serial = 0; const nextId = () => serial++;
   const context = Object.fromEntries(Object.entries({ ...payload, template: template.id }).filter(([, value]) => typeof value === "string"));
