@@ -15,5 +15,6 @@ export function compileImage(node, { packageRoot, nextId }) {
   const animations = animationExpressions(compileAnimations(node.animations));
   const label = `scene_image_${nextId()}`;
   const width = number(node.width, "image.width", 1); const height = number(node.height, "image.height", 1);
-  return { prelude: `movie='${escapePath(asset)}',scale=${width}:${height},format=rgba[${label}]`, filter: `[${label}]colorchannelmixer=aa='${animations.alpha}'[${label}a];[base][${label}a]overlay=x=${number(node.x, "image.x")}:y='${number(node.y, "image.y")}+${animations.yOffset}'[base]` };
+  const x = number(node.x, "image.x"); const y = number(node.y, "image.y");
+  return { prelude: `movie='${escapePath(asset)}',scale=w='${width}*(${animations.scale})':h='${height}*(${animations.scale})':eval=frame,format=rgba[${label}]`, filter: `[${label}]colorchannelmixer=aa='${animations.alpha}'[${label}a];[base][${label}a]overlay=x='${x}+${animations.xOffset}+(${width}-(${width}*${animations.scale}))/2':y='${y}+${animations.yOffset}+(${height}-(${height}*${animations.scale}))/2'[base]` };
 }
