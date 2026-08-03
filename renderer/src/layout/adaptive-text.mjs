@@ -19,12 +19,21 @@ export function resolveAdaptiveText({ value, field, policy }) {
   const fontSize = number(policy.fontSize, 40), minFontSize = number(policy.minFontSize, fontSize), maxWidth = number(policy.maxWidth, 700), maxHeight = number(policy.maxHeight, Infinity), maxLines = number(policy.maxLines, 2), lineSpacing = number(policy.lineSpacing, 0);
   if (minFontSize <= 0 || minFontSize > fontSize || maxWidth <= 0 || maxHeight <= 0 || maxLines < 1 || lineSpacing < 0) throw new TypeError(`invalid text layout policy for ${field}`);
   const options = { maxWidth, maxHeight, maxLines, fontSize, minFontSize, lineSpacing };
-  const mode = policy.mode ?? ((policy.alternates || policy.alternate) ? "alternate-layout" : policy.splitScene ? "split-scene" : "shrink");
+  const mode = policy.mode ?? "adaptive";
   const tryFit = (smallest = minFontSize) => {
     let last;
     for (let size = fontSize; size >= smallest; size -= 1) { const result = layout(value, options, size); if (fits(result, options)) return result; last = result; }
     return last;
   };
+  if (mode === "adaptive") {
+    const result = tryFit();
+    if (fits(result, options)) return { ...result, policy: "shrink" };
+    for (const alternate of (policy.alternates ?? (policy.alternate ? [policy.alternate] : []))) {
+      try { return { ...resolveAdaptiveText({ value, field, policy: alternate }), policy: "alternate" }; } catch (error) { if (!(error instanceof TextOverflowError)) throw error; }
+    }
+    if (policy.splitScene) return resolveAdaptiveText({ value, field, policy: { ...policy, mode: "split-scene" } });
+    throw new TextOverflowError({ field, policy: options, value, measured: result.measured, failedPolicy: mode });
+  }
   if (mode === "error" || mode === "wrap") {
     const result = tryFit(fontSize);
     if (fits(result, options)) return { ...result, policy: mode };

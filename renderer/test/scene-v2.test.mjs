@@ -138,7 +138,7 @@ test("pastel scene-v2 preview fixtures render and retain the TikTok video contra
     await access(fontFile);
     for (const key of Object.keys(previousFonts)) process.env[key] = fontFile;
     const fixtures = (await readdir(fixtureDir)).filter(name => name.endsWith(".json")).sort();
-    assert.deepEqual(fixtures, ["01-short-word.json", "02-long-word.json", "03-short-meaning.json", "04-long-valid-meaning.json", "05-missing-ipa.json", "06-vietnamese-diacritics.json"]);
+    assert.deepEqual(fixtures, ["01-short-word.json", "02-long-word.json", "03-short-meaning.json", "04-long-valid-meaning.json", "05-missing-ipa.json", "06-vietnamese-diacritics.json", "07-boundary-stress.json"]);
     for (const fixture of fixtures) {
       const normalized = await normalizePayload(JSON.parse(await readFile(path.join(fixtureDir, fixture), "utf8")));
       const output = path.join(dir, `${fixture}.mp4`);
