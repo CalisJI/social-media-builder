@@ -69,6 +69,21 @@ test("applies a valid quiz guess-duration override to subsequent stages",async()
   assert.deepEqual(payload.stageTimings, { guess: { start: 0.6, duration: 2 }, reveal: { start: 2.6, duration: 0.5 }, example: { start: 3.7, duration: 0.5 }, cta: { start: 5.8, duration: 0.65 } });
   await assert.rejects(normalizePayload({ ...request, guess_duration_seconds: 5.1 }), /guess_duration_seconds must be between 2 and 5/);
 });
+test("pronunciation challenge requires audio and declares its countdown-to-reveal sequence",async()=>{
+  const fixture = path.resolve(import.meta.dirname, "../../templates/vocabulary-pronunciation-challenge-v1/fixtures/01-valid-pronunciation.json");
+  const request = JSON.parse(await readFile(fixture, "utf8"));
+  const payload = await normalizePayload(request);
+  const strategy = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../strategies/pronunciation-challenge-v1.json"), "utf8"));
+  const manifest = await resolveTemplate(payload.template);
+  assert.equal(payload.strategy, "pronunciation-challenge-v1");
+  assert.equal(payload.pronunciationAudioUrl, request.entries[0].pronunciation_audio_url);
+  assert.deepEqual(strategy.requires, ["word", "ipa", "pronunciation_audio_url", "example_en"]);
+  assert.deepEqual(strategy.stages.map(({ id, role }) => ({ id, role })), [
+    { id: "prompt", role: "word" }, { id: "countdown", role: "word" }, { id: "reveal", role: "ipa" }, { id: "example", role: "example_en" }, { id: "cta", role: "cta" },
+  ]);
+  assert.deepEqual(manifest.audio, { source: "pronunciationAudioUrl", stage: "reveal" });
+  await assert.rejects(normalizePayload({ ...request, entries: [{ ...request.entries[0], pronunciation_audio_url: null }] }), /pronunciation-challenge-v1 requires pronunciation_audio_url/);
+});
 test("reports the missing common_mistake required by mistake correction",async()=>{
   await assert.rejects(
     normalizePayload({ ...sample, template_id: "vocabulary-mistake-correction-scene-v2", strategy_id: "mistake-correction-v1" }),

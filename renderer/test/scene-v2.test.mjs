@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { access, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { access, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { execFile } from "node:child_process";
@@ -129,6 +129,26 @@ test("scene-v2 renders a declarative scene", async () => {
     });
     await access(output);
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test("scene-v2 delays template-declared pronunciation audio until its reveal stage", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "scene-v2-audio-"));
+  const ffmpeg = path.join(dir, "ffmpeg.mjs");
+  const output = path.join(dir, "scene.mp4");
+  const capture = path.join(dir, "args.json");
+  const background = path.resolve(import.meta.dirname, "../../templates/vocabulary-pastel-v1/assets/background.png");
+  try {
+    await writeFile(ffmpeg, `#!/usr/bin/env node\nimport { writeFile } from "node:fs/promises"; await writeFile(process.env.SCENE_V2_ARGS, JSON.stringify(process.argv)); await writeFile(process.argv.at(-1), "");`);
+    await (await import("node:fs/promises")).chmod(ffmpeg, 0o755);
+    process.env.SCENE_V2_ARGS = capture;
+    await sceneV2.render({
+      payload: { ...payload, duration: 0.2, pronunciationAudioUrl: "/audio.mp3", backgroundMusicUrl: null },
+      template: { ...template, assets: { background }, timeline: { reveal: [4, 0.5] }, audio: { source: "pronunciationAudioUrl", stage: "reveal" }, scene: [{ type: "box", x: 0, y: 0, width: 1080, height: 1920, color: "#111111" }] },
+      outputFile: output, ffmpeg, timeoutMs: 120000, font, saveText: async (work, name, value) => { const file = path.join(work, `${name}.txt`); await (await import("node:fs/promises")).writeFile(file, value); return file; }, RenderError: Error,
+    });
+    const args = JSON.parse(await readFile(capture, "utf8"));
+    assert.deepEqual(args.filter(value => value === "/audio.mp3" || value === "[audio]" || value.includes("adelay=")).map(value => value.includes("adelay=") ? value.slice(value.lastIndexOf(";") + 1) : value), ["/audio.mp3", "[1:a]adelay=4000:all=1,apad,atrim=0:0.2[audio]", "[audio]"]);
+  } finally { delete process.env.SCENE_V2_ARGS; await rm(dir, { recursive: true, force: true }); }
 });
 
 test("boundary fixture keeps example text inside declared bounds", async () => {

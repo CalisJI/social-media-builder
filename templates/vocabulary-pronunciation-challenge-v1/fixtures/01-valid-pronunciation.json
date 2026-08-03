@@ -1,0 +1,17 @@
+{
+  "template_id": "vocabulary-pronunciation-challenge-v1",
+  "strategy_id": "pronunciation-challenge-v1",
+  "duration_seconds": 10,
+  "brand_handle": "@daily",
+  "entries": [
+    {
+      "word": "resilient",
+      "ipa": "/rɪˈzɪliənt/",
+      "part_of_speech": "adjective",
+      "meaning_vi": "kiên cường",
+      "example_en": "She stayed resilient through setbacks.",
+      "example_vi": "Cô ấy vẫn kiên cường qua những trở ngại.",
+      "pronunciation_audio_url": "https://cdn.example.com/resilient.mp3"
+    }
+  ]
+}
