@@ -212,6 +212,14 @@ test("tries declared alternate layouts before reporting overflow",()=>{
   assert.equal(layout.policy, "alternate");
   assert.equal(layout.text, "một hai ba bốn");
 });
+test("uses only each template-declared overflow policy",()=>{
+  const base = { value: "một hai ba bốn", field: "meaning", policy: { maxWidth: 100, maxLines: 1, fontSize: 20, minFontSize: 10 } };
+  assert.throws(() => resolveAdaptiveText({ ...base, policy: { ...base.policy, mode: "error" } }), error => error.details.field === "meaning" && error.details.failedPolicy === "error" && !!error.details.measured);
+  assert.equal(resolveAdaptiveText({ ...base, policy: { ...base.policy, mode: "shrink" } }).policy, "shrink");
+  assert.equal(resolveAdaptiveText({ ...base, policy: { ...base.policy, mode: "alternate-layout", alternates: [{ ...base.policy, maxWidth: 200, mode: "wrap" }] } }).policy, "alternate-layout");
+  assert.deepEqual(resolveAdaptiveText({ ...base, policy: { ...base.policy, mode: "split-scene", splitScene: { maxLines: 1, maxScenes: 4 } } }).scenes, ["một hai", "ba bốn"]);
+  assert.equal(resolveAdaptiveText({ ...base, policy: { ...base.policy, mode: "truncate" } }).text, "một hai…");
+});
 
 test("honors template_key from workflow payloads",async()=>{
   const payload=await normalizePayload({...sample,template_id:undefined,template_key:"vocabulary-dark-reference-v1"});
