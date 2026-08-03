@@ -8,12 +8,10 @@
     "background": "assets/background.png",
     "petal": "assets/petal.png"
   },
-  "palette": {
-    "ink": "#27243A",
-    "secondary": "#625D78",
-    "accent": "#E85D75",
-    "card": "#FFF8EC",
-    "ipa": "#E7D9FF"
+  "tokens": {
+    "colors": { "ink": "#27243A", "secondary": "#625D78", "accent": "#E85D75", "card": "#FFF8EC", "ipa": "#E7D9FF" },
+    "typography": { "body": { "fontSize": 36, "weight": "bold" } },
+    "spacing": { "6": 24 }, "radius": { "card": 32 }, "shadows": { "card": "none" }, "motion": { "enter": { "duration": 0.5 } }
   },
   "layout": {
     "safeZone": [80, 220, 920, 1500]
@@ -43,18 +41,18 @@
   },
   "scene": [
     { "type": "image", "asset": "assets/petal.png", "x": 55, "y": 330, "width": 96, "height": 96 },
-    { "type": "box", "x": 96, "y": 300, "width": 888, "height": 1150, "color": "#FFF8EC", "opacity": 0.96 },
-    { "type": "text", "text": "TỪ NÀY NGHĨA LÀ GÌ?", "x": 260, "y": 230, "fontSize": 36, "weight": "bold", "color": "#27243A", "animations": [{ "type": "fade-in", "start": 0, "duration": 0.55 }, { "type": "slide-up", "start": 0, "duration": 0.55, "distance": 36 }] },
-    { "type": "text", "text": "{word}", "x": 140, "y": 405, "fontSize": 88, "weight": "extraBold", "color": "#27243A", "animations": [{ "type": "fade-in", "start": 0.8, "duration": 0.45 }, { "type": "slide-up", "start": 0.8, "duration": 0.45, "distance": 28 }] },
-    { "type": "box", "x": 210, "y": 565, "width": 620, "height": 64, "color": "#E7D9FF" },
-    { "type": "text", "text": "{ipa}", "x": 240, "y": 578, "fontSize": 34, "weight": "regular", "color": "#27243A", "animations": [{ "type": "fade-in", "start": 0.8, "duration": 0.45 }] },
-    { "type": "text", "text": "{part}", "x": 420, "y": 650, "fontSize": 30, "weight": "bold", "color": "#E85D75", "animations": [{ "type": "fade-in", "start": 0.8, "duration": 0.45 }] },
-    { "type": "text", "text": "NGHĨA TIẾNG VIỆT", "x": 148, "y": 748, "fontSize": 26, "weight": "bold", "color": "#625D78", "animations": [{ "type": "fade-in", "start": 2.2, "duration": 0.5 }] },
-    { "type": "text", "text": "{meaning}", "x": 148, "y": 797, "fontSize": 40, "weight": "bold", "color": "#27243A", "lineSpacing": 12, "animations": [{ "type": "fade-in", "start": 2.2, "duration": 0.5 }, { "type": "slide-up", "start": 2.2, "duration": 0.5, "distance": 24 }] },
-    { "type": "text", "text": "VÍ DỤ", "x": 148, "y": 1005, "fontSize": 26, "weight": "bold", "color": "#625D78", "animations": [{ "type": "fade-in", "start": 4, "duration": 0.5 }] },
-    { "type": "text", "text": "{exampleEn}", "x": 148, "y": 1054, "fontSize": 34, "weight": "bold", "color": "#27243A", "lineSpacing": 10, "animations": [{ "type": "fade-in", "start": 4, "duration": 0.5 }, { "type": "slide-up", "start": 4, "duration": 0.5, "distance": 24 }] },
-    { "type": "text", "text": "{exampleVi}", "x": 148, "y": 1176, "fontSize": 28, "weight": "medium", "color": "#625D78", "lineSpacing": 8, "animations": [{ "type": "fade-in", "start": 4.3, "duration": 0.5 }, { "type": "slide-up", "start": 4.3, "duration": 0.5, "distance": 20 }] },
-    { "type": "box", "x": 160, "y": 1320, "width": 720, "height": 104, "color": "#FFF8EC" },
-    { "type": "text", "text": "{cta}", "x": 202, "y": 1355, "fontSize": 30, "weight": "bold", "color": "#27243A", "animations": [{ "type": "fade-in", "start": 7.2, "duration": 0.65 }, { "type": "slide-up", "start": 7.2, "duration": 0.65, "distance": 36 }] }
+    { "type": "box", "x": 96, "y": 300, "width": 888, "height": 1150, "color": "$colors.card", "opacity": 0.96 },
+    { "type": "text", "text": "TỪ NÀY NGHĨA LÀ GÌ?", "x": 260, "y": 230, "fontSize": 36, "weight": "bold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 0, "duration": 0.55 }, { "type": "slide-up", "start": 0, "duration": 0.55, "distance": 36 }] },
+    { "type": "text", "text": "{word}", "x": 140, "y": 405, "fontSize": 88, "weight": "extraBold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 0.8, "duration": 0.45 }, { "type": "slide-up", "start": 0.8, "duration": 0.45, "distance": 28 }] },
+    { "type": "box", "x": 210, "y": 565, "width": 620, "height": 64, "color": "$colors.ipa" },
+    { "type": "text", "text": "{ipa}", "x": 240, "y": 578, "fontSize": 34, "weight": "regular", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 0.8, "duration": 0.45 }] },
+    { "type": "text", "text": "{part}", "x": 420, "y": 650, "fontSize": 30, "weight": "bold", "color": "$colors.accent", "animations": [{ "type": "fade-in", "start": 0.8, "duration": 0.45 }] },
+    { "type": "text", "text": "NGHĨA TIẾNG VIỆT", "x": 148, "y": 748, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "start": 2.2, "duration": 0.5 }] },
+    { "type": "text", "text": "{meaning}", "x": 148, "y": 797, "fontSize": 40, "weight": "bold", "color": "$colors.ink", "lineSpacing": 12, "animations": [{ "type": "fade-in", "start": 2.2, "duration": 0.5 }, { "type": "slide-up", "start": 2.2, "duration": 0.5, "distance": 24 }] },
+    { "type": "text", "text": "VÍ DỤ", "x": 148, "y": 1005, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "start": 4, "duration": 0.5 }] },
+    { "type": "text", "text": "{exampleEn}", "x": 148, "y": 1054, "fontSize": 34, "weight": "bold", "color": "$colors.ink", "lineSpacing": 10, "animations": [{ "type": "fade-in", "start": 4, "duration": 0.5 }, { "type": "slide-up", "start": 4, "duration": 0.5, "distance": 24 }] },
+    { "type": "text", "text": "{exampleVi}", "x": 148, "y": 1176, "fontSize": 28, "weight": "medium", "color": "$colors.secondary", "lineSpacing": 8, "animations": [{ "type": "fade-in", "start": 4.3, "duration": 0.5 }, { "type": "slide-up", "start": 4.3, "duration": 0.5, "distance": 20 }] },
+    { "type": "box", "x": 160, "y": 1320, "width": 720, "height": 104, "color": "$colors.card" },
+    { "type": "text", "text": "{cta}", "x": 202, "y": 1355, "fontSize": 30, "weight": "bold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 7.2, "duration": 0.65 }, { "type": "slide-up", "start": 7.2, "duration": 0.65, "distance": 36 }] }
   ]
 }

@@ -11,6 +11,7 @@ import { resolveTemplateEngine } from "../src/template/resolve-template-engine.m
 import { sceneV2 } from "../src/engines/scene-v2.mjs";
 import { normalizePayload, renderVideo } from "../src/render.mjs";
 import { validatePresentationSchema } from "../src/template/validate-presentation-schema.mjs";
+import { resolveDesignTokens } from "../src/template/resolve-design-tokens.mjs";
 
 const exec = promisify(execFile);
 
@@ -22,7 +23,7 @@ const template = { id: "scene-test-v1", packageRoot: "/templates/scene-test-v1" 
 test("scene-v2 compiles supported primitives and declared initial animations", async () => {
   const filter = await compileScenes({ template, payload, font, saveText, scene: [
     { type: "box", x: 0, y: 0, width: 1080, height: 1920, color: "#111111" },
-    { type: "group", children: [{ type: "text", text: "{word}", x: 100, y: 200, fontSize: 52, weight: "bold", animations: [{ type: "fade-in", start: 0, duration: 0.3 }, { type: "slide-up", start: 0, duration: 0.3 }] }] },
+    { type: "group", children: [{ type: "text", text: "{word}", x: 100, y: 200, fontSize: 52, weight: "bold", color: "#FFFFFF", animations: [{ type: "fade-in", start: 0, duration: 0.3 }, { type: "slide-up", start: 0, duration: 0.3 }] }] },
     { type: "progress", x: 100, y: 400, width: 400, height: 8, value: 0.5, background: "#222222", color: "#FFFFFF" },
     { type: "image", asset: "assets/petal.png", x: 10, y: 20, width: 30, height: 40 },
   ] });
@@ -62,6 +63,22 @@ test("presentation schema versions scene templates and rejects invalid declarati
   assert.throws(() => validatePresentationSchema({ engine: "scene-v2", templateSchemaVersion: 2, capabilities: [], scene: [{ type: "image", asset: "../secret.png" }] }, "/templates/test"), /unsafe image asset path/);
 });
 
+test("design tokens resolve named presentation values and reject missing references", () => {
+  const template = {
+    engine: "scene-v2",
+    tokens: {
+      colors: { ink: "#27243A" },
+      typography: { body: { fontSize: 36, weight: "bold" } },
+      spacing: { "6": 24 }, radius: { card: 32 }, shadows: { card: "none" }, motion: { enter: { duration: 0.5 } },
+    },
+    scene: [{ type: "text", text: "x", x: "$spacing.6", y: 0, fontSize: "$typography.body.fontSize", weight: "$typography.body.weight", color: "$colors.ink", animations: [{ type: "fade-in", start: 0, duration: "$motion.enter.duration" }] }],
+  };
+  const resolved = resolveDesignTokens(template);
+  assert.equal(resolved.scene[0].color, "#27243A");
+  assert.equal(resolved.scene[0].fontSize, 36);
+  assert.throws(() => resolveDesignTokens({ ...template, scene: [{ ...template.scene[0], color: "$colors.missing" }] }), /unknown design token/);
+});
+
 test("scene-v2 is registered without changing the legacy default", () => {
   assert.equal(resolveTemplateEngine({}).id, "legacy-v1");
   assert.equal(resolveTemplateEngine({ engine: "scene-v2" }).id, "scene-v2");
@@ -76,7 +93,7 @@ test("scene-v2 renders a declarative scene", async () => {
     const output = path.join(dir, "scene.mp4");
     await sceneV2.render({
       payload: { ...payload, duration: 0.2, backgroundMusicUrl: null },
-      template: { ...template, assets: { background }, scene: [{ type: "box", x: 0, y: 0, width: 1080, height: 1920, color: "#111111" }, { type: "text", text: "{word}", x: 100, y: 100, fontSize: 48 }] },
+      template: { ...template, assets: { background }, scene: [{ type: "box", x: 0, y: 0, width: 1080, height: 1920, color: "#111111" }, { type: "text", text: "{word}", x: 100, y: 100, fontSize: 48, color: "#FFFFFF" }] },
       outputFile: output, ffmpeg: "ffmpeg", timeoutMs: 120000, font: { regular: fontFile, medium: fontFile, bold: fontFile, extraBold: fontFile },
       saveText: async (work, name, value) => { const file = path.join(work, `${name}.txt`); await (await import("node:fs/promises")).writeFile(file, value); return file; },
       RenderError: Error,

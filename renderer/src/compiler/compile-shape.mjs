@@ -20,6 +20,6 @@ export function compileProgress(node) {
   const x = number(node.x, "progress.x"); const y = number(node.y, "progress.y"); const width = number(node.width, "progress.width", 1); const height = number(node.height, "progress.height", 1);
   const value = number(node.value, "progress.value"); if (value > 1) throw new SceneCompileError("progress.value must be <= 1");
   const animations = animationExpressions(compileAnimations(node.animations));
-  const background = color(node.background ?? "#000000", "progress.background"); const foreground = color(node.color ?? "#FFFFFF", "progress.color");
+  const background = color(node.background, "progress.background"); const foreground = color(node.color, "progress.color");
   return `drawbox=x=${x}:y='${y}+${animations.yOffset}':w=${width}:h=${height}:color=${background}:t=fill,drawbox=x=${x}:y='${y}+${animations.yOffset}':w=${width * value}:h=${height}:color=${foreground}:t=fill,colorchannelmixer=aa='${animations.alpha}'`;
 }
