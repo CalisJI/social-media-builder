@@ -216,9 +216,14 @@ test("mistake correction declares wrong usage, pause, correction, explanation, e
   assert.deepEqual(strategy.stages.map(({ id, role }) => ({ id, role })), [
     { id: "mistake", role: "common_mistake" }, { id: "pause", role: "word" }, { id: "correction", role: "corrected_usage" }, { id: "explanation", role: "meaning_vi" }, { id: "example", role: "example_en" }, { id: "cta", role: "cta" },
   ]);
+  assert.deepEqual(strategy.stages.map(({ id, start, duration }) => ({ id, start, duration })), [
+    { id: "mistake", start: 0, duration: 3.6 }, { id: "pause", start: 2.4, duration: 1.2 }, { id: "correction", start: 3.9, duration: 0.6 }, { id: "explanation", start: 4.8, duration: 0.5 }, { id: "example", start: 5.9, duration: 0.5 }, { id: "cta", start: 7.2, duration: 0.65 },
+  ]);
   const comparison = manifest.scene.find(({ type }) => type === "wrong-right");
   assert.deepEqual([comparison.wrongText, comparison.rightText], ["{common_mistake}", "{corrected_usage}"]);
-  assert.ok(manifest.scene.some(({ text, animations }) => text === "DỪNG LẠI — SAI RỒI!" && animations?.some(({ start }) => start === 2.5)));
+  assert.deepEqual(comparison.wrongAnimations, [{ type: "fade-in", start: 0, duration: 0.5 }, { type: "fade-out", start: 3.6, duration: 0.2 }]);
+  assert.deepEqual(comparison.rightAnimations, [{ type: "fade-in", start: 3.9, duration: 0.6 }]);
+  assert.ok(manifest.scene.some(({ text, animations }) => text === "DỪNG LẠI — SAI RỒI!" && JSON.stringify(animations) === JSON.stringify([{ type: "fade-in", start: 2.4, duration: 0.25 }, { type: "fade-out", start: 3.6, duration: 0.2 }])));
 });
 
 test("scene-v2 applies quiz timing overrides to declared animation stages", async () => {

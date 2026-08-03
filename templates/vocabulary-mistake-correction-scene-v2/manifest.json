@@ -37,8 +37,8 @@
   "timeline": {
     "hook": [0, 0.55],
     "word": [0.8, 0.45],
-    "meaning": [2.2, 0.5],
-    "example": [4, 0.5],
+    "meaning": [4.8, 0.5],
+    "example": [5.9, 0.5],
     "cta": [7.2, 0.65]
   },
   "scene": [
@@ -46,12 +46,12 @@
     { "type": "box", "x": 96, "y": 300, "width": 888, "height": 1150, "color": "$colors.card", "opacity": 0.96 },
     { "type": "text", "text": "SỬA LỖI THƯỜNG GẶP", "x": 260, "y": 230, "fontSize": 36, "weight": "bold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 0, "duration": 0.5 }] },
     { "type": "text", "text": "{word}", "x": 140, "y": 405, "fontSize": 88, "weight": "extraBold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 0, "duration": 0.5 }] },
-    { "type": "wrong-right", "x": 148, "y": 650, "width": 784, "maxHeight": 210, "wrongText": "{common_mistake}", "rightText": "{corrected_usage}", "wrongColor": "$colors.accent", "rightColor": "#2E8B57", "wrongAnimations": [{ "type": "fade-in", "start": 0, "duration": 0.5 }, { "type": "fade-out", "start": 2.5, "duration": 0.2 }], "rightAnimations": [{ "type": "fade-in", "start": 3.2, "duration": 0.5 }] },
-    { "type": "text", "text": "DỪNG LẠI — SAI RỒI!", "x": 270, "y": 840, "fontSize": 32, "weight": "extraBold", "color": "$colors.accent", "animations": [{ "type": "fade-in", "start": 2.5, "duration": 0.2 }, { "type": "fade-out", "start": 3.1, "duration": 0.1 }] },
-    { "type": "text", "text": "GIẢI THÍCH", "x": 148, "y": 1030, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "start": 4.2, "duration": 0.5 }] },
-    { "type": "text", "text": "{meaning}", "x": 148, "y": 1075, "fontSize": 38, "maxWidth": 784, "maxHeight": 100, "maxLines": 2, "minFontSize": 28, "overflowPolicy": "shrink", "weight": "bold", "color": "$colors.ink", "lineSpacing": 10, "animations": [{ "type": "fade-in", "start": 4.2, "duration": 0.5 }, { "type": "slide-up", "start": 4.2, "duration": 0.5, "distance": 24 }] },
-    { "type": "text", "text": "VÍ DỤ", "x": 148, "y": 1200, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "start": 5.3, "duration": 0.5 }] },
-    { "type": "text", "text": "{exampleEn}", "x": 148, "y": 1245, "fontSize": 30, "maxWidth": 784, "maxHeight": 85, "maxLines": 2, "minFontSize": 22, "overflowPolicy": "shrink", "weight": "medium", "color": "$colors.ink", "lineSpacing": 8, "animations": [{ "type": "fade-in", "start": 5.3, "duration": 0.5 }, { "type": "slide-up", "start": 5.3, "duration": 0.5, "distance": 24 }] },
+    { "type": "wrong-right", "x": 148, "y": 650, "width": 784, "maxHeight": 210, "wrongText": "{common_mistake}", "rightText": "{corrected_usage}", "wrongColor": "$colors.accent", "rightColor": "#2E8B57", "wrongAnimations": [{ "type": "fade-in", "start": 0, "duration": 0.5 }, { "type": "fade-out", "start": 3.6, "duration": 0.2 }], "rightAnimations": [{ "type": "fade-in", "start": 3.9, "duration": 0.6 }] },
+    { "type": "text", "text": "DỪNG LẠI — SAI RỒI!", "x": 270, "y": 840, "fontSize": 32, "weight": "extraBold", "color": "$colors.accent", "animations": [{ "type": "fade-in", "start": 2.4, "duration": 0.25 }, { "type": "fade-out", "start": 3.6, "duration": 0.2 }] },
+    { "type": "text", "text": "GIẢI THÍCH", "x": 148, "y": 1030, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "start": 4.8, "duration": 0.5 }] },
+    { "type": "text", "text": "{meaning}", "x": 148, "y": 1075, "fontSize": 38, "maxWidth": 784, "maxHeight": 100, "maxLines": 2, "minFontSize": 28, "overflowPolicy": "shrink", "weight": "bold", "color": "$colors.ink", "lineSpacing": 10, "animations": [{ "type": "fade-in", "start": 4.8, "duration": 0.5 }, { "type": "slide-up", "start": 4.8, "duration": 0.5, "distance": 24 }] },
+    { "type": "text", "text": "VÍ DỤ", "x": 148, "y": 1200, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "start": 5.9, "duration": 0.5 }] },
+    { "type": "text", "text": "{exampleEn}", "x": 148, "y": 1245, "fontSize": 30, "maxWidth": 784, "maxHeight": 85, "maxLines": 2, "minFontSize": 22, "overflowPolicy": "shrink", "weight": "medium", "color": "$colors.ink", "lineSpacing": 8, "animations": [{ "type": "fade-in", "start": 5.9, "duration": 0.5 }, { "type": "slide-up", "start": 5.9, "duration": 0.5, "distance": 24 }] },
     { "type": "text", "text": "{cta}", "x": 202, "y": 1395, "fontSize": 30, "weight": "bold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 7.2, "duration": 0.65 }, { "type": "slide-up", "start": 7.2, "duration": 0.65, "distance": 36 }] }
   ]
 }
