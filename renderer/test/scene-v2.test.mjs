@@ -9,7 +9,7 @@ import { compileScenes } from "../src/compiler/compile-scenes.mjs";
 import { componentRegistry } from "../src/compiler/component-registry.mjs";
 import { resolveTemplateEngine } from "../src/template/resolve-template-engine.mjs";
 import { sceneV2 } from "../src/engines/scene-v2.mjs";
-import { normalizePayload, renderVideo } from "../src/render.mjs";
+import { normalizePayload, renderVideo, resolveTemplate } from "../src/render.mjs";
 import { validatePresentationSchema } from "../src/template/validate-presentation-schema.mjs";
 import { resolveDesignTokens } from "../src/template/resolve-design-tokens.mjs";
 import { resolveAdaptiveText } from "../src/layout/adaptive-text.mjs";
@@ -194,4 +194,27 @@ test("quiz-reveal fixture declares its guess window and renders", async () => {
     }
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test("quiz-reveal declares the complete retention sequence", async () => {
+  const strategy = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../strategies/quiz-reveal-v1.json"), "utf8"));
+  const manifest = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-quiz-v1/manifest.json"), "utf8"));
+  assert.deepEqual(strategy.stages.map(({ id, role }) => ({ id, role })), [
+    { id: "prompt", role: "word" },
+    { id: "guess", role: "word" },
+    { id: "reveal", role: "meaning_vi" },
+    { id: "example", role: "example_en" },
+    { id: "cta", role: "cta" },
+  ]);
+  assert.ok(manifest.scene.some(({ text, animations }) => text === "{exampleEn}" && animations?.some(({ start }) => start === 5.1)));
+});
+
+test("scene-v2 applies quiz timing overrides to declared animation stages", async () => {
+  const request = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-quiz-v1/fixtures/01-valid-quiz.json"), "utf8"));
+  const payload = await normalizePayload({ ...request, guess_duration_seconds: 2 });
+  const template = await resolveTemplate(payload.template);
+  const filter = await compileScenes({ template, payload, font, saveText, scene: template.scene });
+  assert.match(filter, /t,2\.6/);
+  assert.match(filter, /t,3\.7/);
+  assert.match(filter, /t,5\.8/);
 });
