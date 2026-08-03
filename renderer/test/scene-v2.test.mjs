@@ -33,6 +33,16 @@ test("scene-v2 compiles supported primitives and declared initial animations", a
   assert.match(filter, /format=yuv420p\[out\]/);
 });
 
+test("scene-v2 snapshots canonical animation filters for every primitive", async () => {
+  const filter = await compileScenes({ template, payload, font, saveText, scene: [
+    { type: "text", text: "{word}", x: 100, y: 200, fontSize: 52, color: "#FFFFFF", animations: [{ type: "none" }, { type: "fade", start: 0, duration: 0.5 }, { type: "scale", start: 0, duration: 0.5 }] },
+    { type: "box", x: 0, y: 0, width: 100, height: 100, color: "#111111", animations: [{ type: "rise", start: 0, duration: 0.5 }] },
+    { type: "image", asset: "assets/petal.png", x: 10, y: 20, width: 30, height: 40, animations: [{ type: "slide-left", start: 0, duration: 0.5 }] },
+    { type: "progress", x: 0, y: 0, width: 100, height: 10, value: 0.5, background: "#222222", color: "#FFFFFF", animations: [{ type: "slide-right", start: 0, duration: 0.5 }] },
+  ] });
+  assert.equal(filter, await readFile(path.resolve(import.meta.dirname, "snapshots/scene-v2-canonical-filter.txt"), "utf8"));
+});
+
 test("scene-v2 rejects unsafe image paths and unknown declarations", async () => {
   await assert.rejects(compileScenes({ template, payload, font, saveText, scene: [{ type: "image", asset: "../secret.png", x: 0, y: 0, width: 1, height: 1 }] }), /unsafe image asset path/);
   await assert.rejects(compileScenes({ template, payload, font, saveText, scene: [{ type: "script", source: "process.exit()" }] }), /unknown scene primitive/);
