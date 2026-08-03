@@ -48,6 +48,8 @@
     { "type": "box", "x": 148, "y": 860, "width": 784, "height": 240, "color": "$colors.ipa", "opacity": 0.8 },
     { "type": "text", "text": "ĐÁP ÁN", "x": 148, "y": 900, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "start": 4, "duration": 0.5 }] },
     { "type": "text", "text": "{meaning}", "x": 148, "y": 960, "fontSize": 48, "weight": "bold", "color": "$colors.ink", "lineSpacing": 12, "animations": [{ "type": "fade-in", "start": 4, "duration": 0.5 }, { "type": "slide-up", "start": 4, "duration": 0.5, "distance": 24 }] },
+    { "type": "text", "text": "VÍ DỤ", "x": 148, "y": 1135, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "start": 5.1, "duration": 0.5 }] },
+    { "type": "text", "text": "{exampleEn}", "x": 148, "y": 1178, "fontSize": 32, "minFontSize": 24, "maxWidth": 784, "maxHeight": 120, "maxLines": 2, "lineSpacing": 8, "weight": "medium", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 5.1, "duration": 0.5 }, { "type": "slide-up", "start": 5.1, "duration": 0.5, "distance": 24 }] },
     { "type": "text", "text": "{cta}", "x": 202, "y": 1355, "fontSize": 30, "weight": "bold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 7.2, "duration": 0.65 }, { "type": "slide-up", "start": 7.2, "duration": 0.65, "distance": 36 }] }
   ]
 }

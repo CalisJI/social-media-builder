@@ -195,3 +195,16 @@ test("quiz-reveal fixture declares its guess window and renders", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("quiz-reveal declares the complete retention sequence", async () => {
+  const strategy = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../strategies/quiz-reveal-v1.json"), "utf8"));
+  const manifest = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-quiz-v1/manifest.json"), "utf8"));
+  assert.deepEqual(strategy.stages.map(({ id, role }) => ({ id, role })), [
+    { id: "prompt", role: "word" },
+    { id: "guess", role: "word" },
+    { id: "reveal", role: "meaning_vi" },
+    { id: "example", role: "example_en" },
+    { id: "cta", role: "cta" },
+  ]);
+  assert.ok(manifest.scene.some(({ text, animations }) => text === "{exampleEn}" && animations?.some(({ start }) => start === 5.1)));
+});
