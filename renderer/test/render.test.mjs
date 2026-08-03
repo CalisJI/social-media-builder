@@ -212,6 +212,11 @@ test("tries declared alternate layouts before reporting overflow",()=>{
   assert.equal(layout.policy, "alternate");
   assert.equal(layout.text, "một hai ba bốn");
 });
+test("uses the primary layout before declared fallbacks",()=>{
+  const layout = resolveAdaptiveText({ value: "một hai", field: "meaning", policy: { maxWidth: 50, maxLines: 1, fontSize: 20, minFontSize: 10, alternate: { maxWidth: 200, maxLines: 1, fontSize: 20, minFontSize: 20 } } });
+  assert.equal(layout.policy, "shrink");
+  assert.ok(layout.fontSize < 20);
+});
 test("uses only each template-declared overflow policy",()=>{
   const base = { value: "một hai ba bốn", field: "meaning", policy: { maxWidth: 100, maxLines: 1, fontSize: 20, minFontSize: 10 } };
   assert.throws(() => resolveAdaptiveText({ ...base, policy: { ...base.policy, mode: "error" } }), error => error.details.field === "meaning" && error.details.failedPolicy === "error" && !!error.details.measured);
