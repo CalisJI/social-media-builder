@@ -69,7 +69,7 @@ test("scene-v2 rejects unsafe image paths and unknown declarations", async () =>
 });
 
 test("component registry uses stable declarative component IDs", () => {
-  assert.deepEqual([...componentRegistry.keys()], ["text", "box", "image", "progress", "group"]);
+  assert.deepEqual([...componentRegistry.keys()], ["text", "box", "image", "progress", "wrong-right", "group"]);
   for (const component of componentRegistry.values()) {
     assert.equal(component.id, component.type);
     assert.ok(component.input.layout);
@@ -207,6 +207,23 @@ test("quiz-reveal declares the complete retention sequence", async () => {
     { id: "cta", role: "cta" },
   ]);
   assert.ok(manifest.scene.some(({ text, animations }) => text === "{exampleEn}" && animations?.some(({ start }) => start === 5.1)));
+});
+
+test("mistake correction declares wrong usage, pause, correction, explanation, example, and CTA", async () => {
+  const strategy = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../strategies/mistake-correction-v1.json"), "utf8"));
+  const manifest = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-mistake-correction-scene-v2/manifest.json"), "utf8"));
+  assert.deepEqual(strategy.requires, ["word", "meaning_vi", "common_mistake", "corrected_usage"]);
+  assert.deepEqual(strategy.stages.map(({ id, role }) => ({ id, role })), [
+    { id: "mistake", role: "common_mistake" }, { id: "pause", role: "word" }, { id: "correction", role: "corrected_usage" }, { id: "explanation", role: "meaning_vi" }, { id: "example", role: "example_en" }, { id: "cta", role: "cta" },
+  ]);
+  assert.deepEqual(strategy.stages.map(({ id, start, duration }) => ({ id, start, duration })), [
+    { id: "mistake", start: 0, duration: 3.6 }, { id: "pause", start: 2.4, duration: 1.2 }, { id: "correction", start: 3.9, duration: 0.6 }, { id: "explanation", start: 4.8, duration: 0.5 }, { id: "example", start: 5.9, duration: 0.5 }, { id: "cta", start: 7.2, duration: 0.65 },
+  ]);
+  const comparison = manifest.scene.find(({ type }) => type === "wrong-right");
+  assert.deepEqual([comparison.wrongText, comparison.rightText], ["{common_mistake}", "{corrected_usage}"]);
+  assert.deepEqual(comparison.wrongAnimations, [{ type: "fade-in", start: 0, duration: 0.5 }, { type: "fade-out", start: 3.6, duration: 0.2 }]);
+  assert.deepEqual(comparison.rightAnimations, [{ type: "fade-in", start: 3.9, duration: 0.6 }]);
+  assert.ok(manifest.scene.some(({ text, animations }) => text === "DỪNG LẠI — SAI RỒI!" && JSON.stringify(animations) === JSON.stringify([{ type: "fade-in", start: 2.4, duration: 0.25 }, { type: "fade-out", start: 3.6, duration: 0.2 }])));
 });
 
 test("scene-v2 applies quiz timing overrides to declared animation stages", async () => {

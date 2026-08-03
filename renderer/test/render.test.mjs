@@ -75,9 +75,14 @@ test("reports the missing common_mistake required by mistake correction",async()
     error => error.status === 400 && error.code === "invalid_payload" && /mistake-correction-v1 requires common_mistake/.test(error.message),
   );
 });
+test("requires corrected_usage before mistake correction rendering",async()=>{
+  const request = JSON.parse(await readFile(path.resolve(import.meta.dirname, "../../templates/vocabulary-mistake-correction-scene-v2/fixtures/01-valid-mistake.json"), "utf8"));
+  delete request.entries[0].corrected_usage;
+  await assert.rejects(normalizePayload(request), error => error.status === 400 && error.code === "invalid_payload" && /mistake-correction-v1 requires corrected_usage/.test(error.message));
+});
 test("rejects mistake-correction content that exceeds its template constraint",async()=>{
   await assert.rejects(
-    normalizePayload({ ...sample, template_id: "vocabulary-mistake-correction-scene-v2", strategy_id: "mistake-correction-v1", entries: [{ ...sample.entries[0], common_mistake: "x".repeat(361) }] }),
+    normalizePayload({ ...sample, template_id: "vocabulary-mistake-correction-scene-v2", strategy_id: "mistake-correction-v1", entries: [{ ...sample.entries[0], common_mistake: "x".repeat(361), corrected_usage: "Use adaptable for things that can change." }] }),
     /common_mistake.*constraints\.maxLength.*360/,
   );
 });
