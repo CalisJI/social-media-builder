@@ -28,6 +28,7 @@ role assignments are completed.
 ## Latest PR / head SHA
 PR #57: `https://github.com/CalisJI/social-media-builder/pull/57`
 
-Latest head: `680599affd8016f70e4d6e666b87311f719e47e0`.
+Latest reviewed head: `00d72d4c894c31f1c0416fd5b728660b74fe3a2b`.
 
-Governance CI and independent review are pending for PR #57.
+Governance CI passed. Independent reviewer requested changes; the next branch
+update addresses the non-closing issue reference and this status record.
