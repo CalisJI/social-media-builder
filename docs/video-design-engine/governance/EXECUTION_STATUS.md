@@ -4,14 +4,15 @@
 Phase 0 — Alignment and containment
 
 ## Current task
-`SMB-VE-004` — Verify independent implementation and reviewer identities.
+`SMB-VE-005` — Pause unrelated renderer expansion work.
 
 ## Owner / agent
 Tiểu Bạch (orchestrator)
 
 ## Dependencies
 `SMB-VE-001` merged in PR #57; `SMB-VE-003` merged in PR #58.
-`SMB-VE-004` has no remaining dependency.
+`SMB-VE-004` was verified in merged PR #59. `SMB-VE-005` has no remaining
+dependency.
 
 ## Task claim protocol
 1. An agent claims only the highest-priority dependency-satisfied task matching
@@ -25,18 +26,17 @@ Tiểu Bạch (orchestrator)
 - Agent entry point: `AGENTS.md`
 - Canonical task graph: `docs/video-design-engine/governance/tasks.json`
 - Identity evidence: `docs/video-design-engine/governance/IDENTITY_VERIFICATION.md`
+- Scope classification: `docs/video-design-engine/governance/FAST_TRACK_SCOPE.md`
 - Render boundary: `renderer/src/server.mjs` → `renderer/src/render.mjs`
 - Existing publish boundary: `src/app/api/tiktok/*` and
   `n8n/workflows/cal-50-content-scheduler.json`
 
 ## Blockers
-`SMB-VE-004` requires one formal GitHub `COMMENT` review event from the
-independent reviewer before verification. `SMB-VE-002` and `SMB-VE-005` remain
-eligible but unclaimed; Phase 1 remains locked until the required Phase 0 work
-is merged.
+`SMB-VE-002` is in progress as Stage 1 architecture work. Phase 1 remains
+locked until the required Phase 0 work is merged.
 
 ## Latest PR / head SHA
-Merged evidence: PR #58 (`30c00a360b99a6f656277e071b9a3f060c33b3b6`).
+Identity verification: PR #59 (`5a3d82f588f8fbfd43bfab96923562bf87c639cd`).
 
-Active work branch: `agent/ti-u-b-ch/cal-99-identity-verification`; its PR/head
-will be recorded when opened.
+Active work branch: `agent/ti-u-b-ch/cal-101-scope-control`; its PR/head will
+be recorded when opened.
