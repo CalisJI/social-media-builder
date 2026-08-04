@@ -28,7 +28,13 @@ role assignments are completed.
 ## Latest PR / head SHA
 PR #57: `https://github.com/CalisJI/social-media-builder/pull/57`
 
-Latest reviewed head: `00d72d4c894c31f1c0416fd5b728660b74fe3a2b`.
+Current PR branch: `agent/ti-u-b-ch/f8446170` (the GitHub PR resolves this
+mutable ref to the latest head).
 
-Governance CI passed. Independent reviewer requested changes; the next branch
-update addresses the non-closing issue reference and this status record.
+Latest immutable head recorded before this status update:
+`ba75e9a89a3ac8e4a6817671886a8da2573cc6cd`.
+
+Latest reviewed base: `ba75e9a89a3ac8e4a6817671886a8da2573cc6cd`.
+
+Governance CI passed. The non-closing issue reference and status evidence have
+been updated; independent re-review is pending.
