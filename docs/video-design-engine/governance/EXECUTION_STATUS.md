@@ -36,4 +36,4 @@ is merged.
 Merged evidence: PR #57 (`63b89cc0a1caf59a2a29ecb42710e888f00b46e1`).
 
 Active work branch: `agent/ti-u-b-ch/cal-99-phase0-status`; its PR/head will
-be recorded when opened.
+be tracked by PR #58: `https://github.com/CalisJI/social-media-builder/pull/58`.
