@@ -26,4 +26,6 @@ None for `SMB-VE-001`. Phase 1 remains locked until Phase 0 dependencies and
 role assignments are completed.
 
 ## Latest PR / head SHA
-No PR yet. Starting head: `2027683c1809bfd63318f007ac357f7ba7fce265`.
+PR #57: `https://github.com/CalisJI/social-media-builder/pull/57`
+
+Latest head: `82241e2ea3e57cbc6ed7b6b00b9a2f07e5ebe605`.
