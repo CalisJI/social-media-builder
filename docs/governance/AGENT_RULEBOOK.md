@@ -2,7 +2,7 @@
 
 ## All agents
 
-Use `project/tasks.json` as the only task-status source. Work on one implementation task per branch/PR. Do not silently edit unrelated files or mark work verified from tests alone. Write `UNKNOWN` or create a blocker instead of guessing.
+Use `project/tasks.json` as the task-status source for legacy renderer work. For the Video Design Engine program, use `docs/video-design-engine/governance/tasks.json` and `docs/video-design-engine/AGENTS.md`. Work on one implementation task per branch/PR. Do not silently edit unrelated files or mark work verified from tests alone. Write `UNKNOWN` or create a blocker instead of guessing.
 
 ## Orchestrator
 

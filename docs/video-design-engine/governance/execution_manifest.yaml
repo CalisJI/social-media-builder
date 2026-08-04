@@ -1,0 +1,30 @@
+program: Social Media Builder Video Design Engine
+version: 1.0
+active_phase: 0
+fast_track:
+  name: TikTok Gold Standard Module
+  completion_task: SMB-VE-077
+  policy: Later phases must not delay Phase 1.
+source_of_truth:
+  tasks: governance/tasks.json
+  status: governance/EXECUTION_STATUS.md
+  agent_rules: AGENTS.md
+required_gates:
+  - schema
+  - visual_static
+  - sampled_frames
+  - audio
+  - technical_media
+  - fixture_matrix
+  - product_owner_acceptance
+  - independent_review
+protected_scope:
+  - social account connections
+  - authentication
+  - scheduling
+  - publishing integrations
+  - existing platform upload flows
+owner_checkpoints:
+  - SMB-VE-015
+  - SMB-VE-074
+

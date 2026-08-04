@@ -1,0 +1,132 @@
+{
+  "templateId": "tiktok-vocabulary-gold-v1",
+  "version": "0.1.0-draft",
+  "name": "TikTok Vocabulary Gold v1",
+  "contentType": "vocabulary",
+  "platformProfiles": [
+    "tiktok-9x16-1080x1920"
+  ],
+  "tokens": {
+    "palette": "education-pastel-a",
+    "typography": "vocabulary-clear-a",
+    "spacing": "comfortable",
+    "shape": "rounded-layered"
+  },
+  "audioPresetId": "vocab-education-energy-01",
+  "userControls": [
+    {
+      "id": "accentVariant",
+      "type": "enum",
+      "values": [
+        "violet",
+        "coral",
+        "blue"
+      ]
+    },
+    {
+      "id": "motionIntensity",
+      "type": "enum",
+      "values": [
+        "low",
+        "medium"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "semanticType": "hook",
+      "duration": {
+        "preferredMs": 1400,
+        "minMs": 1000,
+        "maxMs": 1800
+      },
+      "transitionIn": "hook-rise",
+      "transitionOut": "soft-cut",
+      "nodes": [
+        {
+          "id": "hookText",
+          "type": "text",
+          "bounds": {
+            "x": 96,
+            "y": 280,
+            "width": 888,
+            "height": 280
+          },
+          "binding": "hook",
+          "style": {
+            "token": "type.hook"
+          },
+          "motionPreset": "hook-rise",
+          "textLayout": {
+            "preferredFontSize": 78,
+            "minFontSize": 54,
+            "maxLines": 2,
+            "overflowStrategy": "balance-wrap"
+          }
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "sfx-hook-soft-01",
+          "atMs": 50
+        }
+      ]
+    },
+    {
+      "id": "challenge",
+      "semanticType": "word_challenge",
+      "duration": {
+        "preferredMs": 2800,
+        "minMs": 2200,
+        "maxMs": 3400
+      },
+      "transitionIn": "word-focus",
+      "transitionOut": "pronunciation-reveal",
+      "nodes": [
+        {
+          "id": "word",
+          "type": "text",
+          "bounds": {
+            "x": 96,
+            "y": 520,
+            "width": 888,
+            "height": 300
+          },
+          "binding": "word",
+          "style": {
+            "token": "type.word"
+          },
+          "motionPreset": "word-focus",
+          "textLayout": {
+            "preferredFontSize": 132,
+            "minFontSize": 72,
+            "maxLines": 2,
+            "overflowStrategy": "shrink-to-min"
+          }
+        },
+        {
+          "id": "countdown",
+          "type": "progress",
+          "bounds": {
+            "x": 190,
+            "y": 1120,
+            "width": 700,
+            "height": 130
+          },
+          "motionPreset": "countdown-pulse"
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "sfx-countdown-tick-01",
+          "repeat": {
+            "count": 3,
+            "intervalMs": 700
+          }
+        }
+      ]
+    }
+  ]
+}
+

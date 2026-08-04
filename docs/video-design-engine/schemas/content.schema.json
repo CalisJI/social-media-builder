@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://social-media-builder.local/schemas/content.schema.json",
+  "title": "Vocabulary Video Content",
+  "type": "object",
+  "required": [
+    "word",
+    "meaningVi",
+    "exampleEn",
+    "exampleVi",
+    "language"
+  ],
+  "properties": {
+    "contentId": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string",
+      "default": "en"
+    },
+    "word": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "normalizedWord": {
+      "type": "string"
+    },
+    "partOfSpeech": {
+      "type": "string"
+    },
+    "ipa": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pronunciationAssetId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "meaningVi": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "exampleEn": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 360
+    },
+    "exampleVi": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 360
+    },
+    "contextTopic": {
+      "type": "string"
+    },
+    "hook": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "cta": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "brandId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": true
+}
+
