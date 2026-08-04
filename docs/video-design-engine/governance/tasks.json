@@ -1,0 +1,1360 @@
+{
+  "schemaVersion": "1.0",
+  "program": "Social Media Builder Video Design Engine",
+  "fastTrackCompletionTask": "SMB-VE-077",
+  "taskSelectionPolicy": "Choose highest-priority backlog task with all dependencies complete and matching agent role.",
+  "tasks": [
+    {
+      "id": "SMB-VE-001",
+      "phase": "0",
+      "title": "Commit execution pack and declare scope",
+      "role": "orchestrator",
+      "priority": "P0",
+      "status": "in_progress",
+      "dependsOn": [],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Version-controlled docs and schemas under docs/video-design-engine.",
+      "acceptanceCriteria": [
+        "All files are present",
+        "Repository AGENTS.md references the pack",
+        "Scope excludes publishing rebuild"
+      ]
+    },
+    {
+      "id": "SMB-VE-002",
+      "phase": "0",
+      "title": "Map existing render entrypoints and publishing boundary",
+      "role": "architecture",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-001"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Repository map limited to renderer, preview, storage, and artifact-to-publisher interface.",
+      "acceptanceCriteria": [
+        "Relevant packages and commands documented",
+        "No old-video audit started",
+        "Publishing boundary identified without redesign"
+      ]
+    },
+    {
+      "id": "SMB-VE-003",
+      "phase": "0",
+      "title": "Establish execution status and task claiming",
+      "role": "orchestrator",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-001"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "EXECUTION_STATUS.md and task claim protocol.",
+      "acceptanceCriteria": [
+        "Only one owner per active task",
+        "Dependencies are visible",
+        "PR/head SHA tracked"
+      ]
+    },
+    {
+      "id": "SMB-VE-004",
+      "phase": "0",
+      "title": "Verify independent implementation and reviewer identities",
+      "role": "orchestrator",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-001"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Identity verification evidence.",
+      "acceptanceCriteria": [
+        "Reviewer App can COMMENT",
+        "Reviewer App can REQUEST_CHANGES on implementation PR",
+        "Author and reviewer logins differ"
+      ]
+    },
+    {
+      "id": "SMB-VE-005",
+      "phase": "0",
+      "title": "Pause unrelated renderer expansion work",
+      "role": "product",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-001"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Issue classification note.",
+      "acceptanceCriteria": [
+        "Later-phase work does not consume fast-track capacity",
+        "Working publishing tasks remain untouched"
+      ]
+    },
+    {
+      "id": "SMB-VE-010",
+      "phase": "1A",
+      "title": "Define TikTok content fixtures",
+      "role": "visual-design",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-002"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Short, normal, long-word, and bilingual stress fixtures.",
+      "acceptanceCriteria": [
+        "Fixtures contain valid production-like content",
+        "No fixture-specific template logic"
+      ]
+    },
+    {
+      "id": "SMB-VE-011",
+      "phase": "1A",
+      "title": "Create scene-by-scene visual specification",
+      "role": "visual-design",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-010"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Gold Standard visual specification.",
+      "acceptanceCriteria": [
+        "All six semantic scenes specified",
+        "Hierarchy, bounds, safe areas, and focal points defined"
+      ]
+    },
+    {
+      "id": "SMB-VE-012",
+      "phase": "1A",
+      "title": "Define v1 tokens and font registry",
+      "role": "visual-design",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-011"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Token and font registry proposal.",
+      "acceptanceCriteria": [
+        "Vietnamese glyph support verified",
+        "No arbitrary font loading",
+        "Contrast intent documented"
+      ]
+    },
+    {
+      "id": "SMB-VE-013",
+      "phase": "1A",
+      "title": "Define motion and audio cue sheet",
+      "role": "visual-design",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-011"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Named motion and audio cue sheet.",
+      "acceptanceCriteria": [
+        "Seven motion presets specified",
+        "Voice/music/SFX timeline defined",
+        "Ducking requirements included"
+      ]
+    },
+    {
+      "id": "SMB-VE-014",
+      "phase": "1A",
+      "title": "Produce representative mockups",
+      "role": "visual-design",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-012",
+        "SMB-VE-013"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Still mockups or equivalent design evidence.",
+      "acceptanceCriteria": [
+        "Normal and stress content shown",
+        "Every scene represented",
+        "Looks like a single coherent brand"
+      ]
+    },
+    {
+      "id": "SMB-VE-015",
+      "phase": "1A",
+      "title": "Owner design checkpoint",
+      "role": "product",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-014"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Explicit accept/revise/reject decision.",
+      "acceptanceCriteria": [
+        "Owner decision recorded",
+        "Blocking revisions converted to tasks"
+      ]
+    },
+    {
+      "id": "SMB-VE-020",
+      "phase": "1B",
+      "title": "Implement content schema validation",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-002"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Content validator using schema.",
+      "acceptanceCriteria": [
+        "Required fields rejected when missing",
+        "Existing content path adapted without meaning invention",
+        "Tests pass"
+      ]
+    },
+    {
+      "id": "SMB-VE-021",
+      "phase": "1B",
+      "title": "Implement minimal template schema validation",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-002"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Template DSL validator.",
+      "acceptanceCriteria": [
+        "Unknown nodes rejected",
+        "Text bounds/min size/overflow required",
+        "Tests cover invalid templates"
+      ]
+    },
+    {
+      "id": "SMB-VE-022",
+      "phase": "1B",
+      "title": "Implement template compiler skeleton",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-020",
+        "SMB-VE-021"
+      ],
+      "effort": "L",
+      "blocksFastTrack": true,
+      "deliverable": "DSL + content to deterministic render plan.",
+      "acceptanceCriteria": [
+        "Same inputs produce same plan",
+        "Bindings and timings resolve",
+        "Errors are structured"
+      ]
+    },
+    {
+      "id": "SMB-VE-023",
+      "phase": "1B",
+      "title": "Implement TikTok platform profile and safe areas",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-022"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "TikTok 9:16 profile.",
+      "acceptanceCriteria": [
+        "1080x1920 profile defined",
+        "Safe-area checks available",
+        "Profile selected by template"
+      ]
+    },
+    {
+      "id": "SMB-VE-024",
+      "phase": "1B",
+      "title": "Implement minimum asset registry",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-022"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Versioned asset lookup and metadata validation.",
+      "acceptanceCriteria": [
+        "Missing asset is structured failure",
+        "License/provenance fields supported",
+        "No production network fetch"
+      ]
+    },
+    {
+      "id": "SMB-VE-025",
+      "phase": "1B",
+      "title": "Implement render-plan snapshot and provenance",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-022",
+        "SMB-VE-024"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Persistable render plan manifest.",
+      "acceptanceCriteria": [
+        "Template/content/asset/renderer versions recorded",
+        "Seed recorded when used"
+      ]
+    },
+    {
+      "id": "SMB-VE-030",
+      "phase": "1C",
+      "title": "Build generic bounded text primitive",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-021",
+        "SMB-VE-015"
+      ],
+      "effort": "L",
+      "blocksFastTrack": true,
+      "deliverable": "Reusable bounded text component.",
+      "acceptanceCriteria": [
+        "Bounds respected",
+        "Preferred/min sizes supported",
+        "No silent clipping"
+      ]
+    },
+    {
+      "id": "SMB-VE-031",
+      "phase": "1C",
+      "title": "Add measurement and balanced wrapping",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-030"
+      ],
+      "effort": "L",
+      "blocksFastTrack": true,
+      "deliverable": "Text measurement and wrap solver.",
+      "acceptanceCriteria": [
+        "Real measurement used",
+        "Bilingual cases tested",
+        "Line breaks stable"
+      ]
+    },
+    {
+      "id": "SMB-VE-032",
+      "phase": "1C",
+      "title": "Add shrink-to-min and validation behavior",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-031"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Adaptive sizing with declared minimum.",
+      "acceptanceCriteria": [
+        "Never below minimum",
+        "Unfit text produces next strategy or error",
+        "Tests cover extremes"
+      ]
+    },
+    {
+      "id": "SMB-VE-033",
+      "phase": "1C",
+      "title": "Add layout variants and split-scene strategy",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-032"
+      ],
+      "effort": "L",
+      "blocksFastTrack": true,
+      "deliverable": "Supported variant/split selection.",
+      "acceptanceCriteria": [
+        "Long content remains readable",
+        "Choice is deterministic",
+        "CTA timing preserved"
+      ]
+    },
+    {
+      "id": "SMB-VE-034",
+      "phase": "1C",
+      "title": "Add overflow and collision tests",
+      "role": "qa",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-033"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Automated layout assertions.",
+      "acceptanceCriteria": [
+        "Every fixture checked",
+        "Failures identify node and bounds"
+      ]
+    },
+    {
+      "id": "SMB-VE-035",
+      "phase": "1C",
+      "title": "Add Vietnamese glyph and font checks",
+      "role": "qa",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-012",
+        "SMB-VE-030"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Font/glyph validation.",
+      "acceptanceCriteria": [
+        "Vietnamese fixture renders without missing glyphs",
+        "Unsupported font fails validation"
+      ]
+    },
+    {
+      "id": "SMB-VE-040",
+      "phase": "1D",
+      "title": "Implement motion preset registry",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-022",
+        "SMB-VE-015"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Named motion preset engine.",
+      "acceptanceCriteria": [
+        "Templates select presets by ID",
+        "Unknown preset rejected",
+        "Deterministic timing"
+      ]
+    },
+    {
+      "id": "SMB-VE-041",
+      "phase": "1D",
+      "title": "Implement Gold Standard motion presets",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-040"
+      ],
+      "effort": "L",
+      "blocksFastTrack": true,
+      "deliverable": "Seven reviewed presets.",
+      "acceptanceCriteria": [
+        "Presets match cue sheet",
+        "Readable hold windows preserved",
+        "No arbitrary template code"
+      ]
+    },
+    {
+      "id": "SMB-VE-042",
+      "phase": "1D",
+      "title": "Implement generic decorative asset slots",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-024",
+        "SMB-VE-015"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Approved visual asset primitives.",
+      "acceptanceCriteria": [
+        "Assets resolved by ID",
+        "Fallback behavior declared",
+        "Decoration does not block text"
+      ]
+    },
+    {
+      "id": "SMB-VE-043",
+      "phase": "1D",
+      "title": "Implement scene transition primitives",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-040"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Reusable transitions.",
+      "acceptanceCriteria": [
+        "Stable final frames",
+        "No frame gaps",
+        "Transitions stay within duration"
+      ]
+    },
+    {
+      "id": "SMB-VE-044",
+      "phase": "1D",
+      "title": "Build Gold Standard template definition",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-023",
+        "SMB-VE-033",
+        "SMB-VE-041",
+        "SMB-VE-042",
+        "SMB-VE-043"
+      ],
+      "effort": "L",
+      "blocksFastTrack": true,
+      "deliverable": "Validated DSL template.",
+      "acceptanceCriteria": [
+        "No bespoke word logic",
+        "All six scenes compile",
+        "Four fixtures render"
+      ]
+    },
+    {
+      "id": "SMB-VE-050",
+      "phase": "1E",
+      "title": "Implement audio asset catalog and schema",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-024",
+        "SMB-VE-013"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Audio preset and approved assets.",
+      "acceptanceCriteria": [
+        "Voice/music/SFX types supported",
+        "Missing assets fail",
+        "Provenance stored"
+      ]
+    },
+    {
+      "id": "SMB-VE-051",
+      "phase": "1E",
+      "title": "Bind pronunciation/voice track",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-050",
+        "SMB-VE-044"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Voice timeline binding.",
+      "acceptanceCriteria": [
+        "Voice aligns with reveal",
+        "Fallback is explicit",
+        "Voice is audible"
+      ]
+    },
+    {
+      "id": "SMB-VE-052",
+      "phase": "1E",
+      "title": "Add music and SFX cues",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-050",
+        "SMB-VE-044"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Music, countdown, reveal, and CTA cues.",
+      "acceptanceCriteria": [
+        "Cues align",
+        "No missing track passes silently"
+      ]
+    },
+    {
+      "id": "SMB-VE-053",
+      "phase": "1E",
+      "title": "Add ducking, fades, and gains",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-051",
+        "SMB-VE-052"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Audio mix controls.",
+      "acceptanceCriteria": [
+        "Music ducks under voice",
+        "No clipping",
+        "Transitions are smooth"
+      ]
+    },
+    {
+      "id": "SMB-VE-054",
+      "phase": "1E",
+      "title": "Add audio analysis and blocking gates",
+      "role": "qa",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-053"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Automated audio report.",
+      "acceptanceCriteria": [
+        "Stream/loudness/peak/silence checked",
+        "Threshold failures block release"
+      ]
+    },
+    {
+      "id": "SMB-VE-055",
+      "phase": "1E",
+      "title": "Add missing-audio failure behavior",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-054"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "No accidental silent production output.",
+      "acceptanceCriteria": [
+        "Required track absence blocks render or activation",
+        "Error is user-readable"
+      ]
+    },
+    {
+      "id": "SMB-VE-060",
+      "phase": "1F",
+      "title": "Render candidate preview",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-044",
+        "SMB-VE-053"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Low-latency preview matching production layout.",
+      "acceptanceCriteria": [
+        "Preview preserves timing/layout/audio relationships",
+        "Artifact is linked to candidate"
+      ]
+    },
+    {
+      "id": "SMB-VE-061",
+      "phase": "1F",
+      "title": "Create preview-session record",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-060"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Persisted preview session.",
+      "acceptanceCriteria": [
+        "Candidate/content/profile/artifact recorded",
+        "Status lifecycle supported"
+      ]
+    },
+    {
+      "id": "SMB-VE-062",
+      "phase": "1F",
+      "title": "Add accept/reject/revise actions",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-061"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "User decision UI/API.",
+      "acceptanceCriteria": [
+        "Explicit decisions stored",
+        "Revise creates new draft",
+        "Reject cannot activate"
+      ]
+    },
+    {
+      "id": "SMB-VE-063",
+      "phase": "1F",
+      "title": "Save accepted template as immutable version",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-062"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Template library persistence.",
+      "acceptanceCriteria": [
+        "Accepted version immutable",
+        "Provenance and preview stored",
+        "Status transitions valid"
+      ]
+    },
+    {
+      "id": "SMB-VE-064",
+      "phase": "1F",
+      "title": "Add template picker and reuse path",
+      "role": "implementation",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-063"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "User can select accepted template without agent.",
+      "acceptanceCriteria": [
+        "Accepted template visible",
+        "Content compatibility shown",
+        "Render can start without AI"
+      ]
+    },
+    {
+      "id": "SMB-VE-065",
+      "phase": "1F",
+      "title": "Render second content item from saved template",
+      "role": "qa",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-064"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Reuse demonstration.",
+      "acceptanceCriteria": [
+        "No source-code change",
+        "Different word/content renders correctly",
+        "Exact template version recorded"
+      ]
+    },
+    {
+      "id": "SMB-VE-070",
+      "phase": "1G",
+      "title": "Add static layout gate",
+      "role": "qa",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-034",
+        "SMB-VE-044"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Layout validation report.",
+      "acceptanceCriteria": [
+        "Bounds/safe areas/min font/collisions checked",
+        "Blocking findings stop activation"
+      ]
+    },
+    {
+      "id": "SMB-VE-071",
+      "phase": "1G",
+      "title": "Add sampled-frame evidence",
+      "role": "qa",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-060"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Contact sheet and frame report.",
+      "acceptanceCriteria": [
+        "Scene starts/midpoints/transitions/final sampled",
+        "Artifacts linked"
+      ]
+    },
+    {
+      "id": "SMB-VE-072",
+      "phase": "1G",
+      "title": "Add technical media validation",
+      "role": "qa",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-060"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Codec/resolution/fps/duration validation.",
+      "acceptanceCriteria": [
+        "Production profile checked",
+        "Corrupt/missing streams fail"
+      ]
+    },
+    {
+      "id": "SMB-VE-073",
+      "phase": "1G",
+      "title": "Run complete fixture matrix",
+      "role": "qa",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-054",
+        "SMB-VE-070",
+        "SMB-VE-071",
+        "SMB-VE-072"
+      ],
+      "effort": "M",
+      "blocksFastTrack": true,
+      "deliverable": "Consolidated QA report.",
+      "acceptanceCriteria": [
+        "All required fixtures run",
+        "Blocking issues resolved or documented"
+      ]
+    },
+    {
+      "id": "SMB-VE-074",
+      "phase": "1G",
+      "title": "Product owner production acceptance",
+      "role": "product",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-073"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Explicit approval of production-profile MP4.",
+      "acceptanceCriteria": [
+        "Owner states video is publishable",
+        "Accepted artifact ID recorded"
+      ]
+    },
+    {
+      "id": "SMB-VE-075",
+      "phase": "1G",
+      "title": "Independent reviewer approval",
+      "role": "reviewer",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-074"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Official GitHub APPROVE on current head SHA.",
+      "acceptanceCriteria": [
+        "Reviewer identity differs from author",
+        "All blocking findings cleared"
+      ]
+    },
+    {
+      "id": "SMB-VE-076",
+      "phase": "1G",
+      "title": "Smoke test existing TikTok publishing flow",
+      "role": "qa",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-075"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Published/private test through existing integration.",
+      "acceptanceCriteria": [
+        "Artifact handed to existing publisher",
+        "No connector regression",
+        "Result/status captured"
+      ]
+    },
+    {
+      "id": "SMB-VE-077",
+      "phase": "1G",
+      "title": "Activate Gold Standard v1 as default",
+      "role": "product",
+      "priority": "P0",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-076"
+      ],
+      "effort": "S",
+      "blocksFastTrack": true,
+      "deliverable": "Active template library version.",
+      "acceptanceCriteria": [
+        "Default selection works",
+        "Rollback target recorded",
+        "Phase 1 completion logged"
+      ]
+    },
+    {
+      "id": "SMB-VE-100",
+      "phase": "2",
+      "title": "Formalize immutable template registry",
+      "role": "architecture",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-077"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Formalize immutable template registry.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-101",
+      "phase": "2",
+      "title": "Add duplicate-as-draft and safe editing",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-100"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add duplicate-as-draft and safe editing.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-102",
+      "phase": "2",
+      "title": "Add rollback and compatibility validation",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-100"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add rollback and compatibility validation.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-103",
+      "phase": "2",
+      "title": "Expand design token registry",
+      "role": "visual-design",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-077"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Expand design token registry.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-104",
+      "phase": "2",
+      "title": "Expand approved asset library",
+      "role": "visual-design",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-077"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Expand approved asset library.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-105",
+      "phase": "2",
+      "title": "Build second shared-primitives visual variant",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-101",
+        "SMB-VE-103"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Build second shared-primitives visual variant.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-106",
+      "phase": "2",
+      "title": "Add renderer reproducibility manifest",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-100"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add renderer reproducibility manifest.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-130",
+      "phase": "3",
+      "title": "Add reference image upload and provenance",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-100"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add reference image upload and provenance.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-131",
+      "phase": "3",
+      "title": "Define design analysis schema",
+      "role": "architecture",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-130"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Define design analysis schema.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-132",
+      "phase": "3",
+      "title": "Implement image analysis adapter",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-131"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Implement image analysis adapter.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-133",
+      "phase": "3",
+      "title": "Map analysis to tokens and primitives",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-132",
+        "SMB-VE-103"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Map analysis to tokens and primitives.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-134",
+      "phase": "3",
+      "title": "Generate constrained CreativePlan",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-133"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Generate constrained CreativePlan.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-135",
+      "phase": "3",
+      "title": "Generate and validate candidate template",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-134"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Generate and validate candidate template.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-136",
+      "phase": "3",
+      "title": "Render normal and stress candidate previews",
+      "role": "qa",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-135"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Render normal and stress candidate previews.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-137",
+      "phase": "3",
+      "title": "Add safe revision controls",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-136"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add safe revision controls.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-138",
+      "phase": "3",
+      "title": "Accept image-derived template into library",
+      "role": "implementation",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-137"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Accept image-derived template into library.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-139",
+      "phase": "3",
+      "title": "Validate three reference-image cases",
+      "role": "qa",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-138"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Validate three reference-image cases.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-160",
+      "phase": "4",
+      "title": "Implement optional Creative Director interface",
+      "role": "implementation",
+      "priority": "P2",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-139"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Implement optional Creative Director interface.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-161",
+      "phase": "4",
+      "title": "Add template recommendation",
+      "role": "implementation",
+      "priority": "P2",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-160"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add template recommendation.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-162",
+      "phase": "4",
+      "title": "Add design knowledge-base retrieval",
+      "role": "implementation",
+      "priority": "P2",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-160"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add design knowledge-base retrieval.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-163",
+      "phase": "4",
+      "title": "Add candidate scoring and explanations",
+      "role": "qa",
+      "priority": "P2",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-160"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add candidate scoring and explanations.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-164",
+      "phase": "4",
+      "title": "Add bounded revision loop",
+      "role": "implementation",
+      "priority": "P2",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-163"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add bounded revision loop.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    },
+    {
+      "id": "SMB-VE-165",
+      "phase": "4",
+      "title": "Add AI-disabled fallback tests",
+      "role": "qa",
+      "priority": "P1",
+      "status": "backlog",
+      "dependsOn": [
+        "SMB-VE-164"
+      ],
+      "effort": "M",
+      "blocksFastTrack": false,
+      "deliverable": "Add AI-disabled fallback tests.",
+      "acceptanceCriteria": [
+        "Implementation matches specification",
+        "Tests and evidence attached",
+        "No regression to Phase 1"
+      ]
+    }
+  ]
+}
+

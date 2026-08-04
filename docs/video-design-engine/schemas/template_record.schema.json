@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://social-media-builder.local/schemas/template_record.schema.json",
+  "title": "Template Library Record",
+  "type": "object",
+  "required": [
+    "templateId",
+    "versionId",
+    "status",
+    "dsl",
+    "createdAt"
+  ],
+  "properties": {
+    "templateId": {
+      "type": "string"
+    },
+    "versionId": {
+      "type": "string"
+    },
+    "parentVersionId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "candidate",
+        "previewed",
+        "user_accepted",
+        "active",
+        "rejected",
+        "superseded",
+        "deprecated",
+        "archived"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dsl": {
+      "$ref": "template.schema.json"
+    },
+    "previewArtifactId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "qualityReportId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "acceptedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": true
+}
+

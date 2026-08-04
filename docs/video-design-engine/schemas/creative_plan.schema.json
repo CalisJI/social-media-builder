@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://social-media-builder.local/schemas/creative_plan.schema.json",
+  "title": "Creative Plan",
+  "type": "object",
+  "required": [
+    "contentType",
+    "platformProfile",
+    "styleIntent",
+    "scenePlan"
+  ],
+  "properties": {
+    "contentType": {
+      "type": "string"
+    },
+    "platformProfile": {
+      "type": "string"
+    },
+    "referenceId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "styleIntent": {
+      "type": "object",
+      "properties": {
+        "moodTags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "palettePreset": {
+          "type": "string"
+        },
+        "typographyPreset": {
+          "type": "string"
+        },
+        "motionIntensity": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "assetStyle": {
+          "type": "string"
+        }
+      }
+    },
+    "scenePlan": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "audioPresetId": {
+      "type": "string"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}
+
