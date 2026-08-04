@@ -1,6 +1,6 @@
 import { validateScene } from "../compiler/compile-scenes.mjs";
 
-const capabilities = new Set(["mistakeCorrection", "quizReveal"]);
+const capabilities = new Set(["mistakeCorrection", "pronunciationChallenge", "quizReveal"]);
 
 function fail(message) {
   const error = new Error(message);

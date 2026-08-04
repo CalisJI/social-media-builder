@@ -1,0 +1,35 @@
+{
+  "id": "vocabulary-pronunciation-challenge-v1",
+  "engine": "scene-v2",
+  "templateSchemaVersion": 2,
+  "capabilities": ["pronunciationChallenge"],
+  "compatibleStrategies": ["pronunciation-challenge-v1"],
+  "assets": { "background": "assets/background.png", "petal": "assets/petal.png" },
+  "tokens": {
+    "colors": { "ink": "#27243A", "secondary": "#625D78", "accent": "#E85D75", "card": "#FFF8EC", "ipa": "#E7D9FF" },
+    "typography": { "body": { "fontSize": 36, "weight": "bold" } },
+    "spacing": { "6": 24 }, "radius": { "card": 32 }, "shadows": { "card": "none" }, "motion": { "enter": { "duration": 0.5 } }
+  },
+  "layout": { "safeZone": [80, 220, 920, 1500] },
+  "constraints": {
+    "brand_handle": { "maxLength": 32 }, "word": { "maxLength": 24 }, "ipa": { "maxLength": 48 }, "part_of_speech": { "maxLength": 24 }, "meaning_vi": { "maxLength": 360 }, "example_en": { "maxLength": 240 }, "example_vi": { "maxLength": 240 }, "cta": { "maxLength": 54 }
+  },
+  "copy": { "hook": "BẠN ĐỌC ĐÚNG KHÔNG?", "meaningLabel": "PHÁT ÂM", "exampleLabel": "VÍ DỤ", "cta": "Follow {handle} • 1 từ mỗi ngày" },
+  "timeline": { "hook": [0, 0.5], "word": [0.6, 0.5], "meaning": [3.6, 0.5], "reveal": [3.6, 0.5], "example": [5, 0.5], "cta": [7.2, 0.65] },
+  "audio": { "source": "pronunciationAudioUrl", "stage": "reveal" },
+  "scene": [
+    { "type": "image", "asset": "assets/petal.png", "x": 55, "y": 330, "width": 96, "height": 96 },
+    { "type": "box", "x": 96, "y": 300, "width": 888, "height": 1150, "color": "$colors.card", "opacity": 0.96 },
+    { "type": "text", "text": "BẠN ĐỌC ĐÚNG KHÔNG?", "x": 250, "y": 230, "fontSize": 36, "weight": "bold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "start": 0, "duration": 0.5 }] },
+    { "type": "text", "text": "{word}", "x": 140, "y": 450, "fontSize": 88, "weight": "extraBold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "stage": "prompt", "start": 0.6, "duration": 0.5 }, { "type": "slide-up", "stage": "prompt", "start": 0.6, "duration": 0.5, "distance": 28 }] },
+    { "type": "text", "text": "Đọc to trước khi đáp án hiện ra", "x": 180, "y": 620, "fontSize": 32, "weight": "medium", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "stage": "countdown", "start": 0.6, "duration": 0.5 }, { "type": "fade-out", "stage": "reveal", "start": 3.6, "duration": 0.2 }] },
+    { "type": "text", "text": "3  •  2  •  1", "x": 330, "y": 750, "fontSize": 62, "weight": "bold", "color": "$colors.accent", "animations": [{ "type": "fade-in", "stage": "countdown", "start": 0.6, "duration": 0.5 }, { "type": "fade-out", "stage": "reveal", "start": 3.6, "duration": 0.2 }] },
+    { "type": "box", "x": 148, "y": 860, "width": 784, "height": 210, "color": "$colors.ipa", "opacity": 0.8 },
+    { "type": "text", "text": "PHÁT ÂM", "x": 148, "y": 900, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "stage": "reveal", "start": 3.6, "duration": 0.5 }] },
+    { "type": "text", "text": "{ipa}", "x": 200, "y": 970, "fontSize": 50, "weight": "bold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "stage": "reveal", "start": 3.6, "duration": 0.5 }, { "type": "slide-up", "stage": "reveal", "start": 3.6, "duration": 0.5, "distance": 24 }] },
+    { "type": "text", "text": "Nghe lại và lặp lại", "x": 330, "y": 1020, "fontSize": 28, "weight": "medium", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "stage": "reveal", "start": 3.6, "duration": 0.5 }] },
+    { "type": "text", "text": "VÍ DỤ", "x": 148, "y": 1160, "fontSize": 26, "weight": "bold", "color": "$colors.secondary", "animations": [{ "type": "fade-in", "stage": "example", "start": 5, "duration": 0.5 }] },
+    { "type": "text", "text": "{exampleEn}", "x": 148, "y": 1205, "fontSize": 32, "minFontSize": 24, "maxWidth": 784, "maxHeight": 100, "maxLines": 2, "lineSpacing": 8, "weight": "medium", "color": "$colors.ink", "animations": [{ "type": "fade-in", "stage": "example", "start": 5, "duration": 0.5 }, { "type": "slide-up", "stage": "example", "start": 5, "duration": 0.5, "distance": 24 }] },
+    { "type": "text", "text": "{cta}", "x": 202, "y": 1355, "fontSize": 30, "weight": "bold", "color": "$colors.ink", "animations": [{ "type": "fade-in", "stage": "cta", "start": 7.2, "duration": 0.65 }, { "type": "slide-up", "stage": "cta", "start": 7.2, "duration": 0.65, "distance": 36 }] }
+  ]
+}
