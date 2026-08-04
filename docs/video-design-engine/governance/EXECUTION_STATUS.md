@@ -4,14 +4,20 @@
 Phase 0 — Alignment and containment
 
 ## Current task
-`SMB-VE-001` — Commit execution pack and declare scope.
+`SMB-VE-003` — Establish execution status and task claiming.
 
 ## Owner / agent
 Tiểu Bạch (orchestrator)
 
 ## Dependencies
-None. `SMB-VE-001` is the sole unblocked Phase 0 task; it unlocks
-`SMB-VE-002` through `SMB-VE-005`.
+`SMB-VE-001` merged in PR #57. `SMB-VE-003` has no remaining dependency.
+
+## Task claim protocol
+1. An agent claims only the highest-priority dependency-satisfied task matching
+   its role by changing its task-graph status from `backlog` to `in_progress`.
+2. This file records the task ID and one owner; another agent must not claim it.
+3. Merge evidence changes the task status to `merged`, then only dependent
+   backlog tasks become eligible for claim.
 
 ## Evidence
 - Execution pack and schemas: `docs/video-design-engine/`
@@ -22,19 +28,12 @@ None. `SMB-VE-001` is the sole unblocked Phase 0 task; it unlocks
   `n8n/workflows/cal-50-content-scheduler.json`
 
 ## Blockers
-None for `SMB-VE-001`. Phase 1 remains locked until Phase 0 dependencies and
-role assignments are completed.
+None for `SMB-VE-003`. `SMB-VE-002`, `SMB-VE-004`, and `SMB-VE-005` are
+eligible but unclaimed; Phase 1 remains locked until the required Phase 0 work
+is merged.
 
 ## Latest PR / head SHA
-PR #57: `https://github.com/CalisJI/social-media-builder/pull/57`
+Merged evidence: PR #57 (`63b89cc0a1caf59a2a29ecb42710e888f00b46e1`).
 
-Current PR branch: `agent/ti-u-b-ch/f8446170` (the GitHub PR resolves this
-mutable ref to the latest head).
-
-Latest immutable head recorded before this status update:
-`ba75e9a89a3ac8e4a6817671886a8da2573cc6cd`.
-
-Latest reviewed base: `ba75e9a89a3ac8e4a6817671886a8da2573cc6cd`.
-
-Governance CI passed. The non-closing issue reference and status evidence have
-been updated; independent re-review is pending.
+Active work branch: `agent/ti-u-b-ch/cal-99-phase0-status`; its PR/head will
+be tracked by PR #58: `https://github.com/CalisJI/social-media-builder/pull/58`.
